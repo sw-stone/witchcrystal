@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>好梦魔法水晶球</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; background: #0a0612; font-family: -apple-system, "PingFang SC", sans-serif; color: #e8e0f5; }
+  body { display: flex; flex-direction: column; align-items: center; justify-content: center; user-select: none; -webkit-tap-highlight-color: transparent; }
+
+  .ball-wrap { position: relative; width: 70vmin; height: 70vmin; max-width: 360px; max-height: 360px; }
+  .ball {
+    position: absolute; inset: 0; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, var(--ball-hi) 0%, var(--ball-mid) 45%, var(--ball-lo) 100%);
+    box-shadow: 0 0 60px 20px var(--glow), inset 0 0 80px 20px rgba(0,0,0,.4);
+    transition: background 1.2s ease, box-shadow 1.2s ease;
+    animation: breathe 4s ease-in-out infinite;
+  }
+  @keyframes breathe { 0%,100% { transform: scale(1); } 50% { transform: scale(1.03); } }
+  .ball.listening { animation: listenPulse 0.8s ease-in-out infinite; }
+  @keyframes listenPulse { 0%,100% { transform: scale(1); box-shadow: 0 0 60px 20px var(--glow), inset 0 0 80px 20px rgba(0,0,0,.4); } 50% { transform: scale(1.08); box-shadow: 0 0 100px 40px var(--glow), inset 0 0 60px 10px rgba(255,255,255,.1); } }
+  .ball.speaking { animation: speakWave 0.6s ease-in-out infinite; }
+  @keyframes speakWave { 0%,100% { transform: scale(1.02); } 50% { transform: scale(1.06); } }
+  .ball::before { content: ''; position: absolute; top: 12%; left: 18%; width: 30%; height: 25%; background: radial-gradient(ellipse, rgba(255,255,255,.5) 0%, transparent 70%); border-radius: 50%; filter: blur(4px); }
+  .base { position: absolute; bottom: -8%; left: 50%; transform: translateX(-50%); width: 55%; height: 14%; background: linear-gradient(#4a3a2a, #2a1f15); border-radius: 0 0 50% 50% / 0 0 100% 100%; box-shadow: 0 8px 20px rgba(0,0,0,.6); }
+
+  .mode-name { position: absolute; top: -8%; left: 50%; transform: translateX(-50%); font-size: clamp(18px, 5vmin, 26px); font-weight: 300; letter-spacing: 4px; color: var(--accent); text-shadow: 0 0 12px var(--glow); opacity: .92; transition: color .8s ease; white-space: nowrap; }
+  .status { position: absolute; top: 2%; left: 50%; transform: translateX(-50%); font-size: 13px; color: #9e98b8; letter-spacing: 2px; white-space: nowrap; }
+
+  .thinking { position: absolute; bottom: 14%; left: 50%; transform: translateX(-50%); display: none; }
+  .thinking.show { display: flex; gap: 6px; }
+  .thinking span { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); animation: dot 1.2s infinite; }
+  .thinking span:nth-child(2) { animation-delay: .2s; }
+  .thinking span:nth-child(3) { animation-delay: .4s; }
+  @keyframes dot { 0%,80%,100% { opacity: .2; } 40% { opacity: 1; } }
+
+  /* 对话气泡 */
+  .dialog { position: fixed; top: 8vmin; left: 16px; right: 16px; max-height: 30vh; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 4px; }
+  .bubble { max-width: 85%; padding: 10px 14px; border-radius: 16px; font-size: 14px; line-height: 1.6; word-break: break-word; opacity: 0; animation: fadeIn .3s forwards; }
+  @keyframes fadeIn { to { opacity: 1; } }
+  .bubble.user { align-self: flex-end; background: rgba(184,168,232,.2); border: 1px solid rgba(184,168,232,.3); }
+  .bubble.ai { align-self: flex-start; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); }
+  .bubble.ai.streaming::after { content: '▋'; animation: cursor 0.8s infinite; }
+  @keyframes cursor { 50% { opacity: 0; } }
+
+  .controls { position: fixed; bottom: 5vmin; left: 0; right: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; padding: 0 16px; }
+  .btn { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); color: #c4bed8; padding: 10px 14px; border-radius: 18px; font-size: 13px; backdrop-filter: blur(8px); transition: all .2s; }
+  .btn:active { transform: scale(.94); background: rgba(255,255,255,.12); }
+  .btn.active { background: var(--accent); color: #1a0f2a; border-color: var(--accent); box-shadow: 0 0 16px var(--glow); }
+  .btn.mic.recording { background: #e08585; color: #fff; border-color: #e08585; box-shadow: 0 0 16px rgba(224,133,133,.5); animation: micPulse 1s infinite; }
+  @keyframes micPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+
+  .conn { position: fixed; top: 8px; right: 12px; font-size: 11px; color: #6a6480; display: flex; align-items: center; gap: 5px; z-index: 10; }
+  .conn .dot { width: 8px; height: 8px; border-radius: 50%; background: #555; }
+  .conn.online .dot { background: #7bc4a4; box-shadow: 0 0 6px #7bc4a4; }
+  .conn.warn .dot { background: #e0b568; }
+
+  /* 打断提示 */
+  .interrupt-toast { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); background: rgba(224,133,133,.95); color: #fff; padding: 12px 24px; border-radius: 24px; font-size: 14px; opacity: 0; pointer-events: none; transition: opacity .3s; z-index: 100; }
+  .interrupt-toast.show { opacity: 1; }
+
+  :root { --ball-hi: #6a5e9e; --ball-mid: #4a3e7e; --ball-lo: #2a1f4a; --glow: rgba(106,94,158,.4); --accent: #b8a8e8; }
+  [data-mode="whitenoise"]   { --ball-hi:#7ea8b8;--ball-mid:#4e7e8e;--ball-lo:#2a4a5a;--glow:rgba(126,168,184,.4);--accent:#a8d0e0; }
+  [data-mode="breathing"]    { --ball-hi:#8fc4a8;--ball-mid:#5e9e7e;--ball-lo:#2a5a3a;--glow:rgba(143,196,168,.4);--accent:#a8e0c4; }
+  [data-mode="meditation"]   { --ball-hi:#8e6ea8;--ball-mid:#5e3e7e;--ball-lo:#2a1a4a;--glow:rgba(142,110,168,.5);--accent:#c8a8e8; }
+  [data-mode="divination"]   { --ball-hi:#b88ea8;--ball-mid:#8e5e7e;--ball-lo:#4a2a4a;--glow:rgba(184,142,168,.5);--accent:#e8a8d8; }
+  [data-mode="alarm"]        { --ball-hi:#e0b568;--ball-mid:#b08540;--ball-lo:#5a4020;--glow:rgba(224,181,104,.5);--accent:#ffd87a; }
+  [data-mode="standby"]      { --ball-hi:#8a8aa0;--ball-mid:#5a5a7e;--ball-lo:#2a2a4a;--glow:rgba(138,138,160,.3);--accent:#c4c4e0; }
+</style>
+</head>
+<body data-mode="standby">
+
+<div class="conn" id="conn"><span class="dot"></span><span id="connTxt">连接中</span></div>
+
+<div class="dialog" id="dialog"></div>
+
+<div class="ball-wrap">
+  <div class="mode-name" id="modeName">待机</div>
+  <div class="status" id="statusTxt">轻触麦克风开始对话</div>
+  <div class="ball" id="ball"></div>
+  <div class="base"></div>
+  <div class="thinking" id="thinking"><span></span><span></span><span></span></div>
+</div>
+
+<div class="interrupt-toast" id="interruptToast">⛔ 已打断，重新聆听中…</div>
+
+<div class="controls">
+  <button class="btn mic" id="micBtn" onclick="toggleMic()">🎤 按住说话</button>
+  <button class="btn" data-cmd="set_mode" data-mode="whitenoise">白噪音</button>
+  <button class="btn" data-cmd="set_mode" data-mode="breathing">呼吸</button>
+  <button class="btn" data-cmd="set_mode" data-mode="meditation">冥想</button>
+  <button class="btn" data-cmd="set_mode" data-mode="divination">占卜</button>
+  <button class="btn" data-cmd="set_mode" data-mode="alarm">闹钟</button>
+</div>
+
+<audio id="audioPlayer" autoplay></audio>
+
+<script>
+const MODE_NAMES = { standby:'待机', whitenoise:'白噪音', breathing:'呼吸引导', meditation:'冥想', divination:'占卜', alarm:'唤醒闹钟' };
+const GW = location.origin;
+const $ = id => document.getElementById(id);
+
+let ws = null;
+let mediaRecorder = null;
+let audioChunks = [];
+let micStream = null;
+let isRecording = false;
+let aiSpeaking = false;
+let currentTTSSource = null;        // 当前 TTS AudioBufferSourceNode（可被 abort）
+let audioCtx = null;
+let ttsAbortController = null;      // TTS fetch 可中断
+let chatAbortController = null;     // LLM SSE 可中断
+
+// ElevenLabs 官方音色 ID（水晶球语音交互轮换使用，增加音色层次）
+const ELEVENLABS_VOICE_IDS = ['Z3R5wn05IrDiVCyEkUrK', 'nDJIICjR9zfJExIFeSCN'];
+let ttsVoiceIdx = 0;
+let vadAnalyser = null;             // VAD 频谱分析器
+let vadInterval = null;
+let vadSilenceStart = 0;
+let isUserSpeaking = false;
+
+/* ====== UI 渲染 ====== */
+function render(s){
+  document.body.dataset.mode = s.mode || 'standby';
+  $('modeName').textContent = MODE_NAMES[s.mode] || s.mode || '待机';
+  const ball = $('ball');
+  ball.classList.toggle('listening', !!s.listening && !aiSpeaking);
+  ball.classList.toggle('speaking', aiSpeaking);
+  $('statusTxt').textContent = aiSpeaking ? '水晶球在说话…（说话可打断）' :
+                              s.listening ? '我在听…' :
+                              s.ai_thinking ? '魔法涌动中…' : '轻触麦克风开始对话';
+  $('thinking').classList.toggle('show', !!s.ai_thinking);
+  document.querySelectorAll('.btn[data-cmd="set_mode"]').forEach(b => {
+    b.classList.toggle('active', b.dataset.mode === s.mode);
+  });
+}
+
+function addBubble(role, text, streaming){
+  const d = $('dialog');
+  const b = document.createElement('div');
+  b.className = 'bubble ' + role + (streaming ? ' streaming' : '');
+  b.textContent = text;
+  d.appendChild(b);
+  d.scrollTop = d.scrollHeight;
+  return b;
+}
+
+function setStatus(txt){ $('statusTxt').textContent = txt; }
+
+/* ====== WebSocket 接 ESP32 状态 ====== */
+function connect(){
+  $('connTxt').textContent = '连接中';
+  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  ws = new WebSocket(proto + '://' + location.host + '/ws/crystal');
+  ws.onopen = () => { $('conn').classList.add('online'); $('connTxt').textContent = '已连接'; };
+  ws.onmessage = e => {
+    try {
+      const s = JSON.parse(e.data);
+      render(s);
+      // ESP32 声音唤醒触发：listening=true 且当前没在录音 → 自动启动手机 mic
+      if (s.listening && !isRecording && !aiSpeaking) {
+        console.log('[Voice] ESP32 sound wake → start mic');
+        startMicRecording();
+      }
+    } catch(err){}
+  };
+  ws.onclose = () => { $('conn').classList.remove('online'); $('connTxt').textContent = '重连中'; setTimeout(connect, 2000); };
+  ws.onerror = () => { ws.close(); };
+}
+
+/* ====== 麦克风：按住说话 + VAD 自动结束 ====== */
+async function toggleMic(){
+  if (isRecording) {
+    stopMicAndSend();
+  } else {
+    await startMicRecording();
+  }
+}
+
+async function startMicRecording(){
+  try {
+    micStream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount:1, echoCancellation:true, noiseSuppression:true } });
+  } catch(e) {
+    setStatus('⚠️ 麦克风权限被拒');
+    return;
+  }
+  audioChunks = [];
+  // 用 audio/webm;codecs=opus（Whisper 兼容，文件小）
+  const mime = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/webm';
+  mediaRecorder = new MediaRecorder(micStream, { mimeType: mime });
+  mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+  mediaRecorder.onstop = () => { handleRecordingComplete(); };
+  mediaRecorder.start();
+
+  isRecording = true;
+  $('micBtn').classList.add('recording');
+  $('micBtn').textContent = '⏹ 松开发送';
+  setStatus('🎤 我在听…（说完松开）');
+  document.getElementById('ball').classList.add('listening');
+
+  // 同步启动浏览器原生 Web Speech 识别（作为 ASR 主力，无需 key）
+  if (initWebSpeech()) {
+    webSpeechResult = '';
+    try { webSpeechRecognition.start(); } catch(_){}  // 重复 start 会抛错，忽略
+  }
+
+  // VAD：检测说话结束（静音 1.5s 自动发送）
+  startVAD();
+}
+
+function startVAD(){
+  if (!micStream) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const source = audioCtx.createMediaStreamSource(micStream);
+  vadAnalyser = audioCtx.createAnalyser();
+  vadAnalyser.fftSize = 512;
+  source.connect(vadAnalyser);
+  const data = new Uint8Array(vadAnalyser.frequencyBinCount);
+  vadSilenceStart = 0;
+  isUserSpeaking = false;
+
+  vadInterval = setInterval(() => {
+    vadAnalyser.getByteFrequencyData(data);
+    let sum = 0;
+    for (let i = 0; i < data.length; i++) sum += data[i];
+    const avg = sum / data.length;
+    const speaking = avg > 15;  // 阈值
+
+    if (speaking) {
+      isUserSpeaking = true;
+      vadSilenceStart = 0;
+    } else if (isUserSpeaking) {
+      // 进入静音
+      if (vadSilenceStart === 0) vadSilenceStart = Date.now();
+      else if (Date.now() - vadSilenceStart > 1500) {
+        // 静音 1.5s，自动结束
+        console.log('[VAD] silence detected, auto-stop');
+        stopMicAndSend();
+      }
+    }
+  }, 100);
+}
+
+function stopVAD(){
+  if (vadInterval) { clearInterval(vadInterval); vadInterval = null; }
+  if (audioCtx) { try { audioCtx.close(); } catch(_){} audioCtx = null; }
+}
+
+async function stopMicAndSend(){
+  if (!isRecording) return;
+  isRecording = false;
+  $('micBtn').classList.remove('recording');
+  $('micBtn').textContent = '🎤 按住说话';
+  document.getElementById('ball').classList.remove('listening');
+  stopVAD();
+  // 停 Web Speech 识别
+  if (webSpeechRecognition) { try { webSpeechRecognition.stop(); } catch(_){} }
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+    mediaRecorder.stop();
+  }
+  if (micStream) { micStream.getTracks().forEach(t => t.stop()); micStream = null; }
+}
+
+async function handleRecordingComplete(){
+  if (audioChunks.length === 0) return;
+  const blob = new Blob(audioChunks, { type: 'audio/webm' });
+  if (blob.size < 1000) { setStatus('录音太短，请再说一次'); return; }
+
+  // 0. 如果 AI 正在说话 → 打断
+  if (aiSpeaking) {
+    interruptAI();
+  }
+
+  setStatus('🔮 识别中…');
+  // 1. ASR：优先用后端 /voice/asr（若配了 Whisper）；
+  //    失败/未配则降级到浏览器原生 Web Speech API（实时识别，无需 key）
+  let text = '';
+  const asrOk = await tryServerASR(blob);
+  if (asrOk === null) {
+    // 后端 ASR 不可用 → 用浏览器原生 Web Speech
+    text = await nativeWebSpeechASR(blob);
+  } else {
+    text = asrOk;
+  }
+  if (!text) { setStatus('没听清，请再说一次'); return; }
+
+  addBubble('user', text);
+  // 2. LLM 流式 + TTS
+  await streamChatAndSpeak(text);
+}
+
+/* 尝试后端 ASR（Whisper）。返回 null=未配置/失败（应降级），string=识别结果 */
+async function tryServerASR(blob){
+  try {
+    const fd = new FormData();
+    fd.append('audio', blob, 'speech.webm');
+    const r = await fetch(GW + '/voice/asr', { method: 'POST', body: fd });
+    if (r.status === 400) return null;  // no active asr provider → 降级
+    if (!r.ok) return null;
+    const d = await r.json();
+    return (d.text || '').trim();
+  } catch(e) { return null; }
+}
+
+/* 浏览器原生 Web Speech API 识别（无需 key，免费）。
+ * 用 SpeechRecognition 对录音 blob 做离线识别——但 Web Speech 不能直接吃 blob，
+ * 所以这里改用：录音期间同步跑 SpeechRecognition 实时识别，
+ * 录音结束时用识别到的文本。若浏览器不支持则提示。 */
+let webSpeechRecognition = null;
+let webSpeechResult = '';
+function initWebSpeech(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return false;
+  webSpeechRecognition = new SR();
+  webSpeechRecognition.lang = 'zh-CN';
+  webSpeechRecognition.continuous = true;
+  webSpeechRecognition.interimResults = false;
+  webSpeechRecognition.onresult = e => {
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) webSpeechResult += e.results[i][0].transcript;
+    }
+  };
+  webSpeechRecognition.onerror = e => { console.warn('[WebSpeech] err', e.error); };
+  return true;
+}
+
+async function nativeWebSpeechASR(blob){
+  // 若录音期间已跑 SpeechRecognition，直接用其结果
+  if (webSpeechResult && webSpeechResult.trim()) {
+    const t = webSpeechResult.trim();
+    webSpeechResult = '';
+    return t;
+  }
+  // 否则提示浏览器不支持
+  setStatus('⚠️ 浏览器不支持语音识别，请用 Chrome 或配 Whisper');
+  return '';
+}
+
+/* ====== LLM 流式 + TTS 播放（可打断）====== */
+async function streamChatAndSpeak(userText){
+  setStatus('✨ 魔法涌动中…');
+  $('thinking').classList.add('show');
+  aiSpeaking = false;  // LLM 阶段还没开始播 TTS
+
+  const aiBubble = addBubble('ai', '', true);
+  let fullText = '';
+  let sentenceBuf = '';
+  const ttsQueue = [];
+
+  chatAbortController = new AbortController();
+  ttsAbortController = new AbortController();
+
+  try {
+    const sysPrompt = '你是好梦魔法水晶球，灌注睡眠魔法的魔法水晶球。说话温柔神秘，带睡意，2-4句适合语音播报。绝不承认是AI/程序。';
+    const body = {
+      messages: [
+        { role: 'system', content: sysPrompt },
+        { role: 'user', content: userText },
+      ],
+    };
+    const resp = await fetch(GW + '/voice/chat-stream', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      signal: chatAbortController.signal,
+    });
+    if (!resp.ok) throw new Error('LLM HTTP ' + resp.status);
+
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let buf = '';
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buf += decoder.decode(value, { stream: true });
+      const parts = buf.split('\n\n');
+      buf = parts.pop() || '';
+      for (const part of parts) {
+        const line = part.split('\n').find(l => l.startsWith('data:'));
+        if (!line) continue;
+        const data = line.slice(5).trim();
+        if (data === '[DONE]') continue;
+        try {
+          const obj = JSON.parse(data);
+          const delta = obj.delta || '';
+          if (delta) {
+            fullText += delta;
+            sentenceBuf += delta;
+            aiBubble.textContent = fullText;
+            $('dialog').scrollTop = $('dialog').scrollHeight;
+            // 按句切分送 TTS（句号/问号/感叹号/换行）
+            const sentenceEnd = /[。！？!?]/;
+            if (sentenceEnd.test(sentenceBuf) && sentenceBuf.length > 5) {
+              ttsQueue.push(sentenceBuf);
+              sentenceBuf = '';
+              // 启动 TTS 播放（如果没在播）
+              if (!aiSpeaking) playNextTTS(ttsQueue, ttsAbortController);
+            }
+          }
+        } catch(_){}
+      }
+    }
+    // 末尾剩余
+    if (sentenceBuf.trim()) {
+      ttsQueue.push(sentenceBuf);
+      if (!aiSpeaking) playNextTTS(ttsQueue, ttsAbortController);
+    }
+    aiBubble.classList.remove('streaming');
+    $('thinking').classList.remove('show');
+    // 等待 TTS 队列播完
+    if (ttsQueue.length > 0 || aiSpeaking) {
+      setStatus('🔮 水晶球在说话…（说话可打断）');
+      await new Promise(resolve => {
+        const check = setInterval(() => {
+          if (ttsQueue.length === 0 && !aiSpeaking) { clearInterval(check); resolve(); }
+        }, 200);
+      });
+    }
+    setStatus('说完了，轻触麦克风继续');
+  } catch(e) {
+    if (e.name === 'AbortError') {
+      aiBubble.textContent = fullText + ' [已打断]';
+    } else {
+      aiBubble.textContent = '❌ ' + e.message;
+    }
+    aiBubble.classList.remove('streaming');
+    $('thinking').classList.remove('show');
+    setStatus('出错了，请重试');
+  }
+}
+
+/* ====== TTS 播放：优先 ElevenLabs（后端 /voice/tts），失败降级浏览器原生 ====== */
+async function playNextTTS(queue, abortCtrl){
+  if (queue.length === 0 || abortCtrl.signal.aborted) {
+    aiSpeaking = false;
+    document.getElementById('ball').classList.remove('speaking');
+    return;
+  }
+  const sentence = queue.shift();
+  if (!sentence || !sentence.trim()) { playNextTTS(queue, abortCtrl); return; }
+
+  aiSpeaking = true;
+  document.getElementById('ball').classList.add('speaking');
+  document.getElementById('ball').classList.remove('listening');
+  setStatus('🔮 水晶球在说话…（说话可打断）');
+
+  // 先试后端 ElevenLabs TTS
+  const ok = await tryServerTTS(sentence, abortCtrl);
+  if (!ok && !abortCtrl.signal.aborted) {
+    // 降级：浏览器原生 SpeechSynthesis（零成本，无需 key）
+    await nativeTTS(sentence, abortCtrl);
+  }
+  if (!abortCtrl.signal.aborted) playNextTTS(queue, abortCtrl);
+}
+
+/* 后端 ElevenLabs TTS。返回 true=成功播放，false=失败（应降级） */
+async function tryServerTTS(text, abortCtrl){
+  try {
+    // 在官方提供的两个音色间轮换，让水晶球「星语」的嗓音更有层次
+    const voice = ELEVENLABS_VOICE_IDS[ttsVoiceIdx % ELEVENLABS_VOICE_IDS.length];
+    ttsVoiceIdx++;
+    const resp = await fetch(GW + '/voice/tts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, voice }),
+      signal: abortCtrl.signal,
+    });
+    if (!resp.ok) return false;
+    const arrayBuf = await resp.arrayBuffer();
+    if (arrayBuf.byteLength < 1000) return false;  // 可能是错误 JSON
+    if (abortCtrl.signal.aborted) return true;
+
+    if (!audioCtx || audioCtx.state === 'closed') {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    const audioBuffer = await audioCtx.decodeAudioData(arrayBuf);
+    if (!audioBuffer) return false;
+    return await new Promise(resolve => {
+      try {
+        currentTTSSource = audioCtx.createBufferSource();
+        currentTTSSource.buffer = audioBuffer;
+        currentTTSSource.connect(audioCtx.destination);
+        currentTTSSource.onended = () => { currentTTSSource = null; resolve(true); };
+        currentTTSSource.onerror = () => { currentTTSSource = null; resolve(false); };
+        currentTTSSource.start();
+      } catch(e) { resolve(false); }
+    });
+  } catch(e) {
+    if (e.name === 'AbortError') return true;  // 被打断算正常结束
+    return false;
+  }
+}
+
+/* 浏览器原生 SpeechSynthesis TTS（降级方案，免费无需 key） */
+async function nativeTTS(text, abortCtrl){
+  if (!('speechSynthesis' in window)) return;
+  return new Promise(resolve => {
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = 'zh-CN';
+    utter.rate = 0.95;
+    utter.pitch = 1.1;
+    // 选中文女声（若有）
+    const voices = speechSynthesis.getVoices();
+    const zh = voices.find(v => v.lang.startsWith('zh') && /female|女/i.test(v.name)) || voices.find(v => v.lang.startsWith('zh'));
+    if (zh) utter.voice = zh;
+    utter.onend = () => resolve();
+    utter.onerror = () => resolve();
+    if (abortCtrl.signal.aborted) { resolve(); return; }
+    // 支持 abort
+    const onAbort = () => { speechSynthesis.cancel(); resolve(); };
+    abortCtrl.signal.addEventListener('abort', onAbort, { once: true });
+    speechSynthesis.speak(utter);
+  });
+}
+
+/* ====== 打断：用户说话时调用 ====== */
+function interruptAI(){
+  console.log('[Interrupt] aborting AI speech');
+  if (chatAbortController) chatAbortController.abort();
+  if (ttsAbortController) ttsAbortController.abort();
+  if (currentTTSSource) { try { currentTTSSource.stop(); } catch(_){} currentTTSSource = null; }
+  aiSpeaking = false;
+  document.getElementById('ball').classList.remove('speaking');
+  $('interruptToast').classList.add('show');
+  setTimeout(() => $('interruptToast').classList.remove('show'), 1500);
+}
+
+/* ====== 模式切换按钮 ====== */
+document.querySelectorAll('.btn[data-cmd]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    fetch(GW + '/device/command', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ cmd: 'set_mode', mode: btn.dataset.mode })
+    });
+  });
+});
+
+/* 按住说话（触屏长按）*/
+const micBtn = $('micBtn');
+let pressTimer = null;
+micBtn.addEventListener('touchstart', async (e) => {
+  e.preventDefault();
+  if (!isRecording) await startMicRecording();
+});
+micBtn.addEventListener('touchend', (e) => {
+  e.preventDefault();
+  if (isRecording) stopMicAndSend();
+});
+// 桌面端点击切换
+micBtn.addEventListener('click', (e) => {
+  // 桌面端 click 在 touchend 后会触发，避免重复：只在非触屏设备响应
+  if (e.detail === 0) return;  // 鼠标点击 e.detail>=1，触屏合成 click e.detail=0
+});
+
+connect();
+</script>
+</body>
+</html>

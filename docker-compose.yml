@@ -1,0 +1,161 @@
+# ===================================================================
+# MBTI 项目 · 全栈 Docker Compose 编排
+# 一台机器一把梭: Postgres + Redis + 11 个 FastAPI 服务 + Nginx + Cloudflare Tunnel
+#
+# 启动:    docker compose up -d
+# 关停:    docker compose down
+# 日志:    docker compose logs -f gateway
+# 重建镜像: 见 build.sh
+# ===================================================================
+
+x-svc-base: &svc-base
+  restart: unless-stopped
+  environment: &svc-env
+    - DATABASE_URL=postgresql://mbti:mbti@postgres:5432/mbti
+    - REDIS_URL=redis://redis:6379/0
+    - MEMORY_STORE_URL=http://memory-store:8000
+    - JWT_SECRET=${JWT_SECRET:-dev-secret-change-me}
+    - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+  depends_on:
+    postgres:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+
+services:
+  # ======================== 基础设施 ========================
+  postgres:
+    image: postgres:16-alpine
+    container_name: mbti-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: mbti
+      POSTGRES_PASSWORD: mbti
+      POSTGRES_DB: mbti
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./infra/initdb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mbti"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: mbti-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # ======================== Backend Services ========================
+  gateway:
+    <<: *svc-base
+    image: mbti/svc:gateway
+    volumes:
+      - ./backend/gateway/app/static:/app/app/static:rw
+    environment:
+      - USER_SERVICE_URL=http://user-service:8000
+      - SOCIAL_SERVICE_URL=http://social-service:8000
+      - PET_PROFILE_SERVICE_URL=http://pet-profile-service:8000
+      - DIARY_SERVICE_URL=http://diary-service:8000
+      - PERSONALITY_ENGINE_URL=http://personality-engine:8000
+      - TOWN_SIMULATION_URL=http://town-simulation:8000
+      - DIVINATION_SERVICE_URL=http://divination-service:8000
+      - EMOTION_SERVICE_URL=http://emotion-service:8000
+      - TASK_SERVICE_URL=http://task-service:8000
+      - JWT_SECRET=${JWT_SECRET:-dev-secret-change-me}
+      - DATABASE_URL=postgresql://mbti:mbti@postgres:5432/mbti
+      - REDIS_URL=redis://redis:6379/0
+    ports:
+      - "3000:8000"
+
+  user-service:
+    <<: *svc-base
+    image: mbti/svc:user
+    ports: ["3001:8000"]
+
+  social-service:
+    <<: *svc-base
+    image: mbti/svc:social
+    ports: ["3002:8000"]
+
+  pet-profile-service:
+    <<: *svc-base
+    image: mbti/svc:pet
+    ports: ["3003:8000"]
+
+  diary-service:
+    <<: *svc-base
+    image: mbti/svc:diary
+    ports: ["3004:8000"]
+
+  divination-service:
+    <<: *svc-base
+    image: mbti/svc:divination
+    ports: ["3008:8000"]
+
+  emotion-service:
+    <<: *svc-base
+    image: mbti/svc:emotion
+    ports: ["3009:8000"]
+
+  task-service:
+    <<: *svc-base
+    image: mbti/svc:task
+    ports: ["3010:8000"]
+
+  # ======================== Agent Services ========================
+  personality-engine:
+    <<: *svc-base
+    image: mbti/svc:personality
+    ports: ["3006:8000"]
+
+  town-simulation:
+    <<: *svc-base
+    image: mbti/svc:town
+    ports: ["3007:8000"]
+
+  memory-store:
+    <<: *svc-base
+    image: mbti/svc:memory
+    # 内部依赖, 不对外暴露
+
+  family-simulator:
+    <<: *svc-base
+    image: mbti/svc:family
+    profiles: ["all"]   # 默认不起, 需要时 docker compose --profile all up
+
+  # ======================== 反向代理 (Cloudflare Tunnel -> nginx -> gateway) ========================
+  nginx:
+    image: mbti/nginx:latest
+    container_name: mbti-nginx
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./infra/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - gateway
+
+  # ======================== Cloudflare Tunnel (公网入口) ========================
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: mbti-cloudflared
+    restart: unless-stopped
+    command: tunnel --no-autoupdate --protocol http2 run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+    depends_on:
+      - nginx
+    profiles: ["prod"]   # 默认不起, 配置好 token 后 docker compose --profile prod up
+
+volumes:
+  pgdata:

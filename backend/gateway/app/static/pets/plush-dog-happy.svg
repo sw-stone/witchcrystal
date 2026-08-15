@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- Plush Dog - happy expression -->
+  <defs>
+    <radialGradient id="dogBody" cx="50%" cy="40%">
+      <stop offset="0%" stop-color="#8D6E63"/>
+      <stop offset="100%" stop-color="#5D4037"/>
+    </radialGradient>
+    <radialGradient id="dogBelly" cx="50%" cy="50%">
+      <stop offset="0%" stop-color="#D7CCC8"/>
+      <stop offset="100%" stop-color="#BCAAA4"/>
+    </radialGradient>
+  </defs>
+  <!-- Floppy ears -->
+  <ellipse cx="52" cy="65" rx="18" ry="38" fill="#6D4C41" stroke="#4E342E" stroke-width="2" transform="rotate(-15 52 65)"/>
+  <ellipse cx="148" cy="65" rx="18" ry="38" fill="#6D4C41" stroke="#4E342E" stroke-width="2" transform="rotate(15 148 65)"/>
+  <!-- Head -->
+  <ellipse cx="100" cy="80" rx="50" ry="46" fill="url(#dogBody)" stroke="#4E342E" stroke-width="2"/>
+  <!-- Snout -->
+  <ellipse cx="100" cy="100" rx="28" ry="20" fill="url(#dogBelly)"/>
+  <!-- Eyes (happy) -->
+  <ellipse cx="78" cy="75" rx="7" ry="8" fill="#3E2723"/>
+  <ellipse cx="122" cy="75" rx="7" ry="8" fill="#3E2723"/>
+  <circle cx="80" cy="73" r="2.5" fill="#fff"/>
+  <circle cx="124" cy="73" r="2.5" fill="#fff"/>
+  <!-- Cheeks -->
+  <circle cx="65" cy="92" r="7" fill="#FF8A65" opacity="0.3"/>
+  <circle cx="135" cy="92" r="7" fill="#FF8A65" opacity="0.3"/>
+  <!-- Nose -->
+  <ellipse cx="100" cy="92" rx="8" ry="6" fill="#3E2723"/>
+  <!-- Mouth (panting happy) -->
+  <path d="M100 98 L100 108" stroke="#3E2723" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M100 108 Q88 114 82 108" fill="none" stroke="#3E2723" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M100 108 Q112 114 118 108" fill="none" stroke="#3E2723" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Tongue -->
+  <ellipse cx="100" cy="112" rx="6" ry="4" fill="#E91E63"/>
+  <!-- Body hint -->
+  <ellipse cx="100" cy="165" rx="60" ry="30" fill="url(#dogBody)" stroke="#4E342E" stroke-width="2"/>
+  <ellipse cx="100" cy="160" rx="35" ry="22" fill="url(#dogBelly)" opacity="0.6"/>
+  <!-- Paws -->
+  <ellipse cx="70" cy="185" rx="14" ry="10" fill="#6D4C41" stroke="#4E342E" stroke-width="2"/>
+  <ellipse cx="130" cy="185" rx="14" ry="10" fill="#6D4C41" stroke="#4E342E" stroke-width="2"/>
+</svg>

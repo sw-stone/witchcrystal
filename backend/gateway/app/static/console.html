@@ -1,0 +1,4129 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="version" content="tarot-fix-v2-20260815">
+<title>星语 · AI玄学水晶球</title>
+<style>
+  :root {
+    --bg: #f4f1fa;
+    --bg-warm: #fef6f0;
+    --bg-cool: #eef4f1;
+    --card: #ffffff;
+    --card2: #f8f6fc;
+    --ink: #2d2a3e;
+    --ink2: #4a4660;
+    --sub: #9e98b8;
+    --sub2: #c4bed8;
+    --accent: #8b7ec8;
+    --accent2: #7468b5;
+    --accent-soft: rgba(139,126,200,.1);
+    --accent-glow: rgba(139,126,200,.15);
+    --warm: #e8b48f;
+    --warm-soft: rgba(232,180,143,.12);
+    --sage: #8fc4a8;
+    --sage-soft: rgba(143,196,168,.12);
+    --rose: #e0a4b8;
+    --rose-soft: rgba(224,164,184,.12);
+    --gold: #e0b568;
+    --green: #7bc4a4;
+    --red: #e08585;
+    --blue: #7ba3d4;
+    --pink: #d49ab8;
+    --lavender: #b8a8e0;
+    --line: #ece8f5;
+    --line2: #ddd7ea;
+    --shadow: 0 4px 24px rgba(45,42,62,.05);
+    --shadow-md: 0 8px 32px rgba(45,42,62,.07);
+    --shadow-lg: 0 12px 48px rgba(139,126,200,.12);
+    --r: 24px;
+    --r-lg: 28px;
+    --r-sm: 16px;
+    --r-xs: 12px;
+    --ease-spring: cubic-bezier(.34, 1.56, .64, 1);
+    --ease-out-soft: cubic-bezier(.22, .61, .36, 1);
+    --ease-mystic: cubic-bezier(.4, 0, .2, 1);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: -apple-system, "PingFang SC", "SF Pro Display", "Microsoft YaHei", sans-serif;
+    background: var(--bg); color: var(--ink); min-height: 100vh;
+    padding-bottom: 100px;
+    -webkit-font-smoothing: antialiased;
+    transition: padding-bottom .3s ease;
+  }
+  body.nav-hidden { padding-bottom: 24px; }
+
+  #starfield { position: fixed; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none; opacity:.4; }
+
+  /* ==================== HERO ==================== */
+  .hero {
+    position: relative; z-index: 5;
+    padding: 40px 24px 20px;
+    text-align: center;
+    transition: all .35s cubic-bezier(.4,.2,.2,1);
+  }
+  .hero.compact { padding: 12px 24px 8px; }
+  .hero.compact .hero-avatar { width: 36px; height: 36px; font-size: 18px; margin-bottom: 4px; }
+  .hero.compact .hero-greeting { font-size: 15px; margin-bottom: 0; }
+  .hero.compact .hero-sub { display: none; }
+  .hero.compact .hero-status { display: none; }
+  .hero-avatar {
+    width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 16px;
+    background: linear-gradient(135deg, var(--accent-soft), var(--warm-soft));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px; position: relative;
+    box-shadow: 0 8px 24px var(--accent-glow);
+    animation: heroFloat 4s ease-in-out infinite;
+  }
+  @keyframes heroFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+  }
+  .hero-avatar::after {
+    content: ''; position: absolute; inset: -3px; border-radius: 50%;
+    background: conic-gradient(from 0deg, var(--accent), var(--warm), var(--sage), var(--gold), var(--accent));
+    z-index: -1; opacity: .25;
+    animation: heroRingSpin 8s linear infinite;
+  }
+  @keyframes heroRingSpin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  .hero-avatar::before {
+    content: ''; position: absolute; inset: -8px; border-radius: 50%;
+    background: radial-gradient(circle, var(--accent-glow), transparent 70%);
+    z-index: -2; opacity: .5;
+  }
+  .hero-greeting { font-size: 22px; font-weight: 700; color: var(--ink); margin-bottom: 4px; letter-spacing: -.02em; }
+  .hero-sub { font-size: 13px; color: var(--sub); font-weight: 500; }
+  .hero-status { display: flex; justify-content: center; gap: 8px; margin-top: 12px; }
+
+  /* ==================== MAIN ==================== */
+  main {
+    position: relative; z-index: 5;
+    max-width: 480px; margin: 0 auto; padding: 0 16px;
+  }
+  .panel { display: none; }
+  .panel.active { display: block; animation: fadeIn .35s ease; }
+  @keyframes fadeIn { from { opacity:0; transform: translateY(12px); } to { opacity:1; transform: translateY(0); } }
+
+  /* ==================== CARDS ==================== */
+  .card {
+    background: var(--card); border-radius: var(--r); padding: 22px;
+    margin-bottom: 14px; box-shadow: var(--shadow);
+    position: relative; overflow: hidden;
+    transition: box-shadow .3s ease, transform .3s ease, border-color .3s ease;
+    border: 1px solid transparent;
+  }
+  .card:hover {
+    box-shadow: var(--shadow-lg); transform: translateY(-2px);
+    border-color: rgba(139,126,200,.12);
+  }
+  .card::after {
+    content: ''; position: absolute; inset: 0; z-index: 0;
+    background: radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(139,126,200,.06), transparent 50%);
+    opacity: 0; transition: opacity .3s ease; pointer-events: none;
+  }
+  .card:hover::after { opacity: 1; }
+  .card > * { position: relative; z-index: 1; }
+  .card-title {
+    font-size: 14px; font-weight: 700; color: var(--ink);
+    margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+    letter-spacing: -.01em;
+  }
+  .card-title .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+
+  /* Accent-tinted cards */
+  .card.warm { background: linear-gradient(160deg, var(--card) 60%, var(--warm-soft)); }
+  .card.cool { background: linear-gradient(160deg, var(--card) 60%, var(--sage-soft)); }
+  .card.lavender { background: linear-gradient(160deg, var(--card) 60%, var(--accent-soft)); }
+
+  /* ==================== FORM ==================== */
+  label { font-size: 12px; color: var(--sub); display: block; margin-bottom: 6px; font-weight: 600; }
+  input[type=text], input[type=password], input[type=number], textarea, select {
+    width: 100%; padding: 14px 16px; border: 1.5px solid var(--line);
+    border-radius: var(--r-sm); font-size: 15px; background: var(--card2);
+    color: var(--ink); font-family: inherit; transition: all .2s ease; font-weight: 500;
+  }
+  input:focus, textarea:focus, select:focus {
+    outline: none; border-color: var(--accent); background: var(--card);
+    box-shadow: 0 0 0 4px var(--accent-soft);
+  }
+  input::placeholder, textarea::placeholder { color: var(--sub2); }
+  textarea { resize: vertical; min-height: 80px; line-height: 1.6; }
+  select { cursor: pointer; }
+  input[type=range] { -webkit-appearance: none; height: 6px; background: var(--line); border-radius: 3px; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); box-shadow: 0 2px 8px var(--accent-glow); cursor: pointer; }
+
+  /* ==================== BUTTONS ==================== */
+  button, .btn {
+    background: var(--ink); color: #fff; border: none; border-radius: var(--r-sm);
+    padding: 14px 24px; font-size: 15px; cursor: pointer; transition: all .2s ease;
+    font-family: inherit; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    width: 100%;
+  }
+  button:hover, .btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); filter: saturate(1.12); }
+  button:active { transform: translateY(0); }
+  button:disabled { opacity: .35; cursor: not-allowed; transform: none; }
+  button.secondary { background: var(--card2); color: var(--ink2); }
+  button.secondary:hover { background: var(--line); }
+  button.accent { background: var(--accent); }
+  button.warm { background: var(--warm); }
+  button.sage { background: var(--sage); }
+  .btn-row { display: flex; gap: 10px; }
+  .btn-row > * { flex: 1; }
+
+  /* ==================== CHIPS ==================== */
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    padding: 10px 18px; border: 1.5px solid var(--line); border-radius: 100px;
+    font-size: 13px; cursor: pointer; color: var(--sub); transition: all .25s var(--ease-out-soft);
+    background: var(--card); font-weight: 600;
+  }
+  .chip:hover { border-color: var(--accent); color: var(--ink); transform: translateY(-1px); }
+  .chip.active {
+    background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff;
+    border-color: transparent;
+    box-shadow: 0 4px 16px var(--accent-glow);
+  }
+
+  /* ==================== MOOD SELECTOR ==================== */
+  .mood-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .mood-btn {
+    background: var(--card2); border: 2px solid transparent; border-radius: var(--r-sm);
+    padding: 16px 8px; text-align: center; cursor: pointer; font-size: 12px; color: var(--sub);
+    transition: all .2s ease; font-weight: 600; line-height: 1.4;
+  }
+  .mood-btn .mood-emoji { font-size: 24px; display: block; margin-bottom: 4px; }
+  .mood-btn:hover { background: var(--card); box-shadow: var(--shadow); }
+  .mood-btn.active { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+
+  /* ==================== STAT TILES ==================== */
+  .stat-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .stat-tile {
+    background: var(--card2); border-radius: var(--r-sm);
+    padding: 16px 12px; flex: 1; min-width: 80px; text-align: center;
+  }
+  .stat-tile .num { font-size: 24px; font-weight: 800; color: var(--ink); letter-spacing: -.03em; }
+  .stat-tile .label { font-size: 11px; color: var(--sub); margin-top: 2px; font-weight: 500; }
+
+  /* ==================== OUTPUT ==================== */
+  .output {
+    background: var(--card2); color: var(--ink2); border-radius: var(--r-sm); padding: 14px;
+    font: 12px/1.7 ui-monospace, Menlo, monospace; white-space: pre-wrap;
+    max-height: 300px; overflow: auto; margin-top: 12px; min-height: 40px;
+  }
+  .result-box {
+    background: var(--card2); border-radius: var(--r-sm); padding: 18px; margin-top: 12px;
+  }
+  .result-box .interpretation { font-size: 15px; line-height: 1.9; color: var(--ink); }
+  .hint-text { font-size: 13px; color: var(--sub); line-height: 1.5; margin-bottom: 12px; }
+  .spacer { height: 10px; }
+  .divider { height: 1px; background: var(--line); margin: 20px 0; }
+  .row { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
+  .row > div { flex: 1; min-width: 130px; }
+
+  /* ==================== TAROT ==================== */
+
+  /* 抽卡区域容器——深紫神秘底 */
+  .tarot-deck-grid {
+    display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; padding: 20px;
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(224,181,104,.08), transparent 60%),
+      linear-gradient(160deg, #1a1330 0%, #2a1f48 40%, #1e1638 100%);
+    border-radius: var(--r); margin-bottom: 14px; max-height: 380px; overflow-y: auto;
+    scrollbar-width: thin; scrollbar-color: rgba(224,181,104,.3) transparent;
+    position: relative; overflow-x: hidden;
+    box-shadow: inset 0 0 40px rgba(139,126,200,.15), 0 4px 20px rgba(26,19,48,.3);
+  }
+  .tarot-deck-grid::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(224,181,104,.5), transparent);
+  }
+  .tarot-deck-grid::-webkit-scrollbar { width: 5px; }
+  .tarot-deck-grid::-webkit-scrollbar-track { background: transparent; }
+  .tarot-deck-grid::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(224,181,104,.4), rgba(139,126,200,.3));
+    border-radius: 3px;
+  }
+  @media (max-width: 420px) { .tarot-deck-grid { grid-template-columns: repeat(6, 1fr); } }
+
+  /* 每张牌格 */
+  .tarot-deck-slot {
+    aspect-ratio: 7/12; border-radius: 8px; overflow: visible; perspective: 800px;
+    position: relative;
+  }
+  .tarot-deck-slot.empty { visibility: hidden; }
+  .tarot-deck-slot.picked .tarot-deck-img { display: none; }
+  .tarot-deck-slot.picked { cursor: default; }
+  .tarot-deck-slot .tarot-pick-inner {
+    width: 100%; height: 100%; position: relative;
+    transform-style: preserve-3d; transition: transform .6s var(--ease-spring);
+  }
+  .tarot-deck-slot .tarot-pick-inner.revealed { transform: rotateY(180deg); }
+  .tarot-deck-slot .tarot-pick-face {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; border-radius: 8px;
+    backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,.3);
+  }
+  .tarot-deck-slot .tarot-pick-front { transform: rotateY(180deg); }
+  .tarot-deck-slot.reversed .tarot-pick-front { transform: rotateY(180deg) rotateZ(180deg); }
+  /* 翻牌瞬间的金色闪光 */
+  .tarot-deck-slot.picked::after {
+    content: ''; position: absolute; inset: -2px; border-radius: 10px;
+    background: radial-gradient(circle, rgba(224,181,104,.4), transparent 70%);
+    opacity: 0; animation: tarotFlipGlow .8s var(--ease-out-soft) forwards;
+    pointer-events: none; z-index: 10;
+  }
+  @keyframes tarotFlipGlow {
+    0% { opacity: 0; transform: scale(.8); }
+    30% { opacity: 1; transform: scale(1.1); }
+    100% { opacity: 0; transform: scale(1.3); }
+  }
+
+  /* 牌背图片（未翻开时） */
+  .tarot-deck-img {
+    width: 100%; height: 100%; object-fit: cover; border-radius: 8px;
+    cursor: pointer; display: block;
+    transition: transform .3s var(--ease-spring), box-shadow .3s var(--ease-out-soft), filter .3s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,.2);
+    border: 1px solid rgba(224,181,104,.15);
+  }
+  .tarot-deck-img:hover {
+    transform: translateY(-6px) scale(1.08);
+    box-shadow: 0 10px 28px rgba(139,126,200,.35), 0 0 0 1px rgba(224,181,104,.4);
+    filter: brightness(1.1) saturate(1.15);
+    z-index: 2; position: relative;
+  }
+  .tarot-deck-img:active { transform: translateY(-2px) scale(1.03); }
+
+  /* 独立翻牌卡片（未使用但保留兼容） */
+  .tarot-pick-card { perspective: 800px; width: 90px; }
+  @media (max-width: 420px) { .tarot-pick-card { width: 72px; } }
+  .tarot-pick-inner { width: 100%; aspect-ratio: 7/12; position: relative; transform-style: preserve-3d; transition: transform .6s var(--ease-spring); }
+  .tarot-pick-inner.revealed { transform: rotateY(180deg); }
+  .tarot-pick-face { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 8px; backface-visibility: hidden; -webkit-backface-visibility: hidden; box-shadow: 0 2px 12px rgba(0,0,0,.3); }
+  .tarot-pick-front { transform: rotateY(180deg); }
+  .tarot-pick-card.reversed .tarot-pick-front { transform: rotateY(180deg) rotateZ(180deg); }
+
+  /* 卡片信息展示——神秘卡片风 */
+  .tarot-card-info { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0 14px; }
+  .tarot-card-info-item {
+    background: linear-gradient(160deg, var(--card2), rgba(139,126,200,.05));
+    border-radius: var(--r-sm); padding: 12px 14px; font-size: 12px; min-width: 90px;
+    border: 1px solid var(--line);
+    transition: all .3s var(--ease-out-soft);
+    position: relative; overflow: hidden;
+  }
+  .tarot-card-info-item::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--gold));
+    opacity: .7;
+  }
+  .tarot-card-info-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--line2);
+  }
+  .tarot-card-info-item .ci-name { font-weight: 700; color: var(--ink); font-size: 14px; }
+  .tarot-card-info-item .ci-pos { color: var(--accent); font-size: 11px; margin-top: 3px; font-weight: 600; }
+  .tarot-card-info-item .ci-kw { color: var(--sub); font-size: 10px; margin-top: 2px; }
+  .tarot-card-info-item.reversed {
+    border: 1.5px solid var(--rose);
+    background: linear-gradient(160deg, var(--card2), rgba(224,164,184,.06));
+  }
+  .tarot-card-info-item.reversed::before {
+    background: linear-gradient(90deg, var(--rose), var(--red));
+  }
+  .tarot-card-info-item .ci-rev {
+    color: var(--rose); font-size: 10px; font-weight: 600;
+    display: inline-block; padding: 2px 6px; border-radius: 4px;
+    background: var(--rose-soft); margin-top: 2px;
+  }
+  .tarot-card-info-item .ci-ai-btn {
+    margin-top: 8px; padding: 5px 10px; font-size: 11px; font-weight: 600;
+    border: 1px solid var(--accent); border-radius: 6px; cursor: pointer;
+    background: linear-gradient(135deg, var(--card2), rgba(124,92,255,.06));
+    color: var(--accent); transition: all .2s;
+  }
+  .tarot-card-info-item .ci-ai-btn:hover:not(:disabled) {
+    background: var(--accent); color: #fff; box-shadow: 0 2px 10px rgba(124,92,255,.35);
+  }
+  .tarot-card-info-item .ci-ai-btn:disabled { opacity: .6; cursor: wait; }
+  .tarot-card-info-item .ci-ai-out { margin-top: 6px; }
+
+  /* 状态提示——仪式感 */
+  .tarot-pick-status {
+    text-align: center; padding: 18px; font-size: 14px; color: var(--ink2);
+    background: linear-gradient(135deg, var(--card2), rgba(224,181,104,.05));
+    border-radius: var(--r-sm); margin-bottom: 14px; font-weight: 500;
+    border: 1px solid var(--line);
+    position: relative; overflow: hidden;
+  }
+  .tarot-pick-status::before {
+    content: '✦'; position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+    color: var(--gold); font-size: 14px; opacity: .4;
+  }
+  .tarot-pick-status::after {
+    content: '✦'; position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+    color: var(--gold); font-size: 14px; opacity: .4;
+  }
+  .tarot-pick-status .count {
+    color: var(--accent); font-weight: 800; font-size: 22px;
+    text-shadow: 0 0 12px var(--accent-glow);
+  }
+
+  /* 补充牌按钮 */
+  .tarot-extra-btn {
+    display: none; margin: 10px auto; padding: 12px 24px;
+    background: var(--card); border: 1.5px dashed var(--accent); color: var(--accent);
+    border-radius: 100px; cursor: pointer; font-size: 13px; font-family: inherit; font-weight: 600; width: auto;
+    transition: all .25s var(--ease-out-soft);
+  }
+  .tarot-extra-btn:hover {
+    background: var(--accent-soft); border-style: solid;
+    box-shadow: 0 4px 16px var(--accent-glow);
+    transform: translateY(-1px);
+  }
+  .tarot-extra-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  /* ==================== DIV MODE SELECTOR ==================== */
+  .div-mode-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 16px; }
+  .div-mode-btn {
+    position: relative; background: var(--card); border: none; border-radius: var(--r);
+    padding: 24px 16px; cursor: pointer; transition: all .3s cubic-bezier(.4,.2,.2,1);
+    overflow: hidden; text-align: center; box-shadow: var(--shadow); width: auto;
+    border: 1px solid transparent;
+  }
+  .div-mode-btn::after {
+    content: ''; position: absolute; bottom: -36px; right: -36px;
+    width: 90px; height: 90px; border-radius: 50%;
+    opacity: 0; filter: blur(20px); transition: opacity .35s ease, filter .35s ease;
+    pointer-events: none; z-index: 0;
+  }
+  .div-mode-btn::before {
+    content: ''; position: absolute; inset: 0; z-index: 0;
+    background: radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(255,255,255,.6), transparent 60%);
+    opacity: 0; transition: opacity .3s ease; pointer-events: none;
+  }
+  .div-mode-btn:hover::before { opacity: 1; }
+  .div-mode-btn:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+  .div-mode-btn:hover::after { opacity: .4; filter: blur(14px); }
+  .div-mode-btn > * { position: relative; z-index: 1; }
+  .div-mode-btn .mode-icon {
+    font-size: 28px; display: flex; align-items: center; justify-content: center;
+    width: 56px; height: 56px; margin: 0 auto 10px; border-radius: 18px;
+    transition: transform .3s ease;
+  }
+  .div-mode-btn:hover .mode-icon { transform: scale(1.08); }
+  .div-mode-btn .mode-title { font-size: 15px; font-weight: 700; color: var(--ink); margin-bottom: 3px; }
+  .div-mode-btn .mode-desc { font-size: 11px; color: var(--sub); line-height: 1.5; }
+  .div-mode-btn.mode-tarot { background: linear-gradient(160deg, var(--card), var(--accent-soft)); }
+  .div-mode-btn.mode-tarot .mode-icon { background: var(--accent-soft); }
+  .div-mode-btn.mode-tarot::after { background: var(--accent); }
+  .div-mode-btn.mode-astro { background: linear-gradient(160deg, var(--card), var(--sage-soft)); }
+  .div-mode-btn.mode-astro .mode-icon { background: var(--sage-soft); }
+  .div-mode-btn.mode-astro::after { background: var(--sage); }
+  .div-mode-btn.mode-dream { background: linear-gradient(160deg, var(--card), var(--rose-soft)); }
+  .div-mode-btn.mode-dream .mode-icon { background: var(--rose-soft); }
+  .div-mode-btn.mode-dream::after { background: var(--rose); }
+  .div-mode-btn.mode-fortune { background: linear-gradient(160deg, var(--card), var(--warm-soft)); }
+  .div-mode-btn.mode-fortune .mode-icon { background: var(--warm-soft); }
+  .div-mode-btn.mode-fortune::after { background: var(--warm); }
+  .div-subpanel { display: none; animation: fadeIn .35s ease; }
+  .div-subpanel.active { display: block; }
+  .div-back-btn {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: none; border: none; color: var(--accent);
+    font-size: 14px; cursor: pointer; padding: 8px 0; margin-bottom: 8px;
+    font-family: inherit; font-weight: 600; width: auto;
+  }
+  .div-back-btn:hover { color: var(--accent2); transform: none; box-shadow: none; }
+
+  /* ==================== MBTI TEST ==================== */
+  .mbti-entry {
+    background: linear-gradient(135deg, var(--accent-soft), var(--warm-soft));
+    border-radius: var(--r); padding: 20px; margin-bottom: 14px; cursor: pointer;
+    transition: all .3s ease; box-shadow: var(--shadow); position: relative; overflow: hidden;
+    border: 1px solid transparent;
+  }
+  .mbti-entry::after {
+    content: ''; position: absolute; bottom: -30px; right: -30px;
+    width: 100px; height: 100px; border-radius: 50%;
+    background: var(--accent); opacity: .15; filter: blur(22px);
+    transition: opacity .35s ease, filter .35s ease; pointer-events: none;
+  }
+  .mbti-entry:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); border-color: rgba(139,126,200,.15); }
+  .mbti-entry:hover::after { opacity: .35; filter: blur(16px); }
+  .mbti-entry > * { position: relative; z-index: 1; }
+  .mbti-entry .me-top { display: flex; align-items: center; gap: 14px; }
+  .mbti-entry .me-icon {
+    font-size: 28px; width: 52px; height: 52px; border-radius: 16px;
+    background: rgba(255,255,255,.6); display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .mbti-entry .me-body { flex: 1; }
+  .mbti-entry .me-title { font-size: 15px; font-weight: 700; color: var(--ink); margin-bottom: 3px; }
+  .mbti-entry .me-desc { font-size: 12px; color: var(--sub); line-height: 1.5; }
+  .mbti-entry .me-badge {
+    display: inline-block; background: var(--accent); color: #fff; font-size: 11px; font-weight: 700;
+    padding: 2px 8px; border-radius: 8px; margin-left: 4px;
+  }
+  .mbti-entry .me-result { font-size: 22px; font-weight: 800; color: var(--accent); margin-top: 6px; letter-spacing: 1px; }
+
+  .mbti-q-progress { height: 6px; background: var(--card2); border-radius: 3px; margin-bottom: 16px; overflow: hidden; }
+  .mbti-q-progress-bar { height: 100%; background: var(--accent); border-radius: 3px; transition: width .4s ease; }
+  .mbti-q-num { font-size: 12px; color: var(--sub); margin-bottom: 4px; font-weight: 600; }
+  .mbti-q-text { font-size: 16px; font-weight: 600; color: var(--ink); line-height: 1.5; margin-bottom: 16px; }
+  .mbti-q-option {
+    display: block; width: 100%; text-align: left; padding: 14px 16px; margin-bottom: 8px;
+    background: var(--card2); border: 2px solid transparent; border-radius: var(--r);
+    font-size: 14px; color: var(--ink); cursor: pointer; transition: all .2s ease; font-family: inherit;
+    line-height: 1.5;
+  }
+  .mbti-q-option:hover { border-color: var(--accent); background: var(--accent-soft); }
+  .mbti-q-option.selected { border-color: var(--accent); background: var(--accent-soft); font-weight: 600; }
+  .mbti-q-actions { display: flex; gap: 8px; margin-top: 12px; }
+  .mbti-q-actions button { width: auto; }
+  .mbti-result { text-align: center; padding: 12px 0; }
+  .mbti-result-type { font-size: 48px; font-weight: 800; color: var(--accent); letter-spacing: 2px; margin-bottom: 8px; }
+  .mbti-result-label { font-size: 16px; font-weight: 700; color: var(--ink); margin-bottom: 12px; }
+  .mbti-result-desc { font-size: 14px; color: var(--sub); line-height: 1.7; text-align: left; margin-bottom: 16px; }
+  .mbti-result-dims { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 16px; }
+  .mbti-dim-pill { font-size: 12px; padding: 4px 10px; border-radius: 8px; font-weight: 600; background: var(--card2); color: var(--ink); }
+
+  /* ==================== PET ANIMATION STAGE ==================== */
+  .pet-stage-box {
+    position: relative;
+    background: linear-gradient(180deg, #e8f5e9 0%, #c8e6c9 50%, #a5d6a7 100%);
+    border-radius: var(--r-lg); overflow: hidden; margin-bottom: 14px;
+    box-shadow: var(--shadow); border: 1px solid rgba(139,126,200,.12);
+    user-select: none; -webkit-user-select: none;
+  }
+  .pet-stage-box.compact { min-height: 240px; }
+  .pet-stage-box.full { min-height: 280px; }
+  .pet-scene {
+    position: relative; width: 100%; height: 240px;
+    display: flex; align-items: flex-end; justify-content: center;
+    overflow: hidden;
+  }
+  .pet-scene-full { height: 280px; }
+  .pet-scene-bg {
+    position: absolute; inset: 0; z-index: 0;
+    background: radial-gradient(ellipse at 50% 70%, rgba(255,255,255,.5), transparent 70%);
+  }
+  .pet-cloud { position: absolute; opacity: .7; animation: petCloudDrift 20s linear infinite; }
+  .pet-cloud:nth-child(2) { animation-duration: 28s; animation-delay: -8s; opacity: .5; transform: scale(.8); }
+  .pet-cloud:nth-child(3) { animation-duration: 35s; animation-delay: -15s; opacity: .4; transform: scale(1.2); }
+  @keyframes petCloudDrift { from{transform:translateX(-60px);} to{transform:translateX(calc(100vw + 60px));} }
+
+  .pet-ground {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 50px; z-index: 1;
+    background: linear-gradient(180deg, #81c784, #66bb6a);
+    border-radius: 50% 50% 0 0 / 12px 12px 0 0;
+  }
+  .pet-ground::before {
+    content: ''; position: absolute; top: -2px; left: 0; right: 0; height: 4px;
+    background: rgba(255,255,255,.3); border-radius: 50%;
+  }
+
+  .pet-sprite {
+    position: relative; z-index: 5; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center;
+    margin-bottom: 38px; transition: transform .3s ease;
+  }
+  .pet-sprite-img {
+    font-size: 72px; line-height: 1; image-rendering: pixelated;
+    animation: petIdle 2.5s ease-in-out infinite;
+    transition: font-size .3s ease;
+  }
+  .pet-sprite-img.bouncing { animation: petBounce .4s ease; }
+  .pet-sprite-img.eating { animation: petEat .5s ease-in-out 3; }
+  .pet-sprite-img.playing { animation: petPlay .5s ease-in-out 4; }
+  .pet-sprite-img.sleeping { animation: petSleep 3s ease-in-out infinite; }
+  .pet-sprite-img.happy { animation: petHappy .4s ease-in-out 3; }
+  .pet-sprite-img.shaking { animation: petShake .3s ease-in-out 3; }
+
+  @keyframes petIdle { 0%,100%{transform:translateY(0) scale(1);} 50%{transform:translateY(-6px) scale(1.02);} }
+  @keyframes petBounce { 0%,100%{transform:translateY(0);} 40%{transform:translateY(-30px) scale(1.05);} 60%{transform:translateY(-20px);} }
+  @keyframes petEat { 0%,100%{transform:scaleY(1) scaleX(1);} 50%{transform:scaleY(.92) scaleX(1.06);} }
+  @keyframes petPlay { 0%,100%{transform:rotate(0deg) translateY(0);} 25%{transform:rotate(-8deg) translateY(-10px);} 75%{transform:rotate(8deg) translateY(-5px);} }
+  @keyframes petSleep { 0%,100%{transform:rotate(0deg) scale(1);} 50%{transform:rotate(-3deg) scale(.98);} }
+  @keyframes petHappy { 0%,100%{transform:translateY(0) rotate(0);} 33%{transform:translateY(-12px) rotate(-5deg);} 66%{transform:translateY(-8px) rotate(5deg);} }
+  @keyframes petShake { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-6px);} 75%{transform:translateX(6px);} }
+
+  .pet-shadow {
+    position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
+    width: 60px; height: 12px; background: rgba(0,0,0,.15); border-radius: 50%;
+    z-index: 4; animation: petShadowPulse 2.5s ease-in-out infinite;
+  }
+  @keyframes petShadowPulse { 0%,100%{opacity:.15;width:60px;} 50%{opacity:.1;width:52px;} }
+
+  .pet-emote {
+    position: absolute; z-index: 10; font-size: 24px; pointer-events: none;
+    animation: petEmoteFloat 1.5s ease-out forwards;
+  }
+  @keyframes petEmoteFloat { 0%{opacity:0;transform:translateY(0) scale(.5);} 20%{opacity:1;transform:translateY(-10px) scale(1.2);} 100%{opacity:0;transform:translateY(-50px) scale(1);} }
+
+  .pet-zzz {
+    position: absolute; z-index: 10; font-size: 18px; pointer-events: none; opacity: 0;
+  }
+  .pet-zzz.show { animation: petZzz 2s ease-in-out infinite; }
+  @keyframes petZzz { 0%,100%{opacity:0;transform:translateY(0) translateX(0);} 50%{opacity:.7;transform:translateY(-15px) translateX(10px);} }
+
+  .pet-stage-hud {
+    position: absolute; top: 0; left: 0; right: 0; z-index: 20;
+    padding: 8px 12px; display: flex; justify-content: space-between; align-items: flex-start;
+    pointer-events: none;
+  }
+  .pet-hud-left { display: flex; flex-direction: column; gap: 2px; }
+  .pet-hud-right { display: flex; flex-direction: column; gap: 2px; align-items: flex-end; }
+  .pet-hud-name { font-size: 14px; font-weight: 700; color: var(--ink); text-shadow: 0 1px 2px rgba(255,255,255,.6); }
+  .pet-hud-stage { font-size: 11px; color: var(--sub); font-weight: 600; text-shadow: 0 1px 2px rgba(255,255,255,.6); }
+  .pet-hud-level {
+    font-size: 11px; font-weight: 700; color: #fff;
+    background: var(--accent); padding: 2px 8px; border-radius: 8px;
+    text-shadow: none;
+  }
+  .pet-hud-coins {
+    font-size: 11px; font-weight: 700; color: var(--ink);
+    background: rgba(255,255,255,.85); padding: 2px 8px; border-radius: 8px;
+  }
+  .pet-hud-mood {
+    font-size: 16px; text-shadow: 0 1px 2px rgba(255,255,255,.6);
+  }
+
+  .pet-quick-bars {
+    position: absolute; bottom: 4px; left: 8px; right: 8px; z-index: 20;
+    display: flex; gap: 6px; padding: 4px;
+  }
+  .pet-quick-bar { flex: 1; }
+  .pet-quick-bar-label { font-size: 9px; color: var(--ink); font-weight: 700; margin-bottom: 1px; text-shadow: 0 1px 2px rgba(255,255,255,.8); display: flex; justify-content: space-between; }
+  .pet-quick-bar-track { height: 6px; background: rgba(0,0,0,.12); border-radius: 3px; overflow: hidden; }
+  .pet-quick-bar-fill { height: 100%; border-radius: 3px; transition: width .5s ease; }
+
+  .pet-tap-hint {
+    position: absolute; bottom: 52px; left: 50%; transform: translateX(-50%); z-index: 15;
+    font-size: 11px; color: var(--sub); opacity: .6; pointer-events: none;
+    background: rgba(255,255,255,.7); padding: 2px 10px; border-radius: 10px;
+  }
+
+  /* ==================== EMOTION BARS ==================== */
+  .emo-bar-container { margin: 10px 0; }
+  .emo-bar-label { font-size: 12px; color: var(--sub); margin-bottom: 4px; display: flex; justify-content: space-between; font-weight: 500; }
+  .emo-bar-bg { height: 24px; background: var(--card2); border-radius: 8px; overflow: hidden; }
+  .emo-bar-fill { height: 100%; border-radius: 8px; transition: width .5s; display: flex; align-items: center; padding-left: 10px; font-size: 11px; color: #fff; font-weight: 600; }
+
+  /* ==================== FEED ==================== */
+  .feed-item { background: var(--card2); border-radius: var(--r-sm); padding: 16px; margin-bottom: 10px; }
+  .feed-item .feed-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .feed-item .feed-user { font-weight: 700; font-size: 14px; color: var(--ink); }
+  .feed-item .feed-type { font-size: 11px; padding: 3px 10px; border-radius: 100px; background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+  .feed-item .feed-question { font-size: 13px; color: var(--accent); margin-bottom: 4px; font-weight: 500; }
+  .feed-item .feed-text { font-size: 14px; line-height: 1.6; color: var(--ink2); }
+  .feed-item .feed-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+  .feed-item .feed-time { font-size: 11px; color: var(--sub); }
+  .like-btn { cursor: pointer; font-size: 13px; color: var(--sub); background: none; border: none; padding: 4px 8px; width: auto; font-weight: 500; }
+  .like-btn:hover { color: var(--rose); transform: none; box-shadow: none; }
+  .like-btn.liked { color: var(--rose); }
+
+  /* ==================== BADGES ==================== */
+  .badge-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+  .badge { padding: 8px 14px; border-radius: 100px; font-size: 12px; display: inline-flex; align-items: center; gap: 4px; font-weight: 600; }
+  .badge.unlocked { background: var(--warm-soft); color: var(--gold); }
+  .badge.locked { background: var(--card2); color: var(--sub); }
+
+  /* ==================== PET ==================== */
+  .pet-card-display {
+    display: flex; gap: 14px; align-items: center;
+    background: linear-gradient(135deg, var(--accent-soft), var(--warm-soft));
+    border-radius: var(--r); padding: 18px; margin-top: 12px;
+  }
+  .pet-avatar-large {
+    width: 80px; height: 80px; border-radius: 50%;
+    background: var(--card); display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; box-shadow: 0 4px 16px var(--accent-glow);
+  }
+  .pet-info { flex: 1; min-width: 0; }
+  .pet-name-large { font-size: 17px; font-weight: 700; margin-bottom: 6px; color: var(--ink); }
+  .pet-level-badge { font-size: 11px; background: var(--warm); color: #fff; padding: 2px 8px; border-radius: 100px; margin-left: 4px; font-weight: 600; }
+  .pet-traits-bars { display: flex; flex-direction: column; gap: 4px; }
+  .pet-trait-bar { display: flex; align-items: center; gap: 6px; font-size: 10px; color: var(--sub); font-weight: 600; }
+  .pet-trait-bar .trait-bg { flex: 1; height: 6px; background: var(--card2); border-radius: 3px; overflow: hidden; }
+  .pet-trait-bar .trait-fill { height: 100%; border-radius: 3px; transition: width .5s; opacity: .85; }
+  .pet-growth { font-size: 11px; color: var(--gold); margin-top: 6px; font-weight: 600; }
+
+  .shop-item-card { background: var(--card2); padding: 14px; border-radius: var(--r-sm); transition: all .2s ease; }
+  .shop-item-card:hover { box-shadow: var(--shadow); }
+  .inventory-slot { background: var(--card2); padding: 10px; border-radius: var(--r-sm); text-align: center; min-width: 80px; cursor: pointer; transition: all .2s ease; }
+  .inventory-slot:hover { box-shadow: var(--shadow); }
+
+  /* ==================== LOADING ==================== */
+  .loading { display: inline-block; width: 18px; height: 18px; border: 2.5px solid var(--accent-soft); border-top-color: var(--accent); border-radius: 50%; animation: spin .6s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .typing-cursor::after { content: '▎'; animation: blink 1s steps(2) infinite; color: var(--accent); opacity: .6; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* ==================== PILLS / BADGES ==================== */
+  .pill { font-size: 11px; padding: 4px 12px; border-radius: 100px; background: var(--card2); color: var(--sub); font-weight: 600; }
+  .pill.ok { background: var(--sage-soft); color: var(--green); }
+  .pill.err { background: rgba(224,133,133,.12); color: var(--red); }
+  .llm-badge { font-size: 11px; padding: 5px 12px; border-radius: 100px; display: inline-flex; align-items: center; gap: 5px; font-weight: 600; }
+  .llm-badge.real { background: var(--sage-soft); color: var(--green); }
+  .llm-badge.mock { background: var(--warm-soft); color: var(--gold); }
+  .llm-badge .dot { width:6px; height:6px; border-radius:50%; }
+  .llm-badge.real .dot { background: var(--green); animation: pulse 2s infinite; }
+  .llm-badge.mock .dot { background: var(--gold); }
+  @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.4; } }
+
+  /* ==================== QUICKSTART ==================== */
+  .quickstart {
+    background: linear-gradient(135deg, var(--accent-soft), var(--warm-soft));
+    border-radius: var(--r-lg); padding: 28px 24px; margin-bottom: 16px; text-align: center;
+  }
+  .quickstart h3 { font-size: 20px; color: var(--ink); margin-bottom: 8px; font-weight: 700; }
+  .quickstart p { font-size: 14px; color: var(--sub); line-height: 1.6; margin-bottom: 20px; }
+
+  .recommend-card {
+    background: var(--card); border-radius: var(--r); padding: 20px; margin-bottom: 14px;
+    display: flex; gap: 14px; align-items: center; box-shadow: var(--shadow);
+  }
+  .recommend-card .rec-icon {
+    font-size: 24px; width: 48px; height: 48px; border-radius: 16px;
+    background: linear-gradient(135deg, var(--warm-soft), var(--accent-soft));
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .recommend-card .rec-text { flex: 1; }
+  .recommend-card .rec-title { font-size: 13px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+  .recommend-card .rec-desc { font-size: 13px; color: var(--sub); line-height: 1.5; }
+
+  /* ==================== BOTTOM NAV ==================== */
+  .bottom-nav {
+    position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+    z-index: 100; display: flex; gap: 4px;
+    background: rgba(255,255,255,.92); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border-radius: 100px; padding: 6px; box-shadow: 0 8px 32px rgba(45,42,62,.1);
+    border: 1px solid rgba(236,232,245,.5);
+    max-width: calc(100vw - 32px); overflow-x: auto; scrollbar-width: none;
+    transition: opacity .3s ease, transform .3s ease, visibility .3s;
+  }
+  .bottom-nav.hidden { opacity: 0; transform: translateX(-50%) translateY(80px); visibility: hidden; }
+  .bottom-nav::-webkit-scrollbar { display: none; }
+  .nav-item {
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    padding: 10px 16px; border-radius: 100px; cursor: pointer;
+    font-size: 10px; color: var(--sub); font-weight: 600; transition: all .25s ease;
+    white-space: nowrap; border: none; background: none; width: auto;
+  }
+  .nav-item:hover { color: var(--ink); transform: none; box-shadow: none; filter: saturate(1.1); }
+  .nav-item .nav-icon { font-size: 20px; transition: transform .25s ease; }
+  .nav-item:hover .nav-icon { transform: scale(1.15); }
+  .nav-item.active {
+    background: var(--ink); color: #fff;
+  }
+  .nav-item.active .nav-icon { transform: scale(1.05); }
+
+  /* ==================== TOAST ==================== */
+  #toast {
+    position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
+    background: var(--ink); color: #fff; border-radius: 100px;
+    padding: 12px 24px; font-size: 14px; box-shadow: var(--shadow-lg);
+    display: none; z-index: 999; max-width: 90vw; font-weight: 600;
+    animation: toastIn .3s ease;
+  }
+  @keyframes toastIn { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
+  /* ==================== SECTION HEADER ==================== */
+  .section-header {
+    font-size: 18px; font-weight: 700; color: var(--ink);
+    padding: 20px 8px 12px; letter-spacing: -.02em;
+  }
+  .section-sub { font-size: 13px; color: var(--sub); padding: 0 8px 16px; }
+
+  /* ============================================================
+     UI POLISH LAYER — keeps all original colors/tones untouched
+     Inspired by Kimi Ambassador: refined easing, micro-feedback,
+     softer depth, kinetic dropdowns, tactile taps.
+     ============================================================ */
+  :root {
+    --ease-out-soft: cubic-bezier(.22, .61, .36, 1);
+    --ease-spring: cubic-bezier(.34, 1.56, .64, 1);
+  }
+  button, .btn {
+    transition: transform .18s var(--ease-out-soft), box-shadow .25s var(--ease-out-soft), filter .25s var(--ease-out-soft), background-color .2s var(--ease-out-soft);
+    position: relative; overflow: hidden;
+  }
+  button:hover, .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(139,126,200,.22); }
+  button:active, .btn:active { transform: translateY(0) scale(.975); box-shadow: 0 4px 12px rgba(45,42,62,.1); transition-duration: .08s; }
+  button.accent:hover { box-shadow: 0 10px 28px rgba(139,126,200,.32); }
+  button.warm:hover { box-shadow: 0 10px 28px rgba(232,180,143,.35); }
+  button.sage:hover { box-shadow: 0 10px 28px rgba(143,196,168,.35); }
+  .ripple-span { position: absolute; border-radius: 50%; pointer-events: none; transform: scale(0); background: rgba(255,255,255,.45); animation: rippleExpand .6s var(--ease-out-soft) forwards; }
+  @keyframes rippleExpand { to { transform: scale(2.6); opacity: 0; } }
+  .chip { transition: transform .2s var(--ease-spring), background-color .2s var(--ease-out-soft), border-color .2s var(--ease-out-soft), color .2s var(--ease-out-soft), box-shadow .25s var(--ease-out-soft); user-select: none; }
+  .chip:hover { transform: translateY(-1px) scale(1.03); }
+  .chip:active { transform: scale(.94); transition-duration: .08s; }
+  .chip.active { box-shadow: 0 6px 18px rgba(139,126,200,.32); animation: chipPop .35s var(--ease-spring); }
+  @keyframes chipPop { 0%{transform:scale(.85);} 60%{transform:scale(1.06);} 100%{transform:scale(1);} }
+  .mood-btn { transition: transform .2s var(--ease-spring), background-color .2s, box-shadow .25s, border-color .2s, color .2s; }
+  .mood-btn:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+  .mood-btn:hover .mood-emoji { animation: emojiWiggle .5s var(--ease-spring); }
+  .mood-btn:active { transform: scale(.93); transition-duration: .08s; }
+  .mood-btn.active { box-shadow: 0 8px 22px rgba(139,126,200,.28); animation: chipPop .35s var(--ease-spring); }
+  .mood-btn.active .mood-emoji { animation: emojiWiggle .6s var(--ease-spring); }
+  @keyframes emojiWiggle { 0%,100%{transform:rotate(0) scale(1);} 25%{transform:rotate(-10deg) scale(1.15);} 75%{transform:rotate(10deg) scale(1.15);} }
+  .card { transition: box-shadow .35s var(--ease-out-soft), transform .35s var(--ease-out-soft), border-color .35s var(--ease-out-soft); }
+  .card:hover { transform: translateY(-3px); box-shadow: 0 18px 44px rgba(139,126,200,.14); }
+  .panel.active .card { animation: cardRise .5s var(--ease-out-soft) backwards; }
+  .panel.active .card:nth-child(1) { animation-delay: .02s; }
+  .panel.active .card:nth-child(2) { animation-delay: .07s; }
+  .panel.active .card:nth-child(3) { animation-delay: .12s; }
+  .panel.active .card:nth-child(4) { animation-delay: .17s; }
+  .panel.active .card:nth-child(5) { animation-delay: .22s; }
+  .panel.active .card:nth-child(6) { animation-delay: .27s; }
+  @keyframes cardRise { from { opacity:0; transform: translateY(16px); } to { opacity:1; transform: translateY(0); } }
+  .div-mode-btn { transition: transform .35s var(--ease-spring), box-shadow .35s var(--ease-out-soft), border-color .35s var(--ease-out-soft); }
+  .div-mode-btn:hover { transform: translateY(-6px); }
+  .div-mode-btn:hover .mode-icon { transform: scale(1.12) translateY(-2px); transition: transform .35s var(--ease-spring); }
+  .div-mode-btn:active { transform: translateY(-2px) scale(.97); transition-duration: .1s; }
+  .div-mode-btn .mode-icon { transition: transform .35s var(--ease-spring); }
+  .div-subpanel.active { animation: subPanelIn .4s var(--ease-out-soft); }
+  @keyframes subPanelIn { from { opacity:0; transform: translateX(18px); } to { opacity:1; transform: translateX(0); } }
+  .panel.active { animation: panelIn .4s var(--ease-out-soft); }
+  @keyframes panelIn { from { opacity:0; transform: translateY(14px); } to { opacity:1; transform: translateY(0); } }
+  .nav-item { transition: color .25s var(--ease-out-soft), background-color .3s var(--ease-out-soft), transform .25s var(--ease-spring); }
+  .nav-item .nav-icon { transition: transform .3s var(--ease-spring); }
+  .nav-item:hover { transform: translateY(-2px); }
+  .nav-item:hover .nav-icon { transform: scale(1.2) translateY(-1px); }
+  .nav-item:active { transform: scale(.92); transition-duration: .08s; }
+  .nav-item.active { box-shadow: 0 6px 18px rgba(45,42,62,.22); animation: navActivate .4s var(--ease-spring); }
+  .nav-item.active .nav-icon { animation: iconBounce .5s var(--ease-spring); }
+  @keyframes navActivate { 0%{transform:scale(.85);} 60%{transform:scale(1.05);} 100%{transform:scale(1);} }
+  @keyframes iconBounce { 0%,100%{transform:scale(1.05);} 50%{transform:scale(1.3);} }
+  select { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238b7ec8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>"); background-repeat: no-repeat; background-position: right 16px center; padding-right: 42px; cursor: pointer; transition: border-color .2s var(--ease-out-soft), box-shadow .2s var(--ease-out-soft), background-color .2s; }
+  select:hover { border-color: var(--accent); }
+  select option { padding: 8px; }
+  input[type=text], input[type=password], input[type=number], textarea { transition: border-color .25s var(--ease-out-soft), box-shadow .25s var(--ease-out-soft), background-color .25s var(--ease-out-soft); }
+  input[type=range] { background: linear-gradient(to right, var(--accent) 0%, var(--accent) var(--pct,50%), var(--line) var(--pct,50%), var(--line) 100%); height: 8px; transition: background .1s; }
+  input[type=range]::-webkit-slider-thumb { transition: transform .2s var(--ease-spring), box-shadow .2s; border: 2px solid #fff; }
+  input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.25); box-shadow: 0 4px 14px var(--accent-glow); }
+  input[type=range]::-moz-range-thumb { border: 2px solid #fff; transition: transform .2s; }
+  input[type=range]::-moz-range-thumb:hover { transform: scale(1.25); }
+  .hero-avatar { animation: heroBreathe 4s ease-in-out infinite; }
+  @keyframes heroBreathe { 0%,100%{box-shadow:0 8px 24px var(--accent-glow);} 50%{box-shadow:0 12px 36px rgba(139,126,200,.28);} }
+  #toast { animation: toastSpring .4s var(--ease-spring); }
+  @keyframes toastSpring { from {opacity:0; transform:translate(-50%,30px) scale(.85);} to {opacity:1; transform:translate(-50%,0) scale(1);} }
+  .mbti-entry, .recommend-card { transition: transform .35s var(--ease-out-soft), box-shadow .35s var(--ease-out-soft), border-color .35s var(--ease-out-soft); }
+  .mbti-entry:hover { transform: translateY(-4px); }
+  .mbti-entry:active, .recommend-card:active { transform: scale(.98); transition-duration: .1s; }
+  .feed-item, .shop-item-card, .inventory-slot { transition: transform .2s var(--ease-out-soft), box-shadow .25s var(--ease-out-soft), background-color .2s; }
+  .feed-item:hover, .shop-item-card:hover, .inventory-slot:hover { transform: translateY(-2px); }
+  .like-btn { transition: transform .2s var(--ease-spring), color .2s; }
+  .like-btn:hover { transform: scale(1.2); }
+  .like-btn.liked { animation: heartPop .4s var(--ease-spring); }
+  @keyframes heartPop { 0%{transform:scale(1);} 50%{transform:scale(1.35);} 100%{transform:scale(1);} }
+  .div-back-btn { transition: color .2s, transform .2s var(--ease-out-soft); gap: 6px; }
+  .div-back-btn:hover { transform: translateX(-3px); }
+  .div-back-btn:active { transform: translateX(-3px) scale(.96); transition-duration: .08s; }
+  .tarot-deck-img { transition: transform .3s var(--ease-spring), box-shadow .3s var(--ease-out-soft), filter .3s ease; }
+  .tarot-deck-img:hover {
+    transform: translateY(-7px) scale(1.08);
+    box-shadow: 0 12px 28px rgba(139,126,200,.3), 0 0 0 1px rgba(224,181,104,.4);
+    filter: brightness(1.12) saturate(1.15);
+  }
+
+  /* 牌阵抽卡区域闪烁星点装饰（伪元素动画） */
+  .tarot-deck-grid .star-deco {
+    position: absolute; width: 2px; height: 2px; border-radius: 50%;
+    background: rgba(224,181,104,.6); pointer-events: none;
+    animation: starTwinkle 3s ease-in-out infinite;
+  }
+  @keyframes starTwinkle {
+    0%, 100% { opacity: .15; transform: scale(.8); }
+    50% { opacity: .7; transform: scale(1.3); }
+  }
+
+  /* "开始抽牌" 按钮神秘光效 */
+  #divSubTarot button.accent {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    position: relative; overflow: hidden;
+    box-shadow: 0 4px 20px var(--accent-glow);
+  }
+  #divSubTarot button.accent::before {
+    content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.2), transparent);
+    animation: btnShimmer 3s ease-in-out infinite;
+  }
+  @keyframes btnShimmer {
+    0%, 100% { left: -100%; }
+    50% { left: 100%; }
+  }
+  #divSubTarot button.accent:hover {
+    box-shadow: 0 8px 28px rgba(139,126,200,.3);
+    filter: brightness(1.05);
+  }
+
+  /* 解读结果区——打字机优化 */
+  #tarotInterp {
+    background: linear-gradient(160deg, var(--card2), rgba(224,181,104,.04));
+    border-radius: var(--r-sm); padding: 16px 18px;
+    border-left: 3px solid var(--gold);
+    font-size: 14px; line-height: 1.75; color: var(--ink2);
+  }
+  .stat-tile { transition: transform .2s var(--ease-spring), box-shadow .2s; }
+  .stat-tile:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+  .stat-tile .num { animation: numPop .5s var(--ease-spring) backwards; }
+  @keyframes numPop { from{opacity:0; transform:scale(.5);} to{opacity:1; transform:scale(1);} }
+  .mbti-q-option { transition: border-color .2s var(--ease-out-soft), background-color .2s var(--ease-out-soft), transform .2s var(--ease-out-soft), box-shadow .25s; }
+  .mbti-q-option:hover { transform: translateX(4px); }
+  .mbti-q-option.selected { box-shadow: 0 6px 18px rgba(139,126,200,.2); animation: chipPop .35s var(--ease-spring); }
+  .mbti-result-type { animation: typeReveal .7s var(--ease-spring) backwards; }
+  @keyframes typeReveal { 0%{opacity:0; transform:scale(.3) rotate(-8deg); letter-spacing:12px;} 100%{opacity:1; transform:scale(1) rotate(0); letter-spacing:2px;} }
+  .quickstart button.accent { animation: ctaPulse 2.5s ease-in-out infinite; }
+  @keyframes ctaPulse { 0%,100%{box-shadow:0 8px 24px rgba(139,126,200,.25);} 50%{box-shadow:0 12px 32px rgba(139,126,200,.42);} }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } .hero-avatar, .quickstart button.accent { animation: none !important; } }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--line2); border-radius: 3px; transition: background .2s; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+</style>
+</head>
+<body>
+
+<canvas id="starfield"></canvas>
+
+<!-- ==================== HERO ==================== -->
+<div class="hero">
+  <div class="hero-avatar">🔮</div>
+  <div class="hero-greeting">星语水晶球</div>
+  <div class="hero-sub">你的 AI 玄学情绪伙伴</div>
+  <div class="hero-status">
+    <span id="llmStatus" class="llm-badge mock"><span class="dot"></span> AI 检测中</span>
+    <span id="gwStatus" class="pill">连接检测中…</span>
+  </div>
+</div>
+
+<main>
+
+<!-- ==================== HOME / DIVINATION ==================== -->
+<div id="panel-divination" class="panel active">
+
+  <div id="quickstartArea" class="quickstart" style="display:none;">
+    <h3>欢迎来到星语</h3>
+    <p>塔罗牌解读命运，情绪追踪陪伴每一天。<br>点击下方按钮，即刻开启你的玄学之旅。</p>
+    <button onclick="quickStartDemo()" class="accent">开始体验</button>
+    <div style="height:8px;"></div>
+    <button onclick="goSettings()" class="secondary">手动注册 / 登录</button>
+  </div>
+
+  <div id="mbtiTestEntry"></div>
+
+  <div class="section-header">今天想探索什么？</div>
+
+  <div id="divModeSelector" class="div-mode-grid">
+    <div class="div-mode-btn mode-tarot" onclick="switchDivMode('tarot')">
+      <div class="mode-icon">🃏</div>
+      <div class="mode-title">塔罗占卜</div>
+      <div class="mode-desc">抽牌解读命运</div>
+    </div>
+    <div class="div-mode-btn mode-astro" onclick="switchDivMode('astro')">
+      <div class="mode-icon">✨</div>
+      <div class="mode-title">星座运势</div>
+      <div class="mode-desc">星辰今日指引</div>
+    </div>
+    <div class="div-mode-btn mode-dream" onclick="switchDivMode('dream')">
+      <div class="mode-icon">🌙</div>
+      <div class="mode-title">AI 解梦</div>
+      <div class="mode-desc">潜意识密语</div>
+    </div>
+    <div class="div-mode-btn mode-fortune" onclick="switchDivMode('fortune')">
+      <div class="mode-icon">☀️</div>
+      <div class="mode-title">今日运势</div>
+      <div class="mode-desc">一张指引牌</div>
+    </div>
+  </div>
+
+  <!-- Tarot sub-panel -->
+  <div id="divSubTarot" class="div-subpanel">
+    <button class="div-back-btn" onclick="switchDivMode('menu')">← 返回</button>
+    <div class="card">
+      <div class="card-title"><span class="dot"></span> 塔罗占卜</div>
+      <label>你想问什么？</label>
+      <input type="text" id="tarotQuestion" placeholder="例如：我的事业发展如何？" value="">
+      <div class="spacer"></div>
+      <label>选择牌阵</label>
+      <div class="chips" id="tarotSpreads">
+        <div class="chip active" data-spread="single" onclick="pickSpread('single',this)">单张指引</div>
+        <div class="chip" data-spread="three_card" onclick="pickSpread('three_card',this)">三牌阵</div>
+        <div class="chip" data-spread="celtic_cross" onclick="pickSpread('celtic_cross',this)">凯尔特十字</div>
+      </div>
+      <div class="spacer"></div>
+      <label>占卜前的心境（可选）</label>
+      <div class="chips" id="tarotEmotionChips">
+        <div class="chip active" data-emo="">无</div>
+        <div class="chip" data-emo="joy">😊 喜悦</div>
+        <div class="chip" data-emo="calm">😌 平静</div>
+        <div class="chip" data-emo="anxiety">😰 焦虑</div>
+        <div class="chip" data-emo="sadness">😢 悲伤</div>
+        <div class="chip" data-emo="anger">😡 愤怒</div>
+        <div class="chip" data-emo="fear">😨 恐惧</div>
+      </div>
+      <div class="spacer"></div>
+      <button onclick="doTarot()" class="accent">开始抽牌</button>
+      <div id="tarotResult"></div>
+    </div>
+  </div>
+
+  <!-- Astrology sub-panel -->
+  <div id="divSubAstro" class="div-subpanel">
+    <button class="div-back-btn" onclick="switchDivMode('menu')">← 返回</button>
+    <div class="card">
+      <div class="card-title"><span class="dot"></span> 星座运势</div>
+      <label>你的星座</label>
+      <div class="chips" id="zodiacChips"></div>
+      <div class="spacer"></div>
+      <label>时间</label>
+      <div class="chips" id="periodChips">
+        <div class="chip active" data-period="daily">今日</div>
+        <div class="chip" data-period="weekly">本周</div>
+      </div>
+      <div class="spacer"></div>
+      <button onclick="doAstrology()" class="accent">查看运势</button>
+      <div id="astrologyResult"></div>
+    </div>
+  </div>
+
+  <!-- Dream sub-panel -->
+  <div id="divSubDream" class="div-subpanel">
+    <button class="div-back-btn" onclick="switchDivMode('menu')">← 返回</button>
+    <div class="card">
+      <div class="card-title"><span class="dot"></span> AI 解梦</div>
+      <label>描述你的梦境</label>
+      <textarea id="dreamText" placeholder="例如：我梦见自己在一片漆黑的海面上漂浮，远处有灯塔在闪烁..."></textarea>
+      <div class="spacer"></div>
+      <button onclick="doDream()" class="accent">解读梦境</button>
+      <div id="dreamResult"></div>
+    </div>
+  </div>
+
+  <!-- Fortune sub-panel -->
+  <div id="divSubFortune" class="div-subpanel">
+    <button class="div-back-btn" onclick="switchDivMode('menu')">← 返回</button>
+    <div class="card warm">
+      <div class="card-title"><span class="dot" style="background:var(--warm)"></span> 今日运势</div>
+      <p class="hint-text">抽取一张命运之牌，获取今日指引</p>
+      <label>星座（可选）</label>
+      <div class="chips" id="fortuneZodiacChips"></div>
+      <div class="spacer"></div>
+      <button onclick="doFortune()" class="warm">抽取指引牌</button>
+      <div id="fortuneResult"></div>
+    </div>
+  </div>
+
+  <!-- MBTI Test sub-panel -->
+  <div id="divSubMbti" class="div-subpanel">
+    <button class="div-back-btn" onclick="switchDivMode('menu')">← 返回</button>
+    <div class="card">
+      <div class="card-title"><span class="dot"></span> MBTI 性格测试</div>
+      <div id="mbtiTestArea"></div>
+    </div>
+  </div>
+
+  <!-- History -->
+  <div class="section-header">占卜记录</div>
+  <div class="card">
+    <div class="btn-row" style="margin-bottom:12px;">
+      <button onclick="loadHistory()" class="secondary">历史</button>
+      <button onclick="loadStats()" class="secondary">统计</button>
+    </div>
+    <div id="statsArea"></div>
+    <div id="historyArea"></div>
+  </div>
+</div>
+
+<!-- ==================== EMOTION ==================== -->
+<div id="panel-emotion" class="panel">
+  <div class="section-header">今天心情如何？</div>
+
+  <div class="card cool">
+    <div class="card-title"><span class="dot" style="background:var(--sage)"></span> 记录情绪</div>
+    <div class="mood-grid" id="moodSelector">
+      <div class="mood-btn" data-emotion="joy"><span class="mood-emoji">😊</span>喜悦</div>
+      <div class="mood-btn active" data-emotion="calm"><span class="mood-emoji">😌</span>平静</div>
+      <div class="mood-btn" data-emotion="anxiety"><span class="mood-emoji">😰</span>焦虑</div>
+      <div class="mood-btn" data-emotion="sadness"><span class="mood-emoji">😢</span>悲伤</div>
+      <div class="mood-btn" data-emotion="anger"><span class="mood-emoji">😡</span>愤怒</div>
+      <div class="mood-btn" data-emotion="fear"><span class="mood-emoji">😨</span>恐惧</div>
+      <div class="mood-btn" data-emotion="surprise"><span class="mood-emoji">😲</span>惊讶</div>
+    </div>
+    <div class="spacer"></div>
+    <label>情绪强度: <span id="intensityVal">5</span> / 10</label>
+    <input type="range" id="intensitySlider" min="1" max="10" value="5" style="width:100%" oninput="document.getElementById('intensityVal').textContent=this.value">
+    <div class="spacer"></div>
+    <button onclick="logEmotion()" class="accent">记录心情</button>
+    <div id="logEmotionResult"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="dot"></span> AI 情绪分析</div>
+    <p class="hint-text">输入一段文字，AI 分析其中的情绪</p>
+    <textarea id="emotionText" placeholder="例如：今天好开心啊，特别快乐！"></textarea>
+    <div class="spacer"></div>
+    <button onclick="analyzeEmotion()" class="accent">分析情绪</button>
+    <div id="emotionResult"></div>
+  </div>
+
+  <div class="section-header">情绪趋势</div>
+  <div class="card">
+    <div class="row">
+      <div>
+        <label>时间</label>
+        <select id="trendDays">
+          <option value="7">最近 7 天</option>
+          <option value="14">最近 14 天</option>
+          <option value="30">最近 30 天</option>
+        </select>
+      </div>
+    </div>
+    <div class="spacer"></div>
+    <div class="btn-row">
+      <button onclick="loadTrends()" class="secondary">趋势</button>
+      <button onclick="loadAssessment()" class="secondary">评估</button>
+      <button onclick="loadReport()" class="secondary">周报</button>
+    </div>
+    <div id="trendsArea"></div>
+  </div>
+</div>
+
+<!-- ==================== PET GAME ==================== -->
+<div id="panel-petgame" class="panel">
+  <div class="section-header">我的宠物</div>
+
+  <!-- ==================== PET ANIMATION STAGE ==================== -->
+  <div id="petStageBox" class="pet-stage-box full" style="display:none;">
+    <div class="pet-scene pet-scene-full" id="petScene">
+      <!-- background clouds -->
+      <div class="pet-cloud" style="top:20px;left:0;">☁️</div>
+      <div class="pet-cloud" style="top:50px;left:0;">☁️</div>
+      <div class="pet-cloud" style="top:15px;left:0;">☁️</div>
+      <!-- HUD overlay -->
+      <div class="pet-stage-hud">
+        <div class="pet-hud-left">
+          <div class="pet-hud-name" id="petAnimName">???</div>
+          <div class="pet-hud-stage" id="petAnimStage">蛋</div>
+        </div>
+        <div class="pet-hud-right">
+          <div class="pet-hud-level" id="petAnimLevel">Lv.1</div>
+          <div class="pet-hud-coins" id="petAnimCoins">💰 100</div>
+          <div class="pet-hud-mood" id="petAnimMoodEmoji">😀</div>
+        </div>
+      </div>
+      <!-- ground -->
+      <div class="pet-ground"></div>
+      <!-- shadow -->
+      <div class="pet-shadow"></div>
+      <!-- zzz (sleeping indicator) -->
+      <div class="pet-zzz" id="petZzz" style="top:60px;right:40%;">💤</div>
+      <!-- pet sprite -->
+      <div class="pet-sprite" id="petSprite" onclick="onPetTap()">
+        <div class="pet-sprite-img" id="petSpriteImg">🥚</div>
+      </div>
+      <!-- tap hint -->
+      <div class="pet-tap-hint">点击宠物互动</div>
+      <!-- quick status bars -->
+      <div class="pet-quick-bars" id="petQuickBars"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div id="petGameStatus" class="output" style="margin-bottom:12px;margin-top:0;"></div>
+  </div>
+
+  <div class="card" id="petGameMain" style="display:none;">
+    <div style="display:flex;gap:16px;align-items:center;margin-bottom:16px;">
+      <div style="text-align:center;min-width:120px;">
+        <div id="gamePetAvatar" style="font-size:64px;line-height:1.2;">🥚</div>
+        <div id="gamePetName" style="font-size:16px;font-weight:700;margin-top:4px;color:var(--ink);">???</div>
+        <div id="gamePetStage" style="font-size:12px;color:var(--sub);">蛋</div>
+        <div id="gamePetLevel" style="font-size:13px;color:var(--accent);margin-top:2px;font-weight:600;">Lv.1</div>
+        <div id="gamePetCoins" style="font-size:13px;color:var(--gold);margin-top:2px;font-weight:600;">💰 100</div>
+      </div>
+      <div style="flex:1;min-width:0;">
+        <div id="gameStatsBars"></div>
+        <div id="gameAlertMsg" style="margin-top:8px;font-size:12px;"></div>
+      </div>
+    </div>
+    <div class="btn-row" style="flex-wrap:wrap;">
+      <button onclick="petCare('feed')" class="secondary">🍽️ 喂食</button>
+      <button onclick="petCare('bathe')" class="secondary">🚿 洗澡</button>
+      <button onclick="petCare('play')" class="secondary">🎾 玩耍</button>
+    </div>
+    <div style="height:8px;"></div>
+    <div class="btn-row" style="flex-wrap:wrap;">
+      <button onclick="petCare('rest')" class="secondary">😴 休息</button>
+      <button onclick="petCare('hatch')" id="hatchBtn" class="warm">🥚 孵化</button>
+      <button onclick="dailyReward()" class="secondary">🎁 签到</button>
+    </div>
+  </div>
+
+  <div class="card" id="gameCreateSection" style="display:none;">
+    <div class="card-title"><span class="dot"></span> 创建宠物</div>
+    <div class="chips" id="gamePetChips">
+      <div class="chip" data-pet="plush-cat">🐱 猫</div>
+      <div class="chip" data-pet="plush-dog">🐶 狗</div>
+      <div class="chip" data-pet="plush-rabbit">🐰 兔</div>
+      <div class="chip active" data-pet="plush-bear">🐻 熊</div>
+    </div>
+    <div class="spacer"></div>
+    <input type="text" id="gamePetNameInput" placeholder="给宠物起名" value="星宝">
+    <div class="spacer"></div>
+    <button onclick="createGamePet()" class="accent">创建宠物</button>
+    <div id="gameCreateResult"></div>
+  </div>
+
+  <div class="card" id="shopCard">
+    <div class="card-title"><span class="dot" style="background:var(--warm)"></span> 道具商店</div>
+    <div id="shopItems" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="dot"></span> 背包</div>
+    <div id="gameInventory" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="dot" style="background:var(--sage)"></span> MBTI 性格</div>
+    <p class="hint-text">调整性格参数影响宠物对话</p>
+    <div id="gameMbtiSliders"></div>
+    <div class="spacer"></div>
+    <button onclick="saveMbtiFromGame()" class="accent">保存性格</button>
+    <div id="gameMbtiResult"></div>
+  </div>
+</div>
+
+<!-- ==================== COMMUNITY ==================== -->
+<div id="panel-community" class="panel">
+  <div class="section-header">社区广场</div>
+  <div class="card">
+    <p class="hint-text">看看大家分享了什么占卜结果</p>
+    <button onclick="loadFeed()" class="secondary" style="margin-bottom:12px;">刷新</button>
+    <div id="feedArea"></div>
+  </div>
+
+  <div class="section-header">分享你的占卜</div>
+  <div class="card">
+    <input type="text" id="shareNickname" placeholder="昵称" value="" style="margin-bottom:10px;">
+    <select id="shareType" style="margin-bottom:10px;">
+      <option value="tarot">塔罗占卜</option>
+      <option value="astrology">星座运势</option>
+      <option value="dream">AI解梦</option>
+      <option value="fortune">今日运势</option>
+    </select>
+    <input type="text" id="shareQuestion" placeholder="你问了什么？" style="margin-bottom:10px;">
+    <textarea id="shareInterpretation" placeholder="占卜解读..." style="margin-bottom:10px;"></textarea>
+    <button onclick="doShare()" class="accent">分享</button>
+    <div id="shareResult"></div>
+  </div>
+</div>
+
+<!-- ==================== PROFILE / SETTINGS ==================== -->
+<div id="panel-settings" class="panel">
+  <div class="section-header">账号</div>
+  <div class="card">
+    <div id="authLoggedIn" style="display:none;">
+      <div class="result-box" style="text-align:center;">
+        <div style="width:60px;height:60px;border-radius:50%;background:var(--accent-soft);margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:28px;">👤</div>
+        <div style="font-weight:700;font-size:15px;color:var(--ink);">用户 <span id="authUid"></span></div>
+        <div style="font-size:12px;color:var(--sub);margin-top:4px;">角色: <span id="authRole"></span></div>
+      </div>
+      <div class="spacer"></div>
+      <button onclick="logout()" class="secondary">退出登录</button>
+    </div>
+    <div id="authForms">
+      <input type="text" id="authIdentifier" placeholder="手机号 / 用户名" style="margin-bottom:10px;">
+      <input type="password" id="authPassword" placeholder="密码（至少6位）" style="margin-bottom:10px;">
+      <input type="text" id="authNickname" placeholder="昵称" style="margin-bottom:10px;">
+      <select id="authMbti" style="margin-bottom:10px;">
+        <option value="">MBTI（可选）</option>
+        <option value="INTJ">INTJ</option><option value="INTP">INTP</option>
+        <option value="ENTJ">ENTJ</option><option value="ENTP">ENTP</option>
+        <option value="INFJ">INFJ</option><option value="INFP">INFP</option>
+        <option value="ENFJ">ENFJ</option><option value="ENFP">ENFP</option>
+        <option value="ISTJ">ISTJ</option><option value="ISFJ">ISFJ</option>
+        <option value="ESTJ">ESTJ</option><option value="ESFJ">ESFJ</option>
+        <option value="ISTP">ISTP</option><option value="ISFP">ISFP</option>
+        <option value="ESTP">ESTP</option><option value="ESFP">ESFP</option>
+      </select>
+      <div class="btn-row">
+        <button onclick="doRegister()" class="accent">注册</button>
+        <button onclick="doLogin()" class="secondary">登录</button>
+      </div>
+      <div style="height:8px;"></div>
+      <button onclick="openMbtiQuiz()" class="secondary">MBTI 测一测</button>
+      <div id="authResult"></div>
+    </div>
+  </div>
+
+  <div class="section-header">每日任务</div>
+  <div class="card">
+    <div id="pointsDisplay"><p class="hint-text">加载积分中...</p></div>
+    <div class="spacer"></div>
+    <div class="btn-row" style="flex-wrap:wrap;">
+      <button onclick="doCheckIn()" class="sage">签到</button>
+      <button onclick="doMoodLogTask()" class="secondary">记录情绪</button>
+    </div>
+    <div id="checkInResult"></div>
+    <div id="moodLogResult"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="dot" style="background:var(--sage)"></span> 冥想放松</div>
+    <div class="chips">
+      <div class="chip" data-med="180">3 分钟</div>
+      <div class="chip active" data-med="300">5 分钟</div>
+      <div class="chip" data-med="600">10 分钟</div>
+    </div>
+    <div class="spacer"></div>
+    <button onclick="doMeditation()" class="sage">开始冥想</button>
+    <div id="meditationResult"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="dot" style="background:var(--warm)"></span> 成就</div>
+    <button onclick="loadAchievements()" class="secondary" style="margin-bottom:12px;">加载成就</button>
+    <div id="achievementsArea"></div>
+  </div>
+
+  <div class="section-header">宠物形象</div>
+  <div class="card">
+    <div style="text-align:center;padding:8px 0 12px;">
+      <img id="petAvatarImg" src="/pets/plush-bear-happy.svg" style="width:100px;height:100px;" alt="pet">
+      <div id="petAvatarLabel" style="font-size:13px;color:var(--sub);margin-top:4px;">毛绒熊</div>
+    </div>
+    <div class="chips" id="petAvatarChips">
+      <div class="chip" data-pet="plush-cat">🐱 猫</div>
+      <div class="chip" data-pet="plush-dog">🐶 狗</div>
+      <div class="chip" data-pet="plush-rabbit">🐰 兔</div>
+      <div class="chip active" data-pet="plush-bear">🐻 熊</div>
+    </div>
+    <div class="spacer"></div>
+    <input type="text" id="petName" placeholder="宠物名字" value="星宝" style="margin-bottom:10px;">
+    <button onclick="createPet()" class="accent">创建宠物</button>
+    <div id="petResult"></div>
+  </div>
+
+  <div class="section-header">连接设置</div>
+  <div class="card">
+    <label>Gateway URL</label>
+    <input type="text" id="gatewayUrl" value="https://mbti.shitman666.top">
+    <div class="spacer"></div>
+    <button onclick="saveGateway()" class="secondary">保存</button>
+    <div id="settingsResult"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="dot"></span> AI 服务配置（LLM / TTS / Voice）</div>
+    <p class="hint-text">三类 provider 独立管理：LLM=文本对话 · TTS=ElevenLabs 文字转语音 · Voice=Moshi 端到端全双工语音对话。每类各自选一个启用。</p>
+
+    <!-- 类型切换 tab -->
+    <div class="btn-row" style="flex-wrap:wrap;margin-bottom:10px;">
+      <button onclick="setLlmTab('llm')" id="llmTabBtn_llm" class="accent" style="font-size:13px;">LLM 文本</button>
+      <button onclick="setLlmTab('tts')" id="llmTabBtn_tts" class="secondary" style="font-size:13px;">TTS (ElevenLabs)</button>
+      <button onclick="setLlmTab('voice')" id="llmTabBtn_voice" class="secondary" style="font-size:13px;">Voice (Moshi)</button>
+    </div>
+
+    <!-- 已有 provider 列表 -->
+    <div id="llmProviderList" style="margin-bottom:14px;"></div>
+
+    <!-- 新增/编辑表单 -->
+    <div class="card-title" style="font-size:14px;margin-top:8px;" id="llmFormTitle">添加新 Provider</div>
+    <input type="text" id="llmName" placeholder="名称（如 MagikCloud GLM-5.2）" style="margin-bottom:8px;">
+    <input type="text" id="llmBaseUrl" placeholder="Base URL" style="margin-bottom:8px;">
+    <input type="text" id="llmModel" placeholder="模型/voice 名称" style="margin-bottom:8px;">
+    <input type="password" id="llmApiKey" placeholder="API Key" style="margin-bottom:8px;">
+    <input type="text" id="llmExtra" placeholder='额外参数 JSON (如 {"ws_path":"/api/moshi","sample_rate":24000})' style="margin-bottom:8px;font-size:12px;">
+    <input type="hidden" id="llmEditId">
+    <input type="hidden" id="llmCurType" value="llm">
+    <div class="btn-row" style="flex-wrap:wrap;">
+      <button onclick="saveLlmProvider()" class="accent">保存</button>
+      <button onclick="cancelLlmEdit()" class="secondary" id="llmCancelBtn" style="display:none;">取消</button>
+      <button onclick="testLlmActive()" class="secondary">测试当前启用</button>
+    </div>
+    <div id="llmConfigResult"></div>
+  </div>
+
+  <div class="section-header">设备模拟</div>
+  <div class="card">
+    <p class="hint-text">模拟 T5AI 设备发送数据</p>
+    <input type="text" id="devUid" value="t5ai_test_001" style="margin-bottom:10px;">
+    <div class="btn-row" style="flex-wrap:wrap;">
+      <button onclick="sendMode()" class="secondary">上报模式</button>
+      <button onclick="sendEmotion()" class="secondary">上报情绪</button>
+      <button onclick="sendDivination()" class="secondary">上报占卜</button>
+    </div>
+    <div style="height:8px;"></div>
+    <select id="devMode" style="margin-bottom:8px;">
+      <option value="0">待机</option><option value="1">塔罗</option>
+      <option value="2">星座</option><option value="3">解梦</option>
+      <option value="4">运势</option><option value="5">陪伴</option>
+    </select>
+    <input type="number" id="devEmotion" placeholder="情绪 1-10" value="5" min="1" max="10" style="margin-bottom:8px;">
+    <input type="text" id="devDivResult" placeholder='占卜结果 JSON'>
+    <div id="deviceResult"></div>
+  </div>
+</div>
+
+<!-- ==================== 测试 Tab（水晶球语音交互测试） ==================== -->
+<div id="panel-test" class="panel">
+  <div class="section-header">水晶球语音测试</div>
+  <div class="section-sub">语音对话 · 实时模式同步 · 流式打断</div>
+
+  <!-- 水晶球动画 -->
+  <div class="card" style="display:flex;flex-direction:column;align-items:center;padding:24px 16px;">
+    <div id="crystalBallWrap" style="position:relative;width:200px;height:200px;margin-bottom:16px;">
+      <div id="crystalBall" style="position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 35% 30%, var(--cb-hi,#6a5e9e) 0%, var(--cb-mid,#4a3e7e) 45%, var(--cb-lo,#2a1f4a) 100%);box-shadow:0 0 40px 12px var(--cb-glow,rgba(106,94,158,.4)),inset 0 0 60px 15px rgba(0,0,0,.4);animation:cbBreathe 4s ease-in-out infinite;transition:background 1.2s,box-shadow 1.2s;"></div>
+      <style>
+        @keyframes cbBreathe {0%,100%{transform:scale(1)}50%{transform:scale(1.03)}}
+        #crystalBall.cb-listening{animation:cbListen .8s ease-in-out infinite}
+        @keyframes cbListen{0%,100%{transform:scale(1)}50%{transform:scale(1.08);box-shadow:0 0 60px 20px var(--cb-glow,rgba(106,94,158,.4))}}
+        #crystalBall.cb-speaking{animation:cbSpeak .6s ease-in-out infinite}
+        @keyframes cbSpeak{0%,100%{transform:scale(1.02)}50%{transform:scale(1.06)}}
+        #crystalBall::before{content:'';position:absolute;top:12%;left:18%;width:30%;height:25%;background:radial-gradient(ellipse,rgba(255,255,255,.5) 0%,transparent 70%);border-radius:50%;filter:blur(4px)}
+        .cb-base{position:absolute;bottom:-12%;left:50%;transform:translateX(-50%);width:55%;height:14%;background:linear-gradient(#4a3a2a,#2a1f15);border-radius:0 0 50% 50%/0 0 100% 100%;box-shadow:0 8px 20px rgba(0,0,0,.6)}
+        @keyframes cbFade { to { opacity: 1; } }
+        @keyframes cbDot { 0%,80%,100% { opacity: .2; } 40% { opacity: 1; } }
+        .bubble.cb-streaming::after { content: '▋'; animation: cbCursor 0.8s infinite; }
+        @keyframes cbCursor { 50% { opacity: 0; } }
+        .btn.recording { background: #e08585 !important; color: #fff !important; border-color: #e08585 !important; box-shadow: 0 0 16px rgba(224,133,133,.5); animation: cbMicPulse 1s infinite; }
+        @keyframes cbMicPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+      </style>
+      <div class="cb-base"></div>
+      <div id="cbThinking" style="position:absolute;bottom:14%;left:50%;transform:translateX(-50%);display:none;gap:6px;">
+        <span style="width:8px;height:8px;border-radius:50%;background:var(--accent);animation:cbDot 1.2s infinite"></span>
+        <span style="width:8px;height:8px;border-radius:50%;background:var(--accent);animation:cbDot 1.2s infinite .2s"></span>
+        <span style="width:8px;height:8px;border-radius:50%;background:var(--accent);animation:cbDot 1.2s infinite .4s"></span>
+      </div>
+    </div>
+    <div id="cbModeName" style="font-size:18px;font-weight:300;letter-spacing:3px;color:var(--accent);text-shadow:0 0 10px var(--accent-glow);">待机</div>
+    <div id="cbStatus" style="font-size:13px;color:var(--sub);margin-top:6px;letter-spacing:1px;">轻触麦克风开始对话</div>
+  </div>
+
+  <!-- 对话气泡区 -->
+  <div id="cbDialog" style="max-height:30vh;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:0 4px 12px;"></div>
+
+  <!-- 麦克风 + 模式按钮 -->
+  <div class="card">
+    <div class="btn-row" style="flex-wrap:wrap;justify-content:center;gap:8px;">
+      <button class="btn accent" id="cbMicBtn" onclick="cbToggleMic()" style="min-width:140px;">🎤 按住说话</button>
+    </div>
+    <div class="spacer"></div>
+    <div class="btn-row" style="flex-wrap:wrap;justify-content:center;gap:6px;">
+      <button class="btn" onclick="cbSendCmd('set_mode',{mode:'whitenoise'})">白噪音</button>
+      <button class="btn" onclick="cbSendCmd('set_mode',{mode:'breathing'})">呼吸</button>
+      <button class="btn" onclick="cbSendCmd('set_mode',{mode:'meditation'})">冥想</button>
+      <button class="btn" onclick="cbSendCmd('set_mode',{mode:'divination'})">占卜</button>
+      <button class="btn" onclick="cbSendCmd('set_mode',{mode:'alarm'})">闹钟</button>
+    </div>
+  </div>
+
+  <!-- 连接状态 -->
+  <div style="text-align:center;font-size:11px;color:var(--sub2);padding:8px;">
+    <span id="cbConnStatus">● 连接中</span>
+  </div>
+
+  <!-- 硬件模拟器（无真硬件时调试用，模拟 PS2 摇杆事件 → POST /device/state）-->
+  <div class="card" style="margin-top:12px;">
+    <div class="section-header" style="font-size:14px;">🎮 硬件模拟器（PS2 摇杆）</div>
+    <div class="section-sub" style="margin-bottom:10px;">真硬件未连时点这里模拟摇杆事件</div>
+    <div class="btn-row" style="flex-wrap:wrap;justify-content:center;gap:6px;">
+      <button class="btn" onclick="hwSimMode('prev')">⬅ 上一模式</button>
+      <button class="btn" onclick="hwSimMode('next')">➡ 下一模式</button>
+      <button class="btn" id="hwSimVoiceBtn" onmousedown="hwSimVoiceStart()" onmouseup="hwSimVoiceStop()" ontouchstart="hwSimVoiceStart()" ontouchend="hwSimVoiceStop()" style="min-width:130px;">🎙 按住说话</button>
+    </div>
+    <div style="text-align:center;font-size:11px;color:var(--sub2);padding:6px 0 2px;">真实 ESP32-S3 + PS2 摇杆固件见 <code>hardware/esp32_joystick_firmware</code></div>
+  </div>
+
+  <!-- 打断提示 toast（水晶球说话时用户开口打断）-->
+  <div id="cbInterruptToast" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(224,133,133,.95);color:#fff;padding:12px 24px;border-radius:24px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .3s;z-index:100;">⛔ 已打断，重新聆听中…</div>
+</div>
+
+</main>
+
+<!-- ==================== BOTTOM NAV ==================== -->
+<div class="bottom-nav">
+  <button class="nav-item active" onclick="switchTab('divination', event)">
+    <span class="nav-icon">🔮</span>首页
+  </button>
+  <button class="nav-item" onclick="switchTab('emotion', event)">
+    <span class="nav-icon">💛</span>情绪
+  </button>
+  <button class="nav-item" onclick="switchTab('petgame', event)">
+    <span class="nav-icon">🐾</span>宠物
+  </button>
+  <button class="nav-item" onclick="switchTab('community', event)">
+    <span class="nav-icon">🌐</span>社区
+  </button>
+  <button class="nav-item" onclick="switchTab('settings', event)">
+    <span class="nav-icon">⚙️</span>我的
+  </button>
+  <button class="nav-item" onclick="switchTab('test', event)">
+    <span class="nav-icon">🧪</span>测试
+  </button>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ==================== State ====================
+let GW = localStorage.getItem('gw_url') || location.origin;
+let UID = localStorage.getItem('user_id') || '';
+let AUTH_TOKEN = localStorage.getItem('auth_token') || '';
+let LLM_KEY = localStorage.getItem('llm_key') || '';
+let LLM_BASE = localStorage.getItem('llm_base') || '';
+let LLM_MODEL = localStorage.getItem('llm_model') || '';
+var selectedSpread = 'single';
+var selectedZodiac = 'scorpio';
+var selectedFortuneZodiac = '';
+var selectedPeriod = 'daily';
+let selectedMood = 'calm';
+let selectedMeditation = 300;
+var selectedTarotEmotion = '';
+let lastDivination = null;
+let typingTimer = null;
+
+const ZODIACS = [
+  ['aries','♈ 白羊'],['taurus','♉ 金牛'],['gemini','♊ 双子'],['cancer','♋ 巨蟹'],
+  ['leo','♌ 狮子'],['virgo','♍ 处女'],['libra','♎ 天秤'],['scorpio','♏ 天蝎'],
+  ['sagittarius','♐ 射手'],['capricorn','♑ 摩羯'],['aquarius','♒ 水瓶'],['pisces','♓ 双鱼'],
+];
+const EMOTION_COLORS = {joy:'#FFD54F',calm:'#81C784',anxiety:'#FFB74D',sadness:'#64B5F6',anger:'#E57373',fear:'#9575CD',surprise:'#4DD0E1'};
+const EMOTION_LABELS = {joy:'喜悦',calm:'平静',anxiety:'焦虑',sadness:'悲伤',anger:'愤怒',fear:'恐惧',surprise:'惊讶'};
+const LED_COLORS = {
+  standby:['#ffffff','#888888'], listening:['#42a5f5','#1565c0'],
+  divining:['#d4956b','#3a2e23'], gold:['#e8c074','#d4956b'],
+  red:['#ef5350','#c62828'], green:['#66bb6a','#2e7d32'],
+  rainbow:['#e91e63','#9c27b0'],
+};
+
+// ==================== Helpers ====================
+function $(id) { return document.getElementById(id); }
+function escapeHtml(s) { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+
+// Mouse-tracking gloss effect for cards and buttons
+document.addEventListener('mousemove', (e) => {
+  document.querySelectorAll('.card, .div-mode-btn, .mbti-entry').forEach(el => {
+    const rect = el.getBoundingClientRect();
+    const mx = ((e.clientX - rect.left) / rect.width * 100).toFixed(1);
+    const my = ((e.clientY - rect.top) / rect.height * 100).toFixed(1);
+    el.style.setProperty('--mx', mx + '%');
+    el.style.setProperty('--my', my + '%');
+  });
+});
+
+async function api(method, path, body, _retry=false) {
+  const opts = { method, headers: {} };
+  if (body) { opts.headers['content-type']='application/json'; opts.body=JSON.stringify(body); }
+  if (AUTH_TOKEN) opts.headers['Authorization'] = 'Bearer ' + AUTH_TOKEN;
+  if (LLM_KEY) opts.headers['x-api-key'] = LLM_KEY;
+  const resp = await fetch(GW + path, opts);
+  const text = await resp.text();
+  let data; try { data = JSON.parse(text); } catch(_) { data = text; }
+  if (resp.status === 401 && AUTH_TOKEN && !_retry && !path.startsWith('/auth/')) {
+    const refreshed = await tryRefreshToken();
+    if (refreshed) return api(method, path, body, true);
+    AUTH_TOKEN = ''; localStorage.removeItem('auth_token');
+    toast('⚠️ 登录已过期，请重新登录');
+    switchTab('settings');
+  }
+  if (!resp.ok) throw new Error(typeof data==='string'?data:(data.detail||JSON.stringify(data)));
+  return data;
+}
+
+async function tryRefreshToken() {
+  try {
+    const resp = await fetch(GW + '/auth/refresh', { method:'POST', headers:{'Authorization':'Bearer '+AUTH_TOKEN} });
+    if (!resp.ok) return false;
+    const r = await resp.json();
+    if (r.accessToken) {
+      AUTH_TOKEN = r.accessToken;
+      localStorage.setItem('auth_token', AUTH_TOKEN);
+      return true;
+    }
+  } catch(_) {}
+  return false;
+}
+
+function toast(msg, ms=3000) {
+  const el = $('toast'); el.textContent = msg; el.style.display='block';
+  clearTimeout(el._t); el._t = setTimeout(()=>el.style.display='none', ms);
+}
+
+function showOutput(id, data) {
+  const el = $(id); if (!el) return;
+  el.innerHTML = '<div class="output">'+escapeHtml(typeof data==='string'?data:JSON.stringify(data,null,2))+'</div>';
+}
+
+function switchTab(name, evt) {
+  document.querySelectorAll('.nav-item').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  if (evt && evt.currentTarget) evt.currentTarget.classList.add('active');
+  else {
+    document.querySelectorAll('.nav-item').forEach(t => {
+      if (t.getAttribute('onclick') && t.getAttribute('onclick').includes("'"+name+"'")) t.classList.add('active');
+    });
+  }
+  $('panel-'+name).classList.add('active');
+  window.scrollTo({top:0, behavior:'smooth'});
+  if (name==='divination') loadRecommendation();
+  if (name==='settings') { loadPoints(); loadLlmProviders(); }
+  if (name==='community') loadFeed();
+  if (name==='petgame') loadGamePet();
+  if (name==='test') cbInit();   // 进入测试 tab 时初始化水晶球语音
+}
+function switchDivMode(mode) {
+  const selector = $('divModeSelector');
+  const panels = ['Tarot','Astro','Dream','Fortune','Mbti'];
+  const hero = document.querySelector('.hero');
+  const nav = document.querySelector('.bottom-nav');
+  const sectionHeader = document.querySelectorAll('#panel-divination .section-header')[0];
+  if (mode === 'menu') {
+    if (selector) selector.style.display = 'grid';
+    panels.forEach(p => { const el = $('divSub'+p); if (el) el.classList.remove('active'); });
+    if (hero) hero.classList.remove('compact');
+    if (nav) nav.classList.remove('hidden');
+    document.body.classList.remove('nav-hidden');
+    if (sectionHeader) sectionHeader.style.display = '';
+  } else {
+    const key = mode.charAt(0).toUpperCase() + mode.slice(1);
+    if (selector) selector.style.display = 'none';
+    panels.forEach(p => { const el = $('divSub'+p); if (el) el.classList.remove('active'); });
+    const target = $('divSub' + key);
+    if (target) target.classList.add('active');
+    if (hero) hero.classList.add('compact');
+    if (nav) nav.classList.add('hidden');
+    document.body.classList.add('nav-hidden');
+    if (sectionHeader) sectionHeader.style.display = 'none';
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+}
+
+// Typewriter effect for interpretations
+function typewriter(el, text, speed=30) {
+  if (typingTimer) clearInterval(typingTimer);
+  el.innerHTML = '<span class="interpretation typing-cursor"></span>';
+  const span = el.querySelector('.interpretation');
+  let i = 0;
+  typingTimer = setInterval(() => {
+    if (i >= text.length) {
+      clearInterval(typingTimer);
+      span.classList.remove('typing-cursor');
+      return;
+    }
+    span.textContent += text[i];
+    i++;
+    el.scrollTop = el.scrollHeight;
+  }, speed);
+}
+
+// ==================== Starfield ====================
+function initStarfield() {
+  const canvas = $('starfield');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  let stars = [];
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    stars = Array.from({length:80}, () => ({
+      x: Math.random()*canvas.width, y: Math.random()*canvas.height,
+      r: Math.random()*1.5+0.3, s: Math.random()*0.3+0.05, tw: Math.random()*Math.PI*2,
+    }));
+  }
+  resize();
+  window.addEventListener('resize', resize);
+  function draw() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    for (const st of stars) {
+      st.tw += 0.015;
+      const alpha = 0.15 + Math.sin(st.tw) * 0.15;
+      ctx.beginPath();
+      ctx.arc(st.x, st.y, st.r, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(184,168,224,${alpha})`;
+      ctx.fill();
+      st.y += st.s * 0.5;
+      if (st.y > canvas.height) st.y = 0;
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+// ==================== LLM Status ====================
+async function checkLlmStatus() {
+  const badge = $('llmStatus');
+  badge.className = 'llm-badge mock';
+  badge.innerHTML = '<span class="dot"></span> 检测中…';
+
+  if (LLM_KEY) {
+    badge.className = 'llm-badge real';
+    badge.innerHTML = `<span class="dot"></span> AI: ${escapeHtml(LLM_MODEL||'已配置')}`;
+    return;
+  }
+
+  // Probe the public server-side AI endpoint (no login required).
+  try {
+    const headers = { 'Content-Type': 'application/json' };
+    if (AUTH_TOKEN) headers['Authorization'] = 'Bearer ' + AUTH_TOKEN;
+    const resp = await fetch(GW + '/divination/tarot/card-reading', {
+      method: 'POST', headers,
+      body: JSON.stringify({ cardId: 0, question: '探测', userId: '_probe' }),
+    });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const r = await resp.json();
+    const interp = r.interpretation || '';
+    const model = r.model || '';
+    if (interp.includes('占位LLM') || interp.includes('占位解读') || interp.includes('Mock')) {
+      badge.className = 'llm-badge mock';
+      badge.innerHTML = '<span class="dot"></span> 占位模式（服务器未配置Key）';
+    } else if (interp.length > 20) {
+      badge.className = 'llm-badge real';
+      badge.innerHTML = `<span class="dot"></span> AI: ${escapeHtml(model||'服务器已配置')}`;
+    } else {
+      badge.className = 'llm-badge real';
+      badge.innerHTML = '<span class="dot"></span> AI 就绪';
+    }
+  } catch(e) {
+    badge.className = 'llm-badge mock';
+    badge.innerHTML = '<span class="dot"></span> AI: 探测失败';
+  }
+}
+
+// ==================== Init ====================
+async function init() {
+  $('gatewayUrl').value = GW;
+  $('shareNickname').value = localStorage.getItem('user_nick') || '星语用户';
+
+  // Load LLM config into settings fields
+  if (LLM_KEY) $('llmApiKey').value = LLM_KEY;
+  if (LLM_BASE) $('llmBaseUrl').value = LLM_BASE;
+  if (LLM_MODEL) $('llmModel').value = LLM_MODEL;
+
+  // Show quickstart if no token
+  if (!AUTH_TOKEN) $('quickstartArea').style.display = 'block';
+
+  // Render MBTI test entry on first load (default panel is divination)
+  renderMbtiEntry();
+
+  // Auth UI state
+  updateAuthUI(UID, '');
+
+  // Populate zodiac chips
+  const zhtml = ZODIACS.map(([v,l])=>`<div class="chip${v==='scorpio'?' active':''}" data-z="${v}">${l}</div>`).join('');
+  if ($('zodiacChips')) $('zodiacChips').innerHTML = zhtml;
+  if ($('fortuneZodiacChips')) $('fortuneZodiacChips').innerHTML = '<div class="chip active" data-z="">不指定</div>' + zhtml;
+
+  // ===== Chip / button click handlers =====
+  // Helper: bind single-select chip group safely
+  function bindChipGroup(containerId, attr, target) {
+    const el = typeof containerId === 'string' ? $(containerId) : containerId;
+    if (!el) return;
+    el.querySelectorAll('.chip').forEach(c => {
+      c.onclick = () => {
+        el.querySelectorAll('.chip').forEach(x => x.classList.remove('active'));
+        c.classList.add('active');
+        window[target] = c.dataset[attr];
+        console.log('[Chip]', target, '=', c.dataset[attr]);
+      };
+    });
+  }
+
+  bindChipGroup('zodiacChips',         'z',      'selectedZodiac');
+  bindChipGroup('fortuneZodiacChips',  'z',      'selectedFortuneZodiac');
+  bindChipGroup('tarotSpreads',        'spread', 'selectedSpread');
+  bindChipGroup('tarotEmotionChips',   'emo',    'selectedTarotEmotion');
+  bindChipGroup('periodChips',         'period', 'selectedPeriod');
+
+  // Mood selector
+  if ($('moodSelector')) {
+    $('moodSelector').querySelectorAll('.mood-btn').forEach(c=>c.onclick=()=>{
+      $('moodSelector').querySelectorAll('.mood-btn').forEach(x=>x.classList.remove('active'));
+      c.classList.add('active'); selectedMood=c.dataset.emotion;
+    });
+  }
+  // Meditation duration
+  document.querySelectorAll('[data-med]').forEach(c=>c.onclick=()=>{
+    document.querySelectorAll('[data-med]').forEach(x=>x.classList.remove('active'));
+    c.classList.add('active'); selectedMeditation=parseInt(c.dataset.med);
+  });
+  // LED effects
+  if ($('ledEffects')) $('ledEffects').querySelectorAll('.chip').forEach(c=>c.onclick=()=>{
+    previewLED(c.dataset.led);
+  });
+  // Pet avatar
+  if ($('petAvatarChips')) $('petAvatarChips').querySelectorAll('.chip').forEach(c=>c.onclick=()=>{
+    selectedPetAvatar = c.dataset.pet;
+    updatePetAvatarImg();
+  });
+  updatePetAvatarImg();
+
+  // Check gateway (with retry + auto-detect)
+  $('gwStatus').textContent = '检测中…'; $('gwStatus').className='pill';
+  let gwOk = false;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      await api('GET','/health');
+      gwOk = true;
+      break;
+    } catch(e) {
+      if (attempt < 2) await new Promise(r => setTimeout(r, 800));
+    }
+  }
+  if (!gwOk) {
+    const currentOrigin = location.origin;
+    if (GW !== currentOrigin) {
+      GW = currentOrigin;
+      try { await api('GET','/health'); gwOk = true; $('gatewayUrl').value = GW; } catch(e2) {}
+    }
+  }
+  $('gwStatus').textContent = gwOk ? '✓ 已连接' : '连接失败';
+  $('gwStatus').className = gwOk ? 'pill ok' : 'pill err';
+
+  checkLlmStatus();
+  initStarfield();
+
+  if (!AUTH_TOKEN) {
+    $('quickstartArea').style.display = 'block';
+  } else {
+    const valid = await tryRefreshToken();
+    if (!valid) {
+      AUTH_TOKEN = ''; localStorage.removeItem('auth_token');
+      UID = ''; localStorage.removeItem('user_id');
+      $('quickstartArea').style.display = 'block';
+      toast('⚠️ 登录已过期，请重新登录或一键体验');
+    } else {
+      loadRecommendation();
+      loadPetInfo();
+    }
+  }
+}
+
+function goSettings() {
+  switchTab('settings');
+  // activate the settings nav item visually
+  document.querySelectorAll('.nav-item').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(t => {
+    if (t.getAttribute('onclick') && t.getAttribute('onclick').includes("'settings'")) t.classList.add('active');
+  });
+}
+
+async function quickStartDemo() {
+  toast('⏳ 正在创建体验账号...');
+  try {
+    const phone = 'demo_' + Date.now();
+    const r = await api('POST', '/auth/register', { identifier: phone, password: 'demo1234', nickname: '星语体验官' });
+    AUTH_TOKEN = r.accessToken;
+    UID = r.userId;
+    localStorage.setItem('auth_token', AUTH_TOKEN);
+    localStorage.setItem('user_id', UID);
+    localStorage.setItem('user_nick', '星语体验官');
+    $('shareNickname').value = '星语体验官';
+    updateAuthUI(UID, r.role);
+
+    try {
+      await api('PATCH', '/users/' + UID + '/profile', { mbtiDisplayType: 'INFJ', gender: 'female', region: 'shanghai' });
+    } catch(_) {}
+
+    $('quickstartArea').style.display = 'none';
+    toast('✅ 体验账号已创建！');
+    loadRecommendation();
+    loadPetInfo();
+    checkLlmStatus();
+  } catch(e) {
+    toast('❌ 创建失败: ' + e.message);
+  }
+}
+
+async function initUser() {
+  saveGateway();
+  try {
+    await api('GET','/health');
+    $('gwStatus').textContent = 'gateway ✓'; $('gwStatus').className='pill ok';
+    $('settingsResult').innerHTML = '<div class="output">✅ Gateway 已连接: ' + GW + '</div>';
+  } catch(e) {
+    toast('❌ 无法连接 gateway: ' + GW);
+    $('settingsResult').innerHTML = '<div class="output">❌ 无法连接: ' + escapeHtml(e.message) + '</div>';
+  }
+}
+
+function requireUid() {
+  if (!UID || !AUTH_TOKEN) {
+    toast('⚠️ 登录已过期，请重新登录');
+    switchTab('settings');
+    return false;
+  }
+  return true;
+}
+
+// ==================== Auth (Task 3.1) ====================
+function saveGateway() {
+  GW = $('gatewayUrl').value.trim().replace(/\/$/,'');
+  localStorage.setItem('gw_url', GW);
+  toast('✅ Gateway URL 已保存: ' + GW);
+  $('settingsResult').innerHTML = '<div class="output">Gateway: ' + GW + '</div>';
+}
+
+async function doRegister() {
+  const identifier = $('authIdentifier').value.trim();
+  const password = $('authPassword').value;
+  const nickname = $('authNickname').value.trim() || '星语用户';
+  if (!identifier || !password) { toast('⚠️ 请填写手机号/用户名和密码'); return; }
+  if (password.length < 6) { toast('⚠️ 密码至少6位'); return; }
+  try {
+    const r = await api('POST', '/auth/register', { identifier, password, nickname });
+    AUTH_TOKEN = r.accessToken;
+    UID = r.userId;
+    localStorage.setItem('auth_token', AUTH_TOKEN);
+    localStorage.setItem('user_id', UID);
+    localStorage.setItem('user_nick', nickname);
+    $('shareNickname').value = nickname;
+    updateAuthUI(r.userId, r.role);
+    toast('✅ 注册成功！');
+
+    const mbti = $('authMbti').value;
+    const gender = $('authGender') ? $('authGender').value : '';
+    const region = $('authRegion') ? $('authRegion').value : '';
+    if (mbti || gender || region) {
+      try {
+        await api('PATCH', '/users/' + UID + '/profile', { mbtiDisplayType: mbti || undefined, gender, region });
+        toast('✅ 个人信息已更新');
+      } catch(e) { console.warn('profile update failed', e); }
+    }
+    $('quickstartArea').style.display = 'none';
+    loadRecommendation();
+    loadPetInfo();
+    checkLlmStatus();
+  } catch(e) {
+    $('authResult').innerHTML = '<div class="output">❌ ' + escapeHtml(e.message) + '</div>';
+    toast('❌ 注册失败: ' + e.message);
+  }
+}
+
+async function doLogin() {
+  const identifier = $('authIdentifier').value.trim();
+  const password = $('authPassword').value;
+  if (!identifier || !password) { toast('⚠️ 请填写手机号/用户名和密码'); return; }
+  try {
+    const r = await api('POST', '/auth/login', { identifier, password });
+    AUTH_TOKEN = r.accessToken;
+    UID = r.userId;
+    localStorage.setItem('auth_token', AUTH_TOKEN);
+    localStorage.setItem('user_id', UID);
+    updateAuthUI(r.userId, r.role);
+
+    try {
+      const me = await api('GET', '/users/' + UID);
+      const nick = me.nickname || '星语用户';
+      localStorage.setItem('user_nick', nick);
+      $('shareNickname').value = nick;
+    } catch(_) {}
+
+    toast('✅ 登录成功！');
+    $('quickstartArea').style.display = 'none';
+    loadRecommendation();
+    loadPetInfo();
+    checkLlmStatus();
+  } catch(e) {
+    $('authResult').innerHTML = '<div class="output">❌ ' + escapeHtml(e.message) + '</div>';
+    toast('❌ 登录失败: ' + e.message);
+  }
+}
+
+function logout() {
+  AUTH_TOKEN = ''; UID = '';
+  localStorage.removeItem('auth_token');
+  localStorage.removeItem('user_id');
+  updateAuthUI('', '');
+  toast('已退出登录');
+}
+
+function updateAuthUI(uid, role) {
+  if (uid && AUTH_TOKEN) {
+    $('authLoggedIn').style.display = 'block';
+    $('authForms').style.display = 'none';
+    $('authUid').textContent = uid;
+    $('authRole').textContent = role || 'user';
+  } else {
+    $('authLoggedIn').style.display = 'none';
+    $('authForms').style.display = 'block';
+  }
+}
+
+// ==================== MBTI Quiz (Task 3.1) ====================
+const MBTI_QUESTIONS = [
+  { text: '在聚会中，你更倾向于：', a: '主动和很多人聊天', b: '和少数熟人深入交流', dim: 'EI' },
+  { text: '独处对你来说是：', a: '消耗能量，需要社交充电', b: '恢复能量的必要方式', dim: 'EI' },
+  { text: '你更关注：', a: '具体的事实和细节', b: '整体的可能性和含义', dim: 'SN' },
+  { text: '做决定时，你更看重：', a: '已有的经验和数据', b: '直觉和未来趋势', dim: 'SN' },
+  { text: '你认为更重要的是：', a: '公平和逻辑', b: '和谐与同理心', dim: 'TF' },
+  { text: '批评别人时，你更倾向于：', a: '直接指出问题', b: '照顾对方感受委婉表达', dim: 'TF' },
+  { text: '你更喜欢：', a: '制定详细计划再执行', b: '保持灵活随机应变', dim: 'JP' },
+  { text: '面对截止日期，你通常：', a: '提前完成', b: '临近时高效冲刺', dim: 'JP' },
+];
+
+let quizAnswers = [];
+
+function openMbtiQuiz() {
+  quizAnswers = [];
+  showQuizQuestion(0);
+}
+
+function showQuizQuestion(idx) {
+  if (idx >= MBTI_QUESTIONS.length) {
+    finishMbtiQuiz();
+    return;
+  }
+  const q = MBTI_QUESTIONS[idx];
+  $('authResult').innerHTML = `
+    <div class="card" style="margin-top:12px;">
+      <div style="font-size:12px;color:var(--sub);margin-bottom:8px;">MBTI 测一测 · 第 ${idx+1}/${MBTI_QUESTIONS.length} 题</div>
+      <div style="font-size:15px;font-weight:bold;margin-bottom:12px;">${escapeHtml(q.text)}</div>
+      <button onclick="answerQuiz(${idx}, 'a')" style="width:100%;text-align:left;margin-bottom:8px;">A. ${escapeHtml(q.a)}</button>
+      <button onclick="answerQuiz(${idx}, 'b')" style="width:100%;text-align:left;" class="secondary">B. ${escapeHtml(q.b)}</button>
+      <div style="margin-top:8px;"><div style="height:4px;background:var(--card2);border-radius:2px;overflow:hidden;"><div style="height:100%;width:${(idx/MBTI_QUESTIONS.length)*100}%;background:var(--accent);transition:width .3s;"></div></div></div>
+    </div>`;
+}
+
+function answerQuiz(idx, choice) {
+  quizAnswers.push({ dim: MBTI_QUESTIONS[idx].dim, choice });
+  showQuizQuestion(idx + 1);
+}
+
+function finishMbtiQuiz() {
+  const scores = { E:0, I:0, S:0, N:0, T:0, F:0, J:0, P:0 };
+  quizAnswers.forEach(a => {
+    if (a.dim === 'EI') { a.choice==='a' ? scores.E++ : scores.I++; }
+    if (a.dim === 'SN') { a.choice==='a' ? scores.S++ : scores.N++; }
+    if (a.dim === 'TF') { a.choice==='a' ? scores.T++ : scores.F++; }
+    if (a.dim === 'JP') { a.choice==='a' ? scores.J++ : scores.P++; }
+  });
+  const type = (scores.E>=scores.I?'E':'I') + (scores.S>=scores.N?'S':'N') + (scores.T>=scores.F?'T':'F') + (scores.J>=scores.P?'J':'P');
+  const typeNames = {
+    INTJ:'建筑师',INTP:'逻辑学家',ENTJ:'指挥官',ENTP:'辩论家',
+    INFJ:'提倡者',INFP:'调停者',ENFJ:'主人公',ENFP:'竞选者',
+    ISTJ:'物流师',ISFJ:'守卫者',ESTJ:'总经理',ESFJ:'执政官',
+    ISTP:'鉴赏家',ISFP:'探险家',ESTP:'企业家',ESFP:'表演者',
+  };
+  $('authMbti').value = type;
+  $('authResult').innerHTML = `
+    <div class="card" style="margin-top:12px;background:linear-gradient(135deg,var(--accent-soft),rgba(184,168,224,.06));border-color:var(--accent);">
+      <div style="text-align:center;padding:12px;">
+        <div style="font-size:32px;font-weight:bold;color:var(--accent);">${type}</div>
+        <div style="font-size:14px;color:var(--sub);margin-top:4px;">${typeNames[type]||''}</div>
+        <div style="font-size:12px;color:var(--sub);margin-top:8px;">E${scores.E}/I${scores.I} · S${scores.S}/N${scores.N} · T${scores.T}/F${scores.F} · J${scores.J}/P${scores.P}</div>
+        <div style="font-size:13px;margin-top:8px;">已填入 MBTI 选择框，请继续注册</div>
+      </div>
+    </div>`;
+  toast('🧪 MBTI 测试结果: ' + type);
+}
+
+// ==================== Pet Avatar (Task 3.3) ====================
+let selectedPetAvatar = localStorage.getItem('pet_avatar') || 'plush-bear';
+const PET_LABELS = { 'plush-cat':'毛绒猫', 'plush-dog':'毛绒狗', 'plush-rabbit':'毛绒兔', 'plush-bear':'毛绒熊' };
+
+function updatePetAvatarImg() {
+  $('petAvatarImg').src = '/pets/' + selectedPetAvatar + '-happy.svg';
+  $('petAvatarLabel').textContent = PET_LABELS[selectedPetAvatar] || selectedPetAvatar;
+  document.querySelectorAll('#petAvatarChips .chip').forEach(c => {
+    c.classList.toggle('active', c.dataset.pet === selectedPetAvatar);
+  });
+}
+
+async function createPet() {
+  if (!requireUid()) return;
+  const name = $('petName').value.trim() || '星宝';
+  const mbti = $('authMbti').value || 'INFJ';
+  try {
+    const traits = mbtiToTraits(mbti);
+    const r = await api('POST', '/pets', {
+      userId: UID,
+      name: name,
+      avatarKey: selectedPetAvatar,
+      traits: traits,
+    });
+    localStorage.setItem('pet_avatar', selectedPetAvatar);
+    localStorage.setItem('pet_id', r.id);
+    renderPetCard(r);
+    toast('🐾 宠物 ' + escapeHtml(name) + ' 已创建！');
+  } catch(e) {
+    $('petResult').innerHTML = '<div class="output">❌ ' + escapeHtml(e.message) + '</div>';
+    toast('❌ 创建失败: ' + e.message);
+  }
+}
+
+async function loadPetInfo() {
+  if (!UID) return;
+  try {
+    const pets = await api('GET', '/pets?user_id=' + UID);
+    if (Array.isArray(pets) && pets.length > 0) {
+      renderPetCard(pets[0]);
+    }
+  } catch(e) {}
+}
+
+function renderPetCard(pet) {
+  if (!pet) return;
+  const avatarKey = pet.avatarKey || pet.avatar_key || 'plush-bear';
+  const level = pet.level || 1;
+  const gp = pet.growthPoints || pet.growth_points || 0;
+  const traits = pet.traits || {};
+  const ei = traits.eI ?? traits.e_i ?? 50;
+  const sn = traits.sN ?? traits.s_n ?? 50;
+  const tf = traits.tF ?? traits.t_f ?? 50;
+  const jp = traits.jP ?? traits.j_p ?? 50;
+  $('petResult').innerHTML = `
+    <div class="pet-card-display">
+      <div class="pet-avatar-large">
+        <img src="/pets/${escapeHtml(avatarKey)}-happy.svg" style="width:100px;height:100px;" alt="${escapeHtml(avatarKey)}">
+      </div>
+      <div class="pet-info">
+        <div class="pet-name-large">${escapeHtml(pet.name||'星宝')} <span class="pet-level-badge">Lv.${level}</span></div>
+        <div class="pet-traits-bars">
+          <div class="pet-trait-bar"><span>E</span><div class="trait-bg"><div class="trait-fill" style="width:${ei}%;background:var(--blue)"></div></div><span>I</span></div>
+          <div class="pet-trait-bar"><span>S</span><div class="trait-bg"><div class="trait-fill" style="width:${sn}%;background:var(--gold)"></div></div><span>N</span></div>
+          <div class="pet-trait-bar"><span>T</span><div class="trait-bg"><div class="trait-fill" style="width:${tf}%;background:var(--red)"></div></div><span>F</span></div>
+          <div class="pet-trait-bar"><span>J</span><div class="trait-bg"><div class="trait-fill" style="width:${jp}%;background:var(--green)"></div></div><span>P</span></div>
+        </div>
+        <div class="pet-growth">成长值: ${gp}</div>
+      </div>
+    </div>`;
+}
+
+function mbtiToTraits(mbti) {
+  const t = { eI:50, sN:50, tF:50, jP:50 };
+  if (!mbti || mbti.length < 4) return t;
+  t.eI = mbti[0]==='E' ? 25 : mbti[0]==='I' ? 75 : 50;
+  t.sN = mbti[1]==='S' ? 25 : mbti[1]==='N' ? 75 : 50;
+  t.tF = mbti[2]==='T' ? 25 : mbti[2]==='F' ? 75 : 50;
+  t.jP = mbti[3]==='J' ? 25 : mbti[3]==='P' ? 75 : 50;
+  return t;
+}
+
+// ==================== LLM Config ====================
+// ==================== LLM/TTS/Voice Provider 管理（类型化 CRUD）====================
+let LLM_CUR_TYPE = 'llm';
+const LLM_TYPE_LABELS = { llm:'LLM 文本', tts:'TTS (ElevenLabs)', voice:'Voice (Moshi)' };
+
+function setLlmTab(t) {
+  LLM_CUR_TYPE = t;
+  $('llmCurType').value = t;
+  // tab 按钮高亮
+  ['llm','tts','voice'].forEach(x => {
+    $('llmTabBtn_'+x).className = (x === t) ? 'accent' : 'secondary';
+  });
+  clearLlmForm();
+  loadLlmProviders();
+}
+
+async function loadLlmProviders() {
+  try {
+    const headers = {};
+    if (AUTH_TOKEN) headers['Authorization'] = 'Bearer ' + AUTH_TOKEN;
+    const resp = await fetch(GW + '/llm/providers?type=' + LLM_CUR_TYPE, { headers });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const data = await resp.json();
+    const list = $('llmProviderList');
+    if (!data.providers || data.providers.length === 0) {
+      list.innerHTML = '<div class="output" style="margin-bottom:8px;">当前类型暂无 provider，请在下方添加。</div>';
+      return;
+    }
+    list.innerHTML = data.providers.map(p => `
+      <div class="card" style="margin-bottom:8px;padding:10px;background:var(--card2);">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:6px;">
+          <div>
+            <strong>${escapeHtml(p.name)}</strong>
+            ${p.active ? '<span style="color:var(--green);font-size:12px;">● 启用中</span>' : ''}
+            <div style="font-size:12px;color:var(--sub);">${escapeHtml(p.base_url)} · ${escapeHtml(p.model)}</div>
+            <div style="font-size:12px;color:var(--sub2);">key: ${escapeHtml(p.api_key)}</div>
+          </div>
+          <div class="btn-row" style="flex-wrap:wrap;">
+            ${p.active ? '' : `<button onclick="activateLlmProvider('${p.id}')" class="secondary" style="font-size:12px;">启用</button>`}
+            <button onclick='editLlmProvider(${JSON.stringify(p).replace(/'/g,"&#39;")})' class="secondary" style="font-size:12px;">编辑</button>
+            <button onclick="deleteLlmProvider('${p.id}','${escapeHtml(p.name)}')" class="secondary" style="font-size:12px;">删除</button>
+          </div>
+        </div>
+      </div>`).join('');
+  } catch(e) {
+    $('llmProviderList').innerHTML = '<div class="output">加载失败: '+escapeHtml(e.message)+'</div>';
+  }
+}
+
+function clearLlmForm() {
+  $('llmName').value = ''; $('llmBaseUrl').value = '';
+  $('llmModel').value = ''; $('llmApiKey').value = '';
+  $('llmExtra').value = '';
+  $('llmEditId').value = '';
+  $('llmFormTitle').textContent = '添加新 ' + LLM_TYPE_LABELS[LLM_CUR_TYPE] + ' Provider';
+  $('llmCancelBtn').style.display = 'none';
+  $('llmApiKey').placeholder = 'API Key';
+}
+
+function cancelLlmEdit() { clearLlmForm(); }
+
+function editLlmProvider(p) {
+  $('llmEditId').value = p.id;
+  $('llmName').value = p.name;
+  $('llmBaseUrl').value = p.base_url;
+  $('llmModel').value = p.model;
+  $('llmApiKey').value = '';  // 不回显 key
+  $('llmApiKey').placeholder = '留空表示不修改 API Key';
+  $('llmExtra').value = p.extra ? JSON.stringify(p.extra) : '';
+  $('llmFormTitle').textContent = '编辑 Provider: ' + p.name;
+  $('llmCancelBtn').style.display = '';
+  $('llmConfigResult').innerHTML = '<div class="output">编辑中，API Key 留空则保持原值</div>';
+}
+
+async function saveLlmProvider() {
+  const id = $('llmEditId').value;
+  const name = $('llmName').value.trim();
+  const baseUrl = $('llmBaseUrl').value.trim();
+  const model = $('llmModel').value.trim();
+  const apiKey = $('llmApiKey').value.trim();
+  const extraRaw = $('llmExtra').value.trim();
+  if (!name || !baseUrl || !model) {
+    $('llmConfigResult').innerHTML = '<div class="output">请填写名称/Base URL/模型</div>';
+    return;
+  }
+  let extra = {};
+  if (extraRaw) {
+    try { extra = JSON.parse(extraRaw); }
+    catch(e) { $('llmConfigResult').innerHTML = '<div class="output">额外参数 JSON 格式错误: '+escapeHtml(e.message)+'</div>'; return; }
+  }
+  const headers = { 'Content-Type': 'application/json' };
+  if (AUTH_TOKEN) headers['Authorization'] = 'Bearer ' + AUTH_TOKEN;
+  try {
+    let resp;
+    if (id) {
+      const body = { name, base_url: baseUrl, model, type: LLM_CUR_TYPE, extra };
+      if (apiKey) body.api_key = apiKey;
+      resp = await fetch(GW + '/llm/providers/' + id, {
+        method: 'PUT', headers, body: JSON.stringify(body)
+      });
+    } else {
+      if (!apiKey) { $('llmConfigResult').innerHTML = '<div class="output">新增时必须填 API Key</div>'; return; }
+      resp = await fetch(GW + '/llm/providers', {
+        method: 'POST', headers,
+        body: JSON.stringify({ name, base_url: baseUrl, api_key: apiKey, model, type: LLM_CUR_TYPE, active: false, extra })
+      });
+    }
+    if (!resp.ok) {
+      const e = await resp.json().catch(() => ({}));
+      throw new Error(e.detail || 'HTTP ' + resp.status);
+    }
+    $('llmConfigResult').innerHTML = '<div class="result-box">✅ 已保存: '+escapeHtml(name)+'</div>';
+    toast('✅ ' + LLM_TYPE_LABELS[LLM_CUR_TYPE] + ' 配置已保存');
+    clearLlmForm();
+    loadLlmProviders();
+  } catch(e) {
+    $('llmConfigResult').innerHTML = '<div class="output">❌ '+escapeHtml(e.message)+'</div>';
+  }
+}
+
+async function activateLlmProvider(id) {
+  const headers = {};
+  if (AUTH_TOKEN) headers['Authorization'] = 'Bearer ' + AUTH_TOKEN;
+  try {
+    const resp = await fetch(GW + '/llm/providers/' + id + '/activate', { method: 'POST', headers });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    toast('✅ 已切换启用');
+    loadLlmProviders();
+  } catch(e) {
+    $('llmConfigResult').innerHTML = '<div class="output">❌ '+escapeHtml(e.message)+'</div>';
+  }
+}
+
+async function deleteLlmProvider(id, name) {
+  if (!confirm('确认删除 provider「'+name+'」？')) return;
+  const headers = {};
+  if (AUTH_TOKEN) headers['Authorization'] = 'Bearer ' + AUTH_TOKEN;
+  try {
+    const resp = await fetch(GW + '/llm/providers/' + id, { method: 'DELETE', headers });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    toast('已删除');
+    loadLlmProviders();
+  } catch(e) {
+    $('llmConfigResult').innerHTML = '<div class="output">❌ '+escapeHtml(e.message)+'</div>';
+  }
+}
+
+async function testLlmActive() {
+  $('llmConfigResult').innerHTML = '<div class="loading"></div> 测试当前启用的 ' + LLM_TYPE_LABELS[LLM_CUR_TYPE] + '...';
+  try {
+    const headers = { 'Content-Type': 'application/json' };
+    if (AUTH_TOKEN) headers['Authorization'] = 'Bearer ' + AUTH_TOKEN;
+    const endpoint = LLM_CUR_TYPE === 'tts' ? '/llm/tts' : '/llm/chat';
+    const body = LLM_CUR_TYPE === 'tts'
+      ? JSON.stringify({ text: '魔法水晶球在线', voice_settings: { stability: 0.5, similarity_boost: 0.5 } })
+      : JSON.stringify({ model: 'auto', messages: [{ role: 'user', content: '说一句"魔法水晶球在线"，不超过10字。' }], max_tokens: 32 });
+    const resp = await fetch(GW + endpoint, { method: 'POST', headers, body });
+    const text = await resp.text();
+    if (!resp.ok) throw new Error(text.substring(0, 120));
+    $('llmConfigResult').innerHTML = '<div class="result-box">✅ 连接成功\n返回: '+escapeHtml(text.substring(0,150))+'</div>';
+    toast('✅ ' + LLM_TYPE_LABELS[LLM_CUR_TYPE] + ' 连接成功');
+  } catch(e) {
+    $('llmConfigResult').innerHTML = '<div class="output">❌ '+escapeHtml(e.message)+'</div>';
+  }
+}
+
+// ==================== Divination ====================
+
+// ==================== Tarot Card Images (waltzingmouse Chinese RWS deck) ====================
+const TAROT_CARD_BACK = '/static/tarot/背面牌.webp';
+const TAROT_CARD_MAP = {
+  // Major Arcana
+  'The Fool':'0-愚人','The Magician':'1-魔术师','The High Priestess':'2-女祭司','The Empress':'3-女皇',
+  'The Emperor':'4-皇帝','The Hierophant':'5-教皇','The Lovers':'6-恋人','The Chariot':'7-战车',
+  'Strength':'8-力量','The Hermit':'9-隐士','Wheel of Fortune':'10-命运之轮','Justice':'11-正义',
+  'The Hanged Man':'12-倒吊人','Death':'13-死神','Temperance':'14-节制','The Devil':'15-恶魔',
+  'The Tower':'16-高塔','The Star':'17-星星','The Moon':'18-月亮','The Sun':'19-太阳',
+  'Judgement':'20-审判','The World':'21-世界',
+  // Wands 权杖
+  'Ace of Wands':'权杖1','Two of Wands':'权杖2','Three of Wands':'权杖3','Four of Wands':'权杖4',
+  'Five of Wands':'权杖5','Six of Wands':'权杖6','Seven of Wands':'权杖7','Eight of Wands':'权杖8',
+  'Nine of Wands':'权杖9','Ten of Wands':'权杖10','Page of Wands':'权杖侍从','Knight of Wands':'权杖骑士',
+  'Queen of Wands':'权杖皇后','King of Wands':'权杖国王',
+  // Cups 圣杯
+  'Ace of Cups':'圣杯1','Two of Cups':'圣杯2','Three of Cups':'圣杯3','Four of Cups':'圣杯4',
+  'Five of Cups':'圣杯5','Six of Cups':'圣杯6','Seven of Cups':'圣杯7','Eight of Cups':'圣杯8',
+  'Nine of Cups':'圣杯9','Ten of Cups':'圣杯10','Page of Cups':'圣杯侍从','Knight of Cups':'圣杯骑士',
+  'Queen of Cups':'圣杯皇后','King of Cups':'圣杯国王',
+  // Swords 宝剑
+  'Ace of Swords':'宝剑1','Two of Swords':'宝剑2','Three of Swords':'宝剑3','Four of Swords':'宝剑4',
+  'Five of Swords':'宝剑5','Six of Swords':'宝剑6','Seven of Swords':'宝剑7','Eight of Swords':'宝剑8',
+  'Nine of Swords':'宝剑9','Ten of Swords':'宝剑10','Page of Swords':'宝剑侍从','Knight of Swords':'宝剑骑士',
+  'Queen of Swords':'宝剑皇后','King of Swords':'宝剑国王',
+  // Pentacles 星币
+  'Ace of Pentacles':'星币1','Two of Pentacles':'星币2','Three of Pentacles':'星币3','Four of Pentacles':'星币4',
+  'Five of Pentacles':'星币5','Six of Pentacles':'星币6','Seven of Pentacles':'星币7','Eight of Pentacles':'星币8',
+  'Nine of Pentacles':'星币9','Ten of Pentacles':'星币10','Page of Pentacles':'星币侍从','Knight of Pentacles':'星币骑士',
+  'Queen of Pentacles':'星币皇后','King of Pentacles':'星币国王',
+};
+
+function getTarotImg(cardName) {
+  const fname = TAROT_CARD_MAP[cardName];
+  return fname ? `/static/tarot/${encodeURIComponent(fname)}.webp` : '';
+}
+
+// ==================== Tarot Grid-Pick State ====================
+let tarotGameState = {
+  deck: [],        // shuffled 78 cards (with reversed flag)
+  pickedCards: [], // cards picked by user
+  targetCount: 1,  // how many to pick
+  revealed: false,
+  extraActive: false,
+  extraCount: 0,
+  spreadType: 'single',
+  question: '',
+  apiResult: null,
+};
+
+// ==================== Crystal Ball Projection Integration ====================
+// 卡牌英文名 → ID 映射（与 tarot_data.py 的 DECK 对齐）
+const TAROT_NAME_TO_ID = {
+  'The Fool':0,'The Magician':1,'The High Priestess':2,'The Empress':3,'The Emperor':4,
+  'The Hierophant':5,'The Lovers':6,'The Chariot':7,'Strength':8,'The Hermit':9,
+  'Wheel of Fortune':10,'Justice':11,'The Hanged Man':12,'Death':13,'Temperance':14,
+  'The Devil':15,'The Tower':16,'The Star':17,'The Moon':18,'The Sun':19,
+  'Judgement':20,'The World':21,
+  'Ace of Wands':22,'Two of Wands':23,'Three of Wands':24,'Four of Wands':25,
+  'Five of Wands':26,'Six of Wands':27,'Seven of Wands':28,'Eight of Wands':29,
+  'Nine of Wands':30,'Ten of Wands':31,'Page of Wands':32,'Knight of Wands':33,
+  'Queen of Wands':34,'King of Wands':35,
+  'Ace of Cups':36,'Two of Cups':37,'Three of Cups':38,'Four of Cups':39,
+  'Five of Cups':40,'Six of Cups':41,'Seven of Cups':42,'Eight of Cups':43,
+  'Nine of Cups':44,'Ten of Cups':45,'Page of Cups':46,'Knight of Cups':47,
+  'Queen of Cups':48,'King of Cups':49,
+  'Ace of Swords':50,'Two of Swords':51,'Three of Swords':52,'Four of Swords':53,
+  'Five of Swords':54,'Six of Swords':55,'Seven of Swords':56,'Eight of Swords':57,
+  'Nine of Swords':58,'Ten of Swords':59,'Page of Swords':60,'Knight of Swords':61,
+  'Queen of Swords':62,'King of Swords':63,
+  'Ace of Pentacles':64,'Two of Pentacles':65,'Three of Pentacles':66,'Four of Pentacles':67,
+  'Five of Pentacles':68,'Six of Pentacles':69,'Seven of Pentacles':70,'Eight of Pentacles':71,
+  'Nine of Pentacles':72,'Ten of Pentacles':73,'Page of Pentacles':74,'Knight of Pentacles':75,
+  'Queen of Pentacles':76,'King of Pentacles':77,
+};
+
+// 当前绑定的水晶球设备 ID（从设置面板 devUid 读取，与设备模拟器共用）
+let PROJECTION_DEV_ID = '';
+function getProjectionDevId() {
+  const el = $('devUid');
+  return (el && el.value.trim()) ? el.value.trim() : (localStorage.getItem('projectionDevId') || '');
+}
+
+/**
+ * 触发水晶球投影动画。
+ * @param phase: 'session'|'reveal'|'interpreting'|'result'|'idle'
+ * @param card:  {name, reversed, position}  (reveal 时必填)
+ */
+async function triggerProjection(phase, card) {
+  const devId = getProjectionDevId();
+  if (!devId) return;  // 未绑定设备则跳过
+  try {
+    const base = `/tuya/device/${devId}/projection`;
+    if (phase === 'session') {
+      await api('POST', `${base}/session`);
+    } else if (phase === 'reveal' && card) {
+      const cardId = TAROT_NAME_TO_ID[card.name] ?? 0;
+      await api('POST', `${base}/reveal?card_id=${cardId}&reversed=${!!card.reversed}&position=${card.position || 0}`);
+    } else if (phase === 'interpreting') {
+      await api('POST', `${base}/interpreting`);
+    } else if (phase === 'result') {
+      await api('POST', `${base}/result`);
+    } else if (phase === 'idle') {
+      await api('POST', `${base}/idle`);
+    }
+  } catch(e) {
+    console.warn('[Projection] command failed:', e.message);
+  }
+}
+
+function shuffleArray(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function buildTarotDeck() {
+  // Build a shuffled deck of all 78 cards
+  const allCards = Object.keys(TAROT_CARD_MAP).map(name => ({
+    name: name,
+    file: getTarotImg(name),
+    reversed: Math.random() < 0.5,
+  }));
+  return shuffleArray(allCards);
+}
+
+function renderTarotDeckGrid() {
+  const grid = $('tarotDeckGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+
+  /* 添加装饰星点（固定随机种子，不会每次重新渲染都变）*/
+  for (let i = 0; i < 12; i++) {
+    const star = document.createElement('div');
+    star.className = 'star-deco';
+    star.style.left = Math.random() * 95 + '%';
+    star.style.top = Math.random() * 95 + '%';
+    star.style.animationDelay = Math.random() * 3 + 's';
+    star.style.animationDuration = (2 + Math.random() * 3) + 's';
+    grid.appendChild(star);
+  }
+
+  tarotGameState.deck.forEach((card, idx) => {
+    const slot = document.createElement('div');
+    slot.className = 'tarot-deck-slot';
+    slot.id = `deck-slot-${idx}`;
+    const img = document.createElement('img');
+    img.src = TAROT_CARD_BACK;
+    img.className = 'tarot-deck-img';
+    img.alt = '牌背';
+    img.loading = 'lazy';
+    img.addEventListener('click', () => pickTarotCard(idx));
+    slot.appendChild(img);
+    grid.appendChild(slot);
+  });
+}
+
+function pickTarotCard(idx) {
+  const slot = $(`deck-slot-${idx}`);
+  if (!slot || slot.classList.contains('empty') || slot.classList.contains('picked')) return;
+
+  const card = tarotGameState.deck[idx];
+  const canPick = tarotGameState.pickedCards.length < tarotGameState.targetCount || tarotGameState.extraActive;
+  if (!canPick) return;
+  console.log('[Tarot] pick', idx, 'picked=', tarotGameState.pickedCards.length, 'target=', tarotGameState.targetCount, 'spread=', tarotGameState.spreadType);
+
+  // Mark as picked (prevent re-click) but DON'T hide — flip in place
+  slot.classList.add('picked');
+  slot.dataset.cardIndex = idx;
+
+  // Replace the plain back image with a flippable card structure
+  slot.innerHTML = `
+    <div class="tarot-pick-inner">
+      <img class="tarot-pick-face tarot-pick-back" src="${TAROT_CARD_BACK}" alt="">
+      <img class="tarot-pick-face tarot-pick-front" src="${card.file}" alt="${escapeHtml(card.name)}">
+    </div>`;
+  // Add reversed class to slot for CSS
+  if (card.reversed) slot.classList.add('reversed');
+
+  // Flip the card in place after a tiny delay
+  const inner = slot.querySelector('.tarot-pick-inner');
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    inner.classList.add('revealed');
+  }));
+
+  // 🔮 触发水晶球投影：翻牌动画 + 显示卡牌图像
+  triggerProjection('reveal', {
+    name: card.name,
+    reversed: card.reversed,
+    position: tarotGameState.pickedCards.length,
+  });
+
+  if (tarotGameState.extraActive) {
+    tarotGameState.extraActive = false;
+    tarotGameState.pickedCards.push(card);
+    tarotGameState.extraCount++;
+    if (tarotGameState.extraCount >= 3) {
+      const btn = $('tarotExtraBtn');
+      if (btn) { btn.textContent = '补充牌已达上限'; btn.disabled = true; }
+    }
+    // 补充牌：单独解读这一张（补充牌不参与整体阵）
+    setTimeout(() => getCardAIReading(tarotGameState.pickedCards.length - 1), 650);
+  } else {
+    tarotGameState.pickedCards.push(card);
+    updatePickStatus();
+
+    if (tarotGameState.pickedCards.length === tarotGameState.targetCount) {
+      // 全部所需牌已点完 → 翻牌动画跑完后再一次性整体解读（避免视觉卡死感）
+      setTimeout(() => {
+        tarotGameState.revealed = true;
+        showTarotCardInfo();
+        const extraBtn = $('tarotExtraBtn');
+        if (extraBtn) extraBtn.style.display = 'block';
+        const restartBtn = $('tarotRestartBtn');
+        if (restartBtn) restartBtn.style.display = 'inline-flex';
+        // 禁用牌堆点击，避免解读中误触
+        const grid = $('tarotDeckGrid');
+        if (grid) grid.style.pointerEvents = 'none';
+        callTarotAPI();
+      }, 900);
+    }
+  }
+}
+
+/* 单牌阵：点一张即解读（targetCount==1 时由 pickTarotCard 的"点完即整体解读"路径覆盖）。
+ * 此函数保留给"补充牌"等需要单独解读单张的场景。 */
+function autoReadCard(idx) {
+  if (idx < 0 || idx >= tarotGameState.pickedCards.length) return;
+  if (tarotGameState.cardReadings[idx]) { showTarotCardInfo(); return; }
+  getCardAIReading(idx);
+}
+
+function updatePickStatus() {
+  const status = $('tarotPickStatus');
+  if (!status) return;
+  const picked = tarotGameState.pickedCards.length;
+  const total = tarotGameState.targetCount;
+  if (picked < total) {
+    status.innerHTML = `请依次选择牌 · 已选 <span class="count">${picked}</span> / ${total}（选完 ${total} 张后整体解读）`;
+  } else {
+    status.innerHTML = `✨ ${total} 张牌已翻完，正在解读…`;
+  }
+}
+
+function showTarotCardInfo() {
+  const infoDiv = $('tarotCardInfo');
+  if (!infoDiv) return;
+  const cards = (tarotGameState.apiResult && tarotGameState.apiResult.cards) || tarotGameState.pickedCards.map(c => ({
+    name: c.name, name_cn: c.name, reversed: c.reversed, position: '', keyword: ''
+  }));
+  infoDiv.innerHTML = '<div class="tarot-card-info">' + cards.map((c, i) => {
+    const mapped = TAROT_CARD_MAP[c.name];
+    const cnName = c.name_cn || (mapped ? mapped.split('-').pop() : '') || c.name || '?';
+    const cardId = c.id != null ? c.id : findCardIdByName(c.name);
+    const reading = tarotGameState.cardReadings[i] || '';   // 翻牌时已自动生成
+    const readingHtml = reading
+      ? '<div class="result-box" style="margin-top:6px;font-size:13px;line-height:1.6;">' + escapeHtml(reading) + '</div>'
+      : '<div class="loading" style="display:inline-block;"></div> <span style="color:var(--sub);font-size:12px;">星语凝视中…</span>';
+    return `<div class="tarot-card-info-item${c.reversed ? ' reversed' : ''}" data-card-idx="${i}">
+      <div class="ci-name">${escapeHtml(cnName)}</div>
+      ${c.reversed ? '<div class="ci-rev">逆位</div>' : ''}
+      ${c.position ? `<div class="ci-pos">[${escapeHtml(c.position)}]</div>` : ''}
+      ${c.keyword ? `<div class="ci-kw">${escapeHtml(c.keyword)}</div>` : ''}
+      <div class="ci-ai-out" id="cardAiOut-${i}">${readingHtml}</div>
+      <button class="ci-ai-btn" onclick="getCardAIReading(${i})" data-cardid="${cardId}" data-rev="${c.reversed?1:0}">${reading ? '🔄 重新解读' : '🤖 生成解读'}</button>
+    </div>`;
+  }).join('') + '</div>';
+  infoDiv.style.display = 'block';
+}
+
+async function callTarotAPI() {
+  const interpDiv = $('tarotInterp');
+  if (interpDiv) interpDiv.innerHTML = '<div class="result-box" style="display:flex;align-items:center;gap:10px;"><div class="loading"></div><span style="color:var(--accent);font-size:14px;">🔮 星语正在凝视牌面，请稍候…</span></div>';
+  // 🔮 触发水晶球投影：AI 解读中
+  triggerProjection('interpreting');
+  const grid = $('tarotDeckGrid');
+  try {
+    const picked = tarotGameState.pickedCards.map(c => ({
+      name_cn: (TAROT_CARD_MAP[c.name]||'').split('-').slice(1).join('-') || c.name,
+      name_en: c.name,
+      reversed: c.reversed,
+      position: ['过去','现在','未来','隐藏','结果'][tarotGameState.pickedCards.indexOf(c)] || '牌'
+    }));
+    const body = {
+      userId: UID || '_guest',
+      question: tarotGameState.question,
+      spread: tarotGameState.spreadType,
+      cards: picked,
+    };
+    if (selectedTarotEmotion) body.emotionBefore = selectedTarotEmotion;
+
+    // Use the streaming endpoint with the SERVER-SIDE key (no key in browser).
+    // Optional base/model overrides come from saved LLM config (advanced users).
+    const headers = { 'Content-Type': 'application/json' };
+    if (LLM_BASE) headers['X-LLM-Base'] = LLM_BASE;
+    if (LLM_MODEL) headers['X-LLM-Model'] = LLM_MODEL;
+    if (AUTH_TOKEN) headers['Authorization'] = 'Bearer ' + AUTH_TOKEN;
+
+    const resp = await fetch(GW + '/divination/tarot/interpret-stream', {
+      method: 'POST', headers, body: JSON.stringify(body),
+    });
+    if (!resp.ok) {
+      const txt = await resp.text();
+      throw new Error('HTTP ' + resp.status + (txt ? (': ' + txt.substring(0,200)) : ''));
+    }
+
+    // Set up the streaming typewriter target.
+    if (interpDiv) {
+      if (typingTimer) clearInterval(typingTimer);
+      interpDiv.innerHTML = '<span class="interpretation typing-cursor"></span>';
+    }
+    const span = interpDiv && interpDiv.querySelector('.interpretation');
+    let acc = '';
+
+    // Parse the SSE stream from the response body.
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder('utf-8');
+    let buf = '';
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buf += decoder.decode(value, { stream: true });
+      // SSE events separated by a blank line.
+      const parts = buf.split('\n\n');
+      buf = parts.pop() || '';
+      for (const part of parts) {
+        const evt = parseSseEvent(part);
+        if (!evt) continue;
+        if (evt.event === 'cards') {
+          try { tarotGameState.apiResult = { cards: JSON.parse(evt.data) }; } catch(_){}
+          showTarotCardInfo();
+        } else if (evt.event === 'delta') {
+          acc += evt.data;
+          if (span) { span.textContent = acc; interpDiv.scrollTop = interpDiv.scrollHeight; }
+        } else if (evt.event === 'done') {
+          acc = evt.data;
+          if (span) span.textContent = acc;
+        } else if (evt.event === 'error') {
+          throw new Error(evt.data);
+        }
+      }
+    }
+    if (span) span.classList.remove('typing-cursor');
+    tarotGameState.apiResult = Object.assign({}, tarotGameState.apiResult || {}, { interpretation: acc });
+    lastDivination = tarotGameState.apiResult;
+    // 🔮 触发水晶球投影：最终结果
+    triggerProjection('result');
+    // 解读完成，恢复牌堆点击（便于继续点补充牌）
+    if (grid) grid.style.pointerEvents = '';
+  } catch(e) {
+    if (interpDiv) interpDiv.innerHTML = `<div class="output">❌ ${escapeHtml(e.message)}</div>`;
+    if (grid) grid.style.pointerEvents = '';
+  }
+}
+
+// Minimal SSE event parser: reads `event:` and `data:` lines from a chunk.
+function parseSseEvent(chunk) {
+  const lines = chunk.split('\n');
+  let event = 'message', data = '';
+  for (const line of lines) {
+    if (line.startsWith('event:')) event = line.slice(6).trim();
+    else if (line.startsWith('data:')) data += (data ? '\n' : '') + line.slice(5).replace(/^ /, '');
+  }
+  return { event, data };
+}
+
+// Look up a card's numeric id (0-77) from its English name via the reverse map.
+const TAROT_CARD_ID_BY_NAME = (() => {
+  const m = {};
+  for (const [en] of Object.keys(TAROT_CARD_MAP).map(k => [k, TAROT_CARD_MAP[k]])) {
+    m[en.toLowerCase()] = null; // placeholder; ids resolved lazily
+  }
+  return m;
+})();
+function findCardIdByName(name) {
+  if (!name) return null;
+  // The 78-card id is its index in deck order. We map via TAROT_CARD_MAP which
+  // is keyed by English name and whose values start with the numeric index.
+  const v = TAROT_CARD_MAP[name];
+  if (v) {
+    const n = parseInt(String(v).split('-')[0], 10);
+    if (!isNaN(n)) return n;
+  }
+  return null;
+}
+
+// Per-card deep AI reading (non-streaming). Uses the server-side key.
+// 翻牌时由 autoReadCard 自动调用；结果存 cardReadings[idx]，刷新 showTarotCardInfo 渲染。
+async function getCardAIReading(cardIdx) {
+  const cards = (tarotGameState.apiResult && tarotGameState.apiResult.cards) || tarotGameState.pickedCards;
+  const card = cards[cardIdx];
+  if (!card) return;
+  const btn = document.querySelector(`.ci-ai-btn[onclick="getCardAIReading(${cardIdx})"]`);
+  if (btn) { btn.disabled = true; btn.textContent = '🤖 星语凝视中...'; }
+  // 占位 loading
+  tarotGameState.cardReadings[cardIdx] = '';
+  showTarotCardInfo();
+  try {
+    const cardId = findCardIdByName(card.name_en || card.name);
+    const body = {
+      cardId: cardId,
+      name: card.name_cn || card.name,
+      reversed: !!card.reversed,
+      question: tarotGameState.question || '',
+      userId: UID || '_guest',
+    };
+    const headers = { 'Content-Type': 'application/json' };
+    if (LLM_BASE) headers['X-LLM-Base'] = LLM_BASE;
+    if (LLM_MODEL) headers['X-LLM-Model'] = LLM_MODEL;
+    if (AUTH_TOKEN) headers['Authorization'] = 'Bearer ' + AUTH_TOKEN;
+    const resp = await fetch(GW + '/divination/tarot/card-reading', {
+      method: 'POST', headers, body: JSON.stringify(body),
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.detail || ('HTTP ' + resp.status));
+    tarotGameState.cardReadings[cardIdx] = data.interpretation || '';
+    showTarotCardInfo();   // 用最新解读重新渲染
+  } catch(e) {
+    tarotGameState.cardReadings[cardIdx] = '❌ ' + e.message;
+    showTarotCardInfo();
+    if (btn) { btn.textContent = '🤖 生成解读'; btn.disabled = false; }
+  }
+}
+
+function activateTarotExtra() {
+  const btn = $('tarotExtraBtn');
+  if (btn && btn.disabled) return;
+  tarotGameState.extraActive = true;
+  if (btn) btn.textContent = '请从上方牌堆中选一张...';
+}
+
+function restartTarotPick() {
+  // Keep the question and spread, rebuild deck
+  tarotGameState.deck = buildTarotDeck();
+  tarotGameState.pickedCards = [];
+  tarotGameState.revealed = false;
+  tarotGameState.extraActive = false;
+  tarotGameState.extraCount = 0;
+  tarotGameState.apiResult = null;
+  // 🔮 触发水晶球投影：回到抽卡准备态
+  triggerProjection('session');
+  renderTarotDeckGrid();
+  if ($('tarotCardInfo')) { $('tarotCardInfo').innerHTML = ''; $('tarotCardInfo').style.display = 'none'; }
+  if ($('tarotInterp')) $('tarotInterp').innerHTML = '';
+  const extraBtn = $('tarotExtraBtn');
+  if (extraBtn) { extraBtn.style.display = 'none'; extraBtn.textContent = '我想再抽一张补充牌'; extraBtn.disabled = false; }
+  updatePickStatus();
+  if ($('tarotRestartBtn')) $('tarotRestartBtn').style.display = 'none';
+}
+
+// ==================== MBTI TEST ====================
+const MBTI_QUESTIONS_FULL = [
+  { dim:'EI', a:{t:'E',text:'在派对上，我倾向于和很多人交谈，包括陌生人。'}, b:{t:'I',text:'在派对上，我更愿意和少数几个熟人深入交谈。'} },
+  { dim:'EI', a:{t:'E',text:'独处太久会让我感到精力耗尽，我需要社交来充电。'}, b:{t:'I',text:'社交太久会让我感到精力耗尽，我需要独处来充电。'} },
+  { dim:'EI', a:{t:'E',text:'我通常是主动发起对话或活动的那个人。'}, b:{t:'I',text:'我通常等别人先开口，再决定是否加入。'} },
+  { dim:'EI', a:{t:'E',text:'想到什么就说出来，边说边理清思路。'}, b:{t:'I',text:'先想清楚再开口，不喜欢被打断思路。'} },
+  { dim:'EI', a:{t:'E',text:'空闲时我更想约朋友一起出去玩。'}, b:{t:'I',text:'空闲时我更想待在家里看书或追剧。'} },
+  { dim:'EI', a:{t:'E',text:'在人群中我感到充满活力和兴奋。'}, b:{t:'I',text:'在人群中我容易感到疲惫和过度刺激。'} },
+  { dim:'EI', a:{t:'E',text:'我的兴趣和注意力比较广泛，喜欢尝试新事物。'}, b:{t:'I',text:'我的兴趣比较专注，喜欢深入钻研少数几个领域。'} },
+  { dim:'SN', a:{t:'S',text:'我更关注具体的事实、细节和实际经验。'}, b:{t:'N',text:'我更关注可能性、想象力和未来的愿景。'} },
+  { dim:'SN', a:{t:'S',text:'我喜欢脚踏实地、循序渐进地做事。'}, b:{t:'N',text:'我喜欢跳着思考、灵感驱动的做事方式。'} },
+  { dim:'SN', a:{t:'S',text:'我更相信过去的经验和已被验证的方法。'}, b:{t:'N',text:'我更相信直觉和对事物本质的洞察。'} },
+  { dim:'SN', a:{t:'S',text:'我倾向于关注"是什么"，注重现实。'}, b:{t:'N',text:'我倾向于关注"可能是什么"，注重想象。'} },
+  { dim:'SN', a:{t:'S',text:'我喜欢实操性强、有明确步骤的指导。'}, b:{t:'N',text:'我喜欢概念性的、有启发性的理论框架。'} },
+  { dim:'SN', a:{t:'S',text:'我更欣赏务实、可靠的人。'}, b:{t:'N',text:'我更欣赏有创意、有远见的人。'} },
+  { dim:'SN', a:{t:'S',text:'学习新东西时，我喜欢先掌握基础再拓展。'}, b:{t:'N',text:'学习新东西时，我喜欢先看全局再填细节。'} },
+  { dim:'TF', a:{t:'T',text:'做决定时，我优先考虑逻辑和客观标准。'}, b:{t:'F',text:'做决定时，我优先考虑感受和对人的影响。'} },
+  { dim:'TF', a:{t:'T',text:'我认为公正和原则比和谐更重要。'}, b:{t:'F',text:'我认为和谐和共情比冰冷的公正更重要。'} },
+  { dim:'TF', a:{t:'T',text:'别人有困难时，我倾向于帮ta分析问题、给出方案。'}, b:{t:'F',text:'别人有困难时，我倾向于先共情、安慰，再讨论。'} },
+  { dim:'TF', a:{t:'T',text:'我被认为是一个理性、头脑清醒的人。'}, b:{t:'F',text:'我被认为是一个温暖、有同理心的人。'} },
+  { dim:'TF', a:{t:'T',text:'批评和被批评时，我关注的是是否准确而非是否伤人。'}, b:{t:'F',text:'批评和被批评时，我会很在意对方的感受和语气。'} },
+  { dim:'TF', a:{t:'T',text:'在争论中我追求"谁对"，而非"谁舒服"。'}, b:{t:'F',text:'在争论中我希望双方都能被理解和尊重。'} },
+  { dim:'TF', a:{t:'T',text:'我觉得"对事不对人"是完全合理的。'}, b:{t:'F',text:'我觉得事情和人是分不开的，情感也很重要。'} },
+  { dim:'JP', a:{t:'J',text:'我喜欢提前制定计划并按计划行事。'}, b:{t:'P',text:'我喜欢保持灵活，随时根据情况调整。'} },
+  { dim:'JP', a:{t:'J',text:'完成一件事比开始多件事更重要。'}, b:{t:'P',text:'探索多种可能性比急着完成更有趣。'} },
+  { dim:'JP', a:{t:'J',text:'我习惯把东西整理有序，清单让我安心。'}, b:{t:'P',text:'我觉得计划是活的，随时可以改，清单是束缚。'} },
+  { dim:'JP', a:{t:'J',text:'截止日期前我会尽早完成，不喜欢赶。'}, b:{t:'P',text:'截止日期前的压力反而能激发我的效率。'} },
+  { dim:'JP', a:{t:'J',text:'我享受"划掉待办事项"的满足感。'}, b:{t:'P',text:'我享受"发现新选项"的自由感。'} },
+  { dim:'JP', a:{t:'J',text:'我认为规则和结构让生活更高效。'}, b:{t:'P',text:'我认为规则可以被灵活解释，弹性更重要。'} },
+  { dim:'JP', a:{t:'J',text:'旅行时我喜欢提前订好酒店和行程。'}, b:{t:'P',text:'旅行时我喜欢走哪算哪，随时改变路线。'} },
+];
+
+const MBTI_TYPES = {
+  'INTJ': { label:'建筑师', desc:'富有想象力的战略家——一切都在你的计划之中。你天生善于系统思考，对自己和世界有极高的标准。' },
+  'INTP': { label:'逻辑学家', desc:'具有创造力的发明家——对知识有不可遏制的好奇心。你喜欢在概念的世界里探索逻辑的极限。' },
+  'ENTJ': { label:'指挥官', desc:'大胆、富有想象力且意志强大的领导者——总能找到方法或创造方法。你天生善于组织资源、驱动目标。' },
+  'ENTP': { label:'辩论家', desc:'聪明好奇的思想者——不会拒绝任何智力上的挑战。你喜欢从不同角度思考问题，享受思辨的乐趣。' },
+  'INFJ': { label:'提倡者', desc:'安静而神秘，同时鼓舞人心且不知疲倦的理想主义者。你能洞察他人的情感，为信念而不懈努力。' },
+  'INFP': { label:'调停者', desc:'诗意、善良的利他主义者——总是热情地为正义的事业伸出援手。你内心世界丰富，追求真实和意义。' },
+  'ENFJ': { label:'主人公', desc:'富有魅力和鼓舞人心的领导者——能让听众为之倾倒。你天生善于理解他人需求，激发集体潜能。' },
+  'ENFP': { label:'竞选者', desc:'热情、有创造力、爱社交的自由灵魂——总能找到理由微笑。你的热情和好奇心感染身边的每一个人。' },
+  'ISTJ': { label:'物流师', desc:'实际且注重事实的人——可靠性不容怀疑。你是秩序的守护者，脚踏实地、责任心极强。' },
+  'ISFJ': { label:'守卫者', desc:'非常专注、温暖的守护者——时刻准备保护爱的人。你的爱藏在细节里，是沉默而可靠的力量。' },
+  'ESTJ': { label:'总经理', desc:'出色的管理者——在管理事物和人方面无与伦比。你高效、务实，是团队的中流砥柱。' },
+  'ESFJ': { label:'执政官', desc:'极有同情心、爱社交、受欢迎的人——总是热心帮助。你是社群的粘合剂，让每个人都感到被关心。' },
+  'ISTP': { label:'鉴赏家', desc:'大胆而实际的实验家——善于使用各种工具。你冷静、灵活，擅长在行动中解决问题。' },
+  'ISFP': { label:'探险家', desc:'灵活、有魅力的艺术家——时刻准备探索新的可能。你的感受比语言更深，审美敏锐，活在当下。' },
+  'ESTP': { label:'企业家', desc:'聪明、精力充沛、善于感知的人——真心享受生活在边缘。你是行动的化身，反应敏捷、享受冒险。' },
+  'ESFP': { label:'表演者', desc:'自发的、精力充沛、热情的表演者——生活在他们周围永远不会无聊。你教会世界活在当下、享受生命。' },
+};
+
+let mbtiTestState = { qIdx: 0, answers: [] };
+
+function renderMbtiEntry() {
+  const cur = ($('authMbti') && $('authMbti').value) || '';
+  const hasResult = cur && cur.length === 4;
+  $('mbtiTestEntry').innerHTML = `
+    <div class="mbti-entry" onclick="switchDivMode('mbti'); startMbtiTest();">
+      <div class="me-top">
+        <div class="me-icon">🌟</div>
+        <div class="me-body">
+          <div class="me-title">MBTI 性格测试 ${hasResult ? '<span class="me-badge">'+cur+'</span>' : ''}</div>
+          <div class="me-desc">${hasResult ? '点击重新测试，探索你的性格密码' : '28道题，2分钟，发现真实的自己'}</div>
+          ${hasResult ? '<div class="me-result">'+cur+' · '+(MBTI_TYPES[cur]?MBTI_TYPES[cur].label:'')+'</div>' : ''}
+        </div>
+      </div>
+    </div>`;
+}
+
+function startMbtiTest() {
+  mbtiTestState = { qIdx: 0, answers: [] };
+  renderMbtiQuestion();
+}
+
+function renderMbtiQuestion() {
+  const i = mbtiTestState.qIdx;
+  const total = MBTI_QUESTIONS_FULL.length;
+  if (i >= total) { renderMbtiResult(); return; }
+  const q = MBTI_QUESTIONS_FULL[i];
+  const prevAnswer = mbtiTestState.answers[i];
+  const dimLabel = q.dim === 'EI' ? '社交能量' : q.dim === 'SN' ? '认知方式' : q.dim === 'TF' ? '决策风格' : '生活态度';
+  $('mbtiTestArea').innerHTML = `
+    <div class="mbti-q-num">第 ${i+1} / ${total} 题 · ${dimLabel}</div>
+    <div class="mbti-q-progress"><div class="mbti-q-progress-bar" style="width:${(i/total)*100}%"></div></div>
+    <div class="mbti-q-text">以下哪个描述更像你？</div>
+    <button class="mbti-q-option ${prevAnswer==='a'?'selected':''}" onclick="answerMbti('a')">${escapeHtml(q.a.text)}</button>
+    <button class="mbti-q-option ${prevAnswer==='b'?'selected':''}" onclick="answerMbti('b')">${escapeHtml(q.b.text)}</button>
+    <div class="mbti-q-actions">
+      ${i > 0 ? '<button class="secondary" onclick="mbtiPrev()">← 上一题</button>' : ''}
+    </div>
+  `;
+}
+
+function answerMbti(choice) {
+  mbtiTestState.answers[mbtiTestState.qIdx] = choice;
+  mbtiTestState.qIdx++;
+  if (mbtiTestState.qIdx >= MBTI_QUESTIONS_FULL.length) {
+    renderMbtiResult();
+  } else {
+    renderMbtiQuestion();
+  }
+}
+
+function mbtiPrev() {
+  if (mbtiTestState.qIdx > 0) {
+    mbtiTestState.qIdx--;
+    renderMbtiQuestion();
+  }
+}
+
+function calcMbtiType() {
+  const scores = { E:0, I:0, S:0, N:0, T:0, F:0, J:0, P:0 };
+  MBTI_QUESTIONS_FULL.forEach((q, i) => {
+    const choice = mbtiTestState.answers[i];
+    if (!choice) return;
+    const letter = q[choice].t;
+    scores[letter]++;
+  });
+  let type = '';
+  type += scores.E >= scores.I ? 'E' : 'I';
+  type += scores.S >= scores.N ? 'S' : 'N';
+  type += scores.T >= scores.F ? 'T' : 'F';
+  type += scores.J >= scores.P ? 'J' : 'P';
+  return { type, scores };
+}
+
+async function renderMbtiResult() {
+  const { type, scores } = calcMbtiType();
+  const info = MBTI_TYPES[type] || { label: '未知', desc: '' };
+  const dims = [
+    { l:'E', v:scores.E }, { l:'I', v:scores.I },
+    { l:'S', v:scores.S }, { l:'N', v:scores.N },
+    { l:'T', v:scores.T }, { l:'F', v:scores.F },
+    { l:'J', v:scores.J }, { l:'P', v:scores.P },
+  ];
+  $('mbtiTestArea').innerHTML = `
+    <div class="mbti-result">
+      <div class="mbti-result-type">${type}</div>
+      <div class="mbti-result-label">${escapeHtml(info.label)}</div>
+      <div class="mbti-result-desc">${escapeHtml(info.desc)}</div>
+      <div class="mbti-result-dims">
+        ${dims.map(d => `<span class="mbti-dim-pill" style="${type.includes(d.l)?'background:var(--accent-soft);color:var(--accent);':'opacity:.5;'}">${d.l}: ${d.v}</span>`).join('')}
+      </div>
+      <button class="accent" onclick="saveMbtiResult('${type}')">保存到我的档案</button>
+      <div style="height:8px;"></div>
+      <button class="secondary" onclick="startMbtiTest()">重新测试</button>
+    </div>
+  `;
+}
+
+async function saveMbtiResult(type) {
+  if (!requireUid()) return;
+  try {
+    await api('PATCH', '/users/' + UID + '/profile', { mbtiDisplayType: type });
+    if ($('authMbti')) $('authMbti').value = type;
+    toast('✅ MBTI 类型已保存：' + type);
+    renderMbtiEntry();
+  } catch(e) {
+    toast('❌ 保存失败：' + e.message);
+  }
+}
+
+// Keep backward-compatible alias
+async function loadRecommendation() { renderMbtiEntry(); }
+
+async function doTarot() {
+  // 抽牌+AI解读走公开端点（服务端Key），登录非必需。
+  const q = $('tarotQuestion').value.trim();
+  if (!q) { toast('⚠️ 请输入问题'); return; }
+
+  // Map spread selection to card count
+  const spreadCount = { 'single': 1, 'three_card': 3, 'celtic_cross': 10 };
+  const count = spreadCount[selectedSpread] || 1;
+  console.log('[Tarot] doTarot selectedSpread=', selectedSpread, 'count=', count);
+
+  // Initialize game state
+  tarotGameState = {
+    deck: buildTarotDeck(),
+    pickedCards: [],
+    targetCount: count,
+    revealed: false,
+    extraActive: false,
+    extraCount: 0,
+    spreadType: selectedSpread,
+    question: q,
+    apiResult: null,
+    cardReadings: [],   // 每张已翻牌的自动解读结果，翻牌即生成
+  };
+
+  // 🔮 触发水晶球投影：开始抽卡动画
+  triggerProjection('session');
+
+  // Render the grid-pick UI
+  $('tarotResult').innerHTML = `
+    <div class="tarot-pick-status" id="tarotPickStatus">请依次选择 <span class="count">0</span> / ${count} 张牌</div>
+    <div class="tarot-deck-grid" id="tarotDeckGrid"></div>
+    <div id="tarotCardInfo" style="display:none;"></div>
+    <button class="tarot-extra-btn" id="tarotExtraBtn" onclick="activateTarotExtra()">我想再抽一张补充牌</button>
+    <button class="secondary" id="tarotRestartBtn" style="display:none;margin-top:8px;" onclick="restartTarotPick()">🔄 重新抽牌</button>
+    <div class="result-box" id="tarotInterp" style="margin-top:12px;"></div>
+  `;
+
+  renderTarotDeckGrid();
+  $('tarotRestartBtn').style.display = 'none';
+}
+
+async function doAstrology() {
+  if (!requireUid()) return;
+  $('astrologyResult').innerHTML = '<div style="text-align:center;padding:20px;"><div class="loading"></div><p style="margin-top:8px;color:var(--sub)">正在连接星象...</p></div>';
+  try {
+    const r = await api('POST','/divination/astrology/horoscope', {userId:UID, zodiacSign:selectedZodiac, period:selectedPeriod});
+    lastDivination = r;
+    const z = r.zodiac || {};
+    $('astrologyResult').innerHTML = `
+      <div class="result-box" style="text-align:center;">
+        <div style="font-size:36px;">${escapeHtml(z.symbol||'✨')}</div>
+        <div style="font-size:18px;font-weight:bold;margin:4px 0;">${escapeHtml(z.name_cn||'')} · ${escapeHtml(z.date_range||'')}</div>
+        <div style="font-size:12px;color:var(--sub);">元素: ${escapeHtml(z.element||'')} · 守护星: ${escapeHtml(z.ruler||'')}</div>
+        <div style="font-size:12px;color:var(--gold);margin:4px 0;">${escapeHtml(z.keywords||'')}</div>
+      </div>
+      <div class="result-box" style="margin-top:8px;" id="astroInterp"></div>`;
+    typewriter($('astroInterp'), r.interpretation);
+  } catch(e) { $('astrologyResult').innerHTML = `<div class="output">❌ ${escapeHtml(e.message)}</div>`; }
+}
+
+async function doDream() {
+  if (!requireUid()) return;
+  const d = $('dreamText').value.trim();
+  if (!d) { toast('⚠️ 请描述梦境'); return; }
+  $('dreamResult').innerHTML = '<div style="text-align:center;padding:20px;"><div class="loading"></div><p style="margin-top:8px;color:var(--sub)">正在解读梦境...</p></div>';
+  try {
+    const r = await api('POST','/divination/dream/interpret', {userId:UID, dreamDescription:d});
+    lastDivination = r;
+    $('dreamResult').innerHTML = '<div class="result-box" id="dreamInterp"></div>';
+    typewriter($('dreamInterp'), r.interpretation);
+  } catch(e) { $('dreamResult').innerHTML = `<div class="output">❌ ${escapeHtml(e.message)}</div>`; }
+}
+
+async function doFortune() {
+  if (!requireUid()) return;
+  $('fortuneResult').innerHTML = '<div style="text-align:center;padding:20px;"><div class="loading"></div><p style="margin-top:8px;color:var(--sub)">抽取命运之牌...</p></div>';
+  try {
+    const body = {userId:UID};
+    if (selectedFortuneZodiac) body.zodiacSign = selectedFortuneZodiac;
+    const r = await api('POST','/divination/daily-fortune', body);
+    lastDivination = r;
+    let cardHtml = '';
+    if (r.cards && r.cards.length) {
+      const c = r.cards[0];
+      const imgFile = getTarotImg(c.name);
+      cardHtml = `<div style="display:flex;justify-content:center;margin:12px 0;">
+        <div class="tarot-pick-card${c.reversed?' reversed':''}" style="width:110px;">
+          <div class="tarot-pick-inner revealed">
+            <img class="tarot-pick-face tarot-pick-back" src="${TAROT_CARD_BACK}" alt="">
+            <img class="tarot-pick-face tarot-pick-front" src="${imgFile}" alt="${escapeHtml(c.name||'')}">
+          </div>
+        </div></div>`;
+    }
+    $('fortuneResult').innerHTML = cardHtml + '<div class="result-box" id="fortuneInterp"></div>';
+    setTimeout(()=>typewriter($('fortuneInterp'), r.interpretation), 800);
+  } catch(e) { $('fortuneResult').innerHTML = `<div class="output">❌ ${escapeHtml(e.message)}</div>`; }
+}
+
+async function loadHistory() {
+  if (!requireUid()) return;
+  try {
+    const h = await api('GET', `/divination/history/${UID}?limit=20`);
+    if (!h.length) { $('historyArea').innerHTML = '<p class="hint-text">暂无历史记录</p>'; return; }
+    const typeIcons = {tarot:'🃏',astrology:'✨',dream:'🌙',fortune:'☀️'};
+    $('historyArea').innerHTML = '<div style="margin-top:12px;">' + h.map(r=>`
+      <div class="result-box" style="margin-bottom:8px;cursor:pointer;" onclick="document.getElementById('hist-${r.id}').style.display=document.getElementById('hist-${r.id}').style.display==='none'?'block':'none'">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <strong>${typeIcons[r.type]||'🔮'} ${escapeHtml(r.type||'')}</strong>
+          <span style="font-size:11px;color:var(--sub)">${escapeHtml((r.createdAt||'').slice(0,16).replace('T',' '))}</span>
+        </div>
+        <div style="font-size:13px;color:var(--gold);margin-top:4px;">${escapeHtml(r.question||'')}</div>
+        <div id="hist-${r.id}" style="display:none;margin-top:8px;font-size:14px;line-height:1.6;">${escapeHtml(r.interpretation||'')}</div>
+      </div>`).join('') + '</div>';
+  } catch(e) { $('historyArea').innerHTML = `<div class="output">❌ ${escapeHtml(e.message)}</div>`; }
+}
+
+async function loadStats() {
+  if (!requireUid()) return;
+  try {
+    const s = await api('GET', `/divination/stats/${UID}`);
+    $('statsArea').innerHTML = `
+      <div class="stat-row" style="margin-top:12px;">
+        <div class="stat-tile"><div class="num">${s.total_divinations||s.totalDivinations||0}</div><div class="label">总计</div></div>
+        <div class="stat-tile"><div class="num">${(s.by_type||s.byType||{}).tarot||0}</div><div class="label">塔罗</div></div>
+        <div class="stat-tile"><div class="num">${(s.by_type||s.byType||{}).astrology||0}</div><div class="label">星座</div></div>
+        <div class="stat-tile"><div class="num">${(s.by_type||s.byType||{}).dream||0}</div><div class="label">解梦</div></div>
+        <div class="stat-tile"><div class="num">${(s.by_type||s.byType||{}).fortune||0}</div><div class="label">运势</div></div>
+      </div>`;
+  } catch(e) { $('statsArea').innerHTML = `<div class="output">❌ ${escapeHtml(e.message)}</div>`; }
+}
+
+// ==================== Emotion ====================
+async function analyzeEmotion() {
+  const text = $('emotionText').value.trim();
+  if (!text) { toast('⚠️ 请输入文字'); return; }
+  $('emotionResult').innerHTML = '<div class="loading"></div>';
+  try {
+    const r = await api('POST','/emotion/analyze', {text});
+    const label = EMOTION_LABELS[r.emotion] || r.emotion;
+    const color = EMOTION_COLORS[r.emotion] || '#888';
+    let bars = '';
+    const scores = r.all_scores || {};
+    const sorted = Object.entries(scores).sort((a,b)=>b[1]-a[1]);
+    for (const [emo, score] of sorted) {
+      const pct = Math.min(100, score * 20);
+      bars += `<div class="emo-bar-container">
+        <div class="emo-bar-label"><span>${EMOTION_LABELS[emo]||emo}</span><span>${score}</span></div>
+        <div class="emo-bar-bg"><div class="emo-bar-fill" style="width:${pct}%;background:${EMOTION_COLORS[emo]||'#888'}"></div></div>
+      </div>`;
+    }
+    $('emotionResult').innerHTML = `
+      <div class="result-box">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+          <div style="width:48px;height:48px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;font-size:24px;">${r.intensity>=7?'🔥':'💬'}</div>
+          <div><div style="font-size:18px;font-weight:bold;color:${color}">${label}</div><div style="font-size:13px;color:var(--sub)">强度: ${r.intensity}/10</div></div>
+        </div>
+        ${bars}
+      </div>`;
+  } catch(e) { $('emotionResult').innerHTML = `<div class="output">❌ ${escapeHtml(e.message)}</div>`; }
+}
+
+async function logEmotion() {
+  if (!requireUid()) return;
+  const intensity = parseInt($('intensitySlider').value);
+  try {
+    await api('POST','/emotion/log', {userId:UID, emotion:selectedMood, intensity, triggerSource:'test_console'});
+    $('logEmotionResult').innerHTML = `<div class="result-box">✅ 已记录: ${EMOTION_LABELS[selectedMood]} (${intensity}/10)</div>`;
+    toast('✅ 情绪已记录');
+  } catch(e) { $('logEmotionResult').innerHTML = `<div class="output">❌ ${escapeHtml(e.message)}</div>`; }
+}
+
+async function loadTrends() {
+  if (!requireUid()) return;
+  const days = $('trendDays').value;
+  $('trendsArea').innerHTML = '<div class="loading"></div>';
+  try {
+    const t = await api('GET', `/emotion/trends/${UID}?days=${days}`);
+    if (!t.daily_trends?.length && !t.dailyTrends?.length) {
+      $('trendsArea').innerHTML = '<p class="hint-text">暂无趋势数据，先记录几次情绪吧</p>'; return;
+    }
+    const trends = t.daily_trends || t.dailyTrends || [];
+    let html = `<div class="stat-row" style="margin-bottom:16px;">
+      <div class="stat-tile"><div class="num">${t.total_logs||t.totalLogs||0}</div><div class="label">总记录</div></div>
+      <div class="stat-tile"><div class="num">${trends.length}</div><div class="label">记录天数</div></div>
+    </div>`;
+    for (const d of trends) {
+      const color = EMOTION_COLORS[d.dominant_emotion||d.dominantEmotion] || '#888';
+      const label = EMOTION_LABELS[d.dominant_emotion||d.dominantEmotion] || '未知';
+      const intensity = d.avg_intensity || d.avgIntensity || 0;
+      html += `<div class="emo-bar-container">
+        <div class="emo-bar-label"><span>${escapeHtml((d.date||'').slice(5))} · ${label}</span><span>${d.log_count||d.logCount||0}条 · 强度${intensity.toFixed(1)}</span></div>
+        <div class="emo-bar-bg"><div class="emo-bar-fill" style="width:${intensity*10}%;background:${color}">${intensity.toFixed(1)}</div></div>
+      </div>`;
+    }
+    $('trendsArea').innerHTML = html;
+  } catch(e) { $('trendsArea').innerHTML = `<div class="output">❌ ${escapeHtml(e.message)}</div>`; }
+}
+
+async function loadAssessment() {
+  if (!requireUid()) return;
+  try {
+    const a = await api('GET', `/emotion/assessment/${UID}`);
+    const riskColors = {minimal:'#66bb6a',mild:'#ffd54f',moderate:'#ffb74d',moderately_severe:'#ef5350'};
+    const riskLabels = {minimal:'风险极低',mild:'轻度困扰',moderate:'中度困扰',moderately_severe:'中重度困扰'};
+    const color = riskColors[a.risk_level||a.riskLevel] || '#888';
+    const score = a.phq4_score||a.phq4Score||0;
+    $('trendsArea').innerHTML = `
+      <div class="result-box">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <strong style="font-size:16px;">🧠 PHQ-4 心理健康评估</strong>
+          <span class="pill" style="background:${color}22;color:${color}">${riskLabels[a.risk_level||a.riskLevel]||''}</span>
+        </div>
+        <div class="emo-bar-container">
+          <div class="emo-bar-label"><span>总分</span><span>${score} / 12</span></div>
+          <div class="emo-bar-bg"><div class="emo-bar-fill" style="width:${score/12*100}%;background:${color}">${score}</div></div>
+        </div>
+        <div class="spacer"></div>
+        <div style="font-size:14px;line-height:1.6;color:var(--sub);background:var(--bg);padding:12px;border-radius:10px;">${escapeHtml(a.recommendation||'')}</div>
+      </div>`;
+  } catch(e) { $('trendsArea').innerHTML = `<div class="output">❌ ${escapeHtml(e.message)}</div>`; }
+}
+
+async function loadReport() {
+  if (!requireUid()) return;
+  const days = $('trendDays').value;
+  try {
+    const r = await api('GET', `/emotion/report/${UID}?days=${days}`);
+    let html = `<div class="result-box">
+      <strong style="font-size:16px;">📋 ${days}天情绪报告</strong>
+      <div class="stat-row" style="margin:12px 0;">
+        <div class="stat-tile"><div class="num">${r.summary.total_logs||0}</div><div class="label">总记录</div></div>
+        <div class="stat-tile"><div class="num">${r.summary.logging_days||0}</div><div class="label">记录天数</div></div>
+        <div class="stat-tile"><div class="num">${r.mental_health.phq4_score}</div><div class="label">PHQ-4分</div></div>
+      </div>`;
+    html += '<div style="margin-bottom:12px;"><strong>✨ AI 洞察</strong><ul style="margin-top:8px;padding-left:20px;">';
+    for (const ins of (r.insights||[])) html += `<li style="font-size:14px;line-height:1.6;margin-bottom:6px;">${escapeHtml(ins)}</li>`;
+    html += '</ul></div></div>';
+    $('trendsArea').innerHTML = html;
+  } catch(e) { $('trendsArea').innerHTML = `<div class="output">❌ ${escapeHtml(e.message)}</div>`; }
+}
+
+// ==================== Task ====================
+async function loadPoints() {
+  if (!requireUid()) return;
+  try {
+    const p = await api('GET', `/task/points/${UID}`);
+    $('pointsDisplay').innerHTML = `
+      <div class="stat-row">
+        <div class="stat-tile"><div class="num">Lv.${p.level||p.Level||1}</div><div class="label">等级</div></div>
+        <div class="stat-tile"><div class="num" style="color:var(--gold)">${p.total_points||p.totalPoints||0}</div><div class="label">积分</div></div>
+        <div class="stat-tile"><div class="num" style="color:var(--green)">${p.streak_days||p.streakDays||0}</div><div class="label">连续签到</div></div>
+      </div>`;
+  } catch(e) {}
+}
+
+async function doCheckIn() {
+  if (!requireUid()) return;
+  try {
+    const r = await api('POST','/task/check-in', {userId:UID});
+    const earned = r.earned||0;
+    if (r.already_checked_in||r.alreadyCheckedIn) {
+      $('checkInResult').innerHTML = `<div class="result-box">📋 ${escapeHtml(r.message||'今天已经签到了')}</div>`;
+    } else {
+      $('checkInResult').innerHTML = `<div class="result-box">✅ 签到成功！获得 ${earned} 积分\n连续签到 ${r.streak_days||r.streakDays||0} 天</div>`;
+      toast(`🎉 签到成功 +${earned} 积分！`);
+    }
+    loadPoints();
+  } catch(e) { $('checkInResult').innerHTML = `<div class="output">❌ ${escapeHtml(e.message)}</div>`; }
+}
+
+async function doMoodLogTask() {
+  if (!requireUid()) return;
+  try {
+    const r = await api('POST','/task/mood-log', {userId:UID, emotion:selectedMood, intensity:5});
+    $('moodLogResult').innerHTML = `<div class="result-box">✅ 情绪已记录 +${r.earned||0} 积分</div>`;
+    toast('✅ +'+(r.earned||0)+' 积分');
+    loadPoints();
+  } catch(e) { $('moodLogResult').innerHTML = `<div class="output">❌ ${escapeHtml(e.message)}</div>`; }
+}
+
+async function doMeditation() {
+  if (!requireUid()) return;
+  try {
+    const r = await api('POST','/task/meditation', {userId:UID, durationSeconds:selectedMeditation});
+    const min = Math.floor(selectedMeditation/60);
+    $('meditationResult').innerHTML = `<div class="result-box">🧘 ${min}分钟冥想完成 +${r.earned||0} 积分</div>`;
+    toast(`🧘 冥想完成 +${r.earned||0} 积分！`);
+    loadPoints();
+  } catch(e) { $('meditationResult').innerHTML = `<div class="output">❌ ${escapeHtml(e.message)}</div>`; }
+}
+
+async function loadAchievements() {
+  if (!requireUid()) return;
+  try {
+    const [unlocked, all] = await Promise.all([
+      api('GET', `/task/achievements/${UID}`),
+      api('GET', '/task/achievements'),
+    ]);
+    const unlockedCodes = new Set(unlocked.map(a=>a.code));
+    $('achievementsArea').innerHTML = '<div class="badge-grid" style="margin-bottom:12px;">' +
+      all.map(a=>{
+        const u = unlockedCodes.has(a.code);
+        return `<div class="badge ${u?'unlocked':'locked'}">${u?'🏆':'🔒'} ${escapeHtml(a.name)}</div>`;
+      }).join('') + '</div>' +
+      `<div class="hint-text">已解锁 ${unlocked.length} / ${all.length} 个成就</div>`;
+  } catch(e) { $('achievementsArea').innerHTML = `<div class="output">❌ ${escapeHtml(e.message)}</div>`; }
+}
+
+// ==================== Community ====================
+async function loadFeed() {
+  try {
+    const feed = await api('GET','/divination/community?limit=30');
+    if (!feed.length) { $('feedArea').innerHTML = '<p class="hint-text">社区还没有内容，快来成为第一个分享的人！</p>'; return; }
+    const typeLabels = {tarot:'塔罗',astrology:'星座',dream:'解梦',fortune:'运势'};
+    $('feedArea').innerHTML = '<div style="margin-top:12px;">' + feed.map(s=>`
+      <div class="feed-item">
+        <div class="feed-header">
+          <div class="feed-user">${escapeHtml(s.nickname||'匿名')}</div>
+          <span class="feed-type">${typeLabels[s.type]||s.type}</span>
+        </div>
+        ${s.question?`<div class="feed-question">❝ ${escapeHtml(s.question)}</div>`:''}
+        <div class="feed-text">${escapeHtml((s.interpretation||'').substring(0,200))}${(s.interpretation||'').length>200?'...':''}</div>
+        <div class="feed-footer">
+          <span class="feed-time">${escapeHtml((s.createdAt||s.created_at||'').slice(0,16).replace('T',' '))}</span>
+          <button class="like-btn" onclick="likePost('${s.id}', this)">🤍 ${s.likes||0}</button>
+        </div>
+      </div>`).join('') + '</div>';
+  } catch(e) { $('feedArea').innerHTML = `<div class="output">❌ ${escapeHtml(e.message)}</div>`; }
+}
+
+async function likePost(id, btn) {
+  if (!requireUid()) return;
+  try {
+    const r = await api('POST', `/divination/community/${id}/like`, {userId:UID});
+    if (r) { btn.textContent = `💖 ${r.likes}`; btn.classList.add('liked'); }
+  } catch(e) { toast('点赞失败'); }
+}
+
+async function doShare() {
+  if (!requireUid()) return;
+  const nick = $('shareNickname').value.trim() || '匿名';
+  const type = $('shareType').value;
+  const q = $('shareQuestion').value.trim();
+  const interp = $('shareInterpretation').value.trim();
+  if (!interp) { toast('⚠️ 请填写解读内容'); return; }
+  try {
+    const r = await api('POST','/divination/share', {
+      userId:UID, nickname:nick, divinationId:'manual_'+Date.now(),
+      divType:type, question:q, interpretation:interp,
+    });
+    $('shareResult').innerHTML = `<div class="result-box">✅ 已分享到社区！\n分享ID: ${r.id}</div>`;
+    $('shareQuestion').value=''; $('shareInterpretation').value='';
+    toast('✅ 已分享到社区');
+    loadFeed();
+  } catch(e) { $('shareResult').innerHTML = `<div class="output">❌ ${escapeHtml(e.message)}</div>`; }
+}
+
+// ==================== Device Simulation ====================
+async function sendMode() {
+  const mode = parseInt($('devMode').value);
+  const devId = $('devUid').value.trim();
+  try {
+    const r = await api('POST', `/tuya/device/${devId}/mode?mode=${mode}`);
+    showOutput('deviceResult', r);
+    const modeNames = ['待机','塔罗','星座','解梦','运势','陪伴'];
+    toast(`📡 模式已上报: ${modeNames[mode]||mode}`);
+  } catch(e) { showOutput('deviceResult', '❌ '+e.message); }
+}
+
+async function sendEmotion() {
+  const level = parseInt($('devEmotion').value);
+  const devId = $('devUid').value.trim();
+  const status = [{code:'emotion_level', value:level}];
+  try {
+    const r = await api('POST','/tuya/callback', {devId, status});
+    showOutput('deviceResult', r);
+    toast(`💛 情绪已上报: ${level}/10`);
+  } catch(e) { showOutput('deviceResult', '❌ '+e.message); }
+}
+
+async function sendDivination() {
+  const devId = $('devUid').value.trim();
+  const raw = $('devDivResult').value.trim() || '{"type":"tarot","question":"test","interpretation":"测试"}';
+  const status = [{code:'last_divination', value:raw}];
+  try {
+    const r = await api('POST','/tuya/callback', {devId, status});
+    showOutput('deviceResult', r);
+    toast('🃏 占卜结果已上报');
+  } catch(e) { showOutput('deviceResult', '❌ '+e.message); }
+}
+
+// ==================== LED Preview ====================
+let ledTimer = null;
+function previewLED(effect) {
+  if (ledTimer) clearInterval(ledTimer);
+  const el = $('ledPreview');
+  const colors = LED_COLORS[effect] || ['#fff','#ccc'];
+  let toggle = false;
+  const update = () => {
+    toggle = !toggle;
+    const c = toggle ? colors[0] : (colors[1]||colors[0]);
+    el.style.background = c;
+    el.style.boxShadow = `0 0 ${20+Math.random()*15}px ${c}`;
+  };
+  const intervals = {standby:800, listening:600, divining:250, gold:1000, red:400, green:1000, rainbow:200};
+  update();
+  ledTimer = setInterval(update, intervals[effect]||500);
+}
+
+// ==================== Pet Game (养成游戏) ====================
+let gamePetId = null;
+let gamePetData = null;
+let selectedGameAvatar = localStorage.getItem('pet_avatar') || 'plush-bear';
+
+const STAGE_EMOJI = { egg:'🥚', baby:'🐣', child:'🐥', teen:'🐤', adult:'🐔' };
+const STAGE_NAMES = { egg:'蛋', baby:'幼年', child:'少年', teen:'青少年', adult:'成年' };
+const AVATAR_EMOJI = { 'plush-cat':'🐱','plush-dog':'🐶','plush-rabbit':'🐰','plush-bear':'🐻' };
+
+// setup avatar chips
+document.querySelectorAll('#gamePetChips .chip').forEach(c => {
+  if (c.dataset.pet === selectedGameAvatar) c.classList.add('active');
+  else c.classList.remove('active');
+  c.onclick = () => {
+    selectedGameAvatar = c.dataset.pet;
+    document.querySelectorAll('#gamePetChips .chip').forEach(x => x.classList.remove('active'));
+    c.classList.add('active');
+  };
+});
+
+  function statBar(label, val, icon, color) {
+    const v = Math.round(val||0);
+    const status = v < 30 ? '⚠️' : v < 60 ? '😐' : '✅';
+    return `<div style="margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+        <span style="font-weight:600;color:var(--ink);">${icon} ${label} ${status}</span><span style="color:var(--sub);font-weight:600;">${v}/100</span>
+      </div>
+      <div style="height:10px;background:var(--bg2);border-radius:5px;overflow:hidden;">
+        <div style="height:100%;width:${v}%;background:${color};border-radius:5px;transition:width .5s;opacity:.85;"></div>
+      </div>
+    </div>`;
+}
+
+async function loadGamePet() {
+  if (!UID) {
+    $('petGameStatus').innerHTML = '⚠️ 请先在设置页面注册/登录';
+    $('gameCreateSection').style.display = 'block';
+    $('petGameMain').style.display = 'none';
+    $('petStageBox').style.display = 'none';
+    return;
+  }
+  try {
+    const pets = await api('GET', '/pets?user_id=' + UID);
+    if (Array.isArray(pets) && pets.length > 0) {
+      gamePetId = pets[0].id;
+      gamePetData = pets[0];
+      $('gameCreateSection').style.display = 'none';
+      $('petGameMain').style.display = 'block';
+      $('petStageBox').style.display = 'block';
+      await loadPetStatus();
+      await loadShop();
+    } else {
+      $('gameCreateSection').style.display = 'block';
+      $('petGameMain').style.display = 'none';
+      $('petStageBox').style.display = 'none';
+      $('petGameStatus').innerHTML = '还没有宠物，创建一个吧！';
+    }
+  } catch(e) {
+    $('petGameStatus').innerHTML = '❌ 加载失败: ' + escapeHtml(e.message);
+  }
+}
+
+async function loadPetStatus() {
+  if (!gamePetId) return;
+  try {
+    const status = await api('GET', '/pets/' + gamePetId + '/status');
+    gamePetData = status.pet;
+    renderGamePet(status);
+    renderGameInventory(gamePetData.inventory || []);
+    renderGameMbti(gamePetData.traits || {});
+  } catch(e) {
+    $('petGameStatus').innerHTML = '❌ ' + escapeHtml(e.message);
+  }
+}
+
+function renderGamePet(status) {
+  const pet = status.pet;
+  const cs = pet.careState || {};
+  const stage = pet.stage || 'egg';
+  const avatarEmoji = pet.hatched ? (AVATAR_EMOJI[pet.avatarKey] || '🐾') : '🥚';
+
+  $('gamePetAvatar').textContent = avatarEmoji;
+  $('gamePetName').textContent = escapeHtml(pet.name || '???');
+  $('gamePetStage').textContent = STAGE_NAMES[stage] || stage;
+  $('gamePetLevel').textContent = `Lv.${pet.level || 1}`;
+  $('gamePetCoins').textContent = `💰 ${pet.coins ?? 100}`;
+
+  $('gameStatsBars').innerHTML =
+    statBar('饱食度', cs.satiety, '🍔', '#ff8a65') +
+    statBar('清洁度', cs.cleanliness, '🧼', '#26c6da') +
+    statBar('心情', cs.mood, '😊', '#ffd54f') +
+    statBar('亲密度', cs.intimacy, '💝', '#ec407a') +
+    statBar('精力', cs.energy, '⚡', '#66bb6a') +
+    statBar('健康', cs.health, '❤️', '#ef5350') +
+    `<div style="margin-top:8px;font-size:12px;color:var(--gold);">成长值: ${pet.growthPoints ?? 0} / ${(pet.level||1)*100}</div>`;
+
+  // alerts
+  const alerts = [];
+  if (status.isHungry) alerts.push('🍔 宠物饿了，快喂食！');
+  if (status.isDirty) alerts.push('🧼 宠物脏了，该洗澡了！');
+  if (status.isSad) alerts.push('😢 宠物心情不好，陪它玩玩吧~');
+  if (status.isTired) alerts.push('😴 宠物累了，让它休息一下');
+  if (status.isSick) alerts.push('🤒 宠物生病了！需要治疗！');
+  $('gameAlertMsg').innerHTML = alerts.length ? `<div style="color:var(--red);">${alerts.join(' ')}</div>` : `<div style="color:var(--green);">${escapeHtml(status.decaySummary||'状态良好~')}</div>`;
+
+  // hatch button visibility
+  $('hatchBtn').style.display = stage === 'egg' ? '' : 'none';
+
+  // status text
+  $('petGameStatus').innerHTML = `<span style="color:var(--sub);">${escapeHtml(pet.name||'宠物')} · ${STAGE_NAMES[stage]||stage} · Lv.${pet.level||1}</span>`;
+
+  // Update animation stage
+  renderPetAnimation(pet, cs);
+}
+
+// ==================== Pet Animation ====================
+const PET_MOOD_EMOJIS = [
+  { max:20, emoji:'😭', label:'难过' },
+  { max:40, emoji:'😕', label:'低落' },
+  { max:60, emoji:'😐', label:'一般' },
+  { max:80, emoji:'😊', label:'开心' },
+  { max:100, emoji:'🥰', label:'幸福' },
+];
+const PET_HUNGRY_EMOJI = '🤤';
+const PET_DIRTY_EMOJI = '🤢';
+const PET_SICK_EMOJI = '🤒';
+const PET_SLEEP_EMOJI = '😴';
+
+function getMoodEmoji(mood, isSleeping, isHungry, isDirty, isSick) {
+  if (isSick) return PET_SICK_EMOJI;
+  if (isSleeping) return PET_SLEEP_EMOJI;
+  if (isDirty) return PET_DIRTY_EMOJI;
+  if (isHungry) return PET_HUNGRY_EMOJI;
+  for (const m of PET_MOOD_EMOJIS) { if ((mood||0) <= m.max) return m.emoji; }
+  return '😀';
+}
+
+function renderPetAnimation(pet, cs) {
+  const box = $('petStageBox');
+  if (!box) return;
+  box.style.display = 'block';
+
+  const stage = pet.stage || 'egg';
+  const avatarEmoji = pet.hatched ? (AVATAR_EMOJI[pet.avatarKey] || '🐾') : '🥚';
+
+  // HUD
+  $('petAnimName').textContent = pet.name || '???';
+  $('petAnimStage').textContent = STAGE_NAMES[stage] || stage;
+  $('petAnimLevel').textContent = `Lv.${pet.level||1}`;
+  $('petAnimCoins').textContent = `💰 ${pet.coins ?? 100}`;
+
+  const isHungry = (cs.satiety||0) < 30;
+  const isDirty = (cs.cleanliness||0) < 30;
+  const isSick = (cs.health||0) < 30;
+  const isTired = (cs.energy||0) < 20;
+  const isSleeping = isTired && !isHungry;
+  $('petAnimMoodEmoji').textContent = getMoodEmoji(cs.mood, isSleeping, isHungry, isDirty, isSick);
+
+  // Sprite
+  const img = $('petSpriteImg');
+  img.textContent = avatarEmoji;
+
+  // Sleeping indicator
+  const zzz = $('petZzz');
+  if (isSleeping) { zzz.classList.add('show'); img.classList.add('sleeping'); }
+  else { zzz.classList.remove('show'); img.classList.remove('sleeping'); }
+
+  // Quick bars
+  const bars = [
+    { label:'饱食', val: cs.satiety||0, color:'#ff8a65', icon:'🍔' },
+    { label:'清洁', val: cs.cleanliness||0, color:'#26c6da', icon:'🧼' },
+    { label:'心情', val: cs.mood||0, color:'#ffd54f', icon:'😊' },
+    { label:'精力', val: cs.energy||0, color:'#66bb6a', icon:'⚡' },
+    { label:'健康', val: cs.health||0, color:'#ef5350', icon:'❤️' },
+  ];
+  $('petQuickBars').innerHTML = bars.map(b => {
+    const v = Math.round(b.val);
+    return `<div class="pet-quick-bar">
+      <div class="pet-quick-bar-label"><span>${b.icon}${b.label}</span><span>${v}</span></div>
+      <div class="pet-quick-bar-track"><div class="pet-quick-bar-fill" style="width:${v}%;background:${b.color};"></div></div>
+    </div>`;
+  }).join('');
+}
+
+function showPetEmote(emoji) {
+  const scene = $('petScene');
+  if (!scene) return;
+  const el = document.createElement('div');
+  el.className = 'pet-emote';
+  el.textContent = emoji;
+  const sprite = $('petSprite');
+  if (sprite) {
+    const rect = sprite.getBoundingClientRect();
+    const sceneRect = scene.getBoundingClientRect();
+    el.style.left = (rect.left - sceneRect.left + rect.width/2 - 12) + 'px';
+    el.style.top = (rect.top - sceneRect.top - 10) + 'px';
+  } else {
+    el.style.left = '50%'; el.style.top = '40%';
+  }
+  scene.appendChild(el);
+  setTimeout(() => el.remove(), 1500);
+}
+
+function setPetAnimClass(cls, duration) {
+  const img = $('petSpriteImg');
+  if (!img) return;
+  // Remove all anim classes
+  img.classList.remove('bouncing','eating','playing','sleeping','happy','shaking');
+  if (cls) {
+    img.classList.add(cls);
+    if (duration) setTimeout(() => img.classList.remove(cls), duration);
+  }
+}
+
+let petTapCount = 0;
+function onPetTap() {
+  petTapCount++;
+  const taps = ['bouncing','happy','shaking'];
+  const cls = taps[petTapCount % taps.length];
+  setPetAnimClass(cls, 600);
+  const emotes = ['💕','✨','🎶','⭐','💙'];
+  showPetEmote(emotes[petTapCount % emotes.length]);
+
+  // Every 5th tap, trigger pet_head care action
+  if (petTapCount % 5 === 0 && gamePetId) {
+    api('POST', '/pets/' + gamePetId + '/care', { action: 'pet_head' }).then(() => {
+      showPetEmote('💛');
+      loadPetStatus();
+    }).catch(()=>{});
+  }
+}
+
+function renderGameInventory(inventory) {
+  if (!inventory || inventory.length === 0) {
+    $('gameInventory').innerHTML = '<div style="color:var(--sub);font-size:13px;">背包空空如也，去商店看看吧~</div>';
+    return;
+  }
+  $('gameInventory').innerHTML = inventory.map(item => `
+    <div class="inventory-slot"
+         onclick="useItem('${escapeHtml(item.itemId)}')" title="点击使用">
+      <div style="font-size:28px;">${item.icon || '📦'}</div>
+      <div style="font-size:12px;margin-top:2px;font-weight:600;color:var(--ink);">${escapeHtml(item.name)}</div>
+      <div style="font-size:11px;color:var(--gold);font-weight:700;">×${item.quantity}</div>
+    </div>
+  `).join('');
+}
+
+async function loadShop() {
+  try {
+    const items = await api('GET', '/shop/items');
+    $('shopItems').innerHTML = items.map(s => `
+      <div class="shop-item-card">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+          <span style="font-size:28px;">${s.icon}</span>
+          <div>
+            <div style="font-size:14px;font-weight:700;color:var(--ink);">${escapeHtml(s.name)}</div>
+            <div style="font-size:11px;color:var(--sub);">${escapeHtml(s.category)}</div>
+          </div>
+        </div>
+        <div style="font-size:12px;color:var(--sub);margin-bottom:8px;">${escapeHtml(s.description)}</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="color:var(--gold);font-size:14px;font-weight:700;">💰 ${s.price}</span>
+          <button onclick="buyItem('${escapeHtml(s.itemId)}')" style="padding:6px 16px;font-size:12px;">购买</button>
+        </div>
+      </div>
+    `).join('');
+  } catch(e) {
+    $('shopItems').innerHTML = '<div style="color:var(--sub);">商店加载失败</div>';
+  }
+}
+
+async function petCare(action) {
+  if (!gamePetId) { toast('⚠️ 请先创建宠物'); return; }
+  try {
+    const r = await api('POST', '/pets/' + gamePetId + '/care', { action });
+    gamePetData = r;
+    const names = { feed:'喂食', bathe:'洗澡', play:'玩耍', pet_head:'摸头', rest:'休息', hatch:'孵化' };
+    toast(`✅ ${names[action]||action} 成功！`);
+
+    // Trigger animation
+    if (action === 'feed') { setPetAnimClass('eating', 1500); showPetEmote('🍽️'); }
+    else if (action === 'bathe') { setPetAnimClass('shaking', 900); showPetEmote('🧼'); }
+    else if (action === 'play') { setPetAnimClass('playing', 2000); showPetEmote('🎾'); }
+    else if (action === 'rest') { setPetAnimClass('sleeping', 0); showPetEmote('💤'); }
+    else if (action === 'hatch') {
+      toast(`🎉 恭喜！宠物孵化了！`);
+      setPetAnimClass('bouncing', 800);
+      showPetEmote('🎉');
+    }
+    else { setPetAnimClass('happy', 1200); showPetEmote('💛'); }
+
+    await loadPetStatus();
+  } catch(e) {
+    toast('❌ ' + e.message);
+  }
+}
+
+async function useItem(itemId) {
+  if (!gamePetId) return;
+  try {
+    const r = await api('POST', '/pets/' + gamePetId + '/use-item', { itemId });
+    toast('✅ 使用成功！');
+    await loadPetStatus();
+  } catch(e) {
+    toast('❌ ' + e.message);
+  }
+}
+
+async function buyItem(itemId) {
+  if (!gamePetId) { toast('⚠️ 请先创建宠物'); return; }
+  try {
+    const r = await api('POST', '/pets/' + gamePetId + '/buy', { itemId, quantity:1 });
+    toast('✅ 购买成功！');
+    await loadPetStatus();
+  } catch(e) {
+    toast('❌ ' + e.message);
+  }
+}
+
+async function dailyReward() {
+  if (!gamePetId) { toast('⚠️ 请先创建宠物'); return; }
+  try {
+    const r = await api('GET', '/pets/' + gamePetId + '/daily-reward');
+    toast(`🎁 签到成功！+${r.coinsAwarded} 金币`);
+    await loadPetStatus();
+  } catch(e) {
+    toast('❌ ' + e.message);
+  }
+}
+
+async function createGamePet() {
+  if (!requireUid()) return;
+  const name = $('gamePetNameInput').value.trim() || '星宝';
+  const mbti = $('authMbti').value || 'INFJ';
+  try {
+    const traits = mbtiToTraits(mbti);
+    const r = await api('POST', '/pets', {
+      userId: UID,
+      name: name,
+      avatarKey: selectedGameAvatar,
+      traits: traits,
+    });
+    localStorage.setItem('pet_avatar', selectedGameAvatar);
+    localStorage.setItem('pet_id', r.id);
+    gamePetId = r.id;
+    toast('🐾 宠物 ' + escapeHtml(name) + ' 已创建！');
+    await loadGamePet();
+  } catch(e) {
+    $('gameCreateResult').innerHTML = '<div class="output">❌ ' + escapeHtml(e.message) + '</div>';
+    toast('❌ 创建失败: ' + e.message);
+  }
+}
+
+function renderGameMbti(traits) {
+  const ei = traits.eI ?? traits.e_i ?? 50;
+  const sn = traits.sN ?? traits.s_n ?? 50;
+  const tf = traits.tF ?? traits.t_f ?? 50;
+  const jp = traits.jP ?? traits.j_p ?? 50;
+  $('gameMbtiSliders').innerHTML = `
+    <div style="margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;"><span>E 外向</span><span>${ei}</span><span>I 内向</span></div>
+      <input type="range" min="0" max="100" value="${ei}" id="slider_ei" style="width:100%;" oninput="this.previousElementChild.children[1].textContent=this.value">
+    </div>
+    <div style="margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;"><span>S 实感</span><span>${sn}</span><span>N 直觉</span></div>
+      <input type="range" min="0" max="100" value="${sn}" id="slider_sn" style="width:100%;" oninput="this.previousElementChild.children[1].textContent=this.value">
+    </div>
+    <div style="margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;"><span>T 思考</span><span>${tf}</span><span>F 情感</span></div>
+      <input type="range" min="0" max="100" value="${tf}" id="slider_tf" style="width:100%;" oninput="this.previousElementChild.children[1].textContent=this.value">
+    </div>
+    <div style="margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;"><span>J 判断</span><span>${jp}</span><span>P 感知</span></div>
+      <input type="range" min="0" max="100" value="${jp}" id="slider_jp" style="width:100%;" oninput="this.previousElementChild.children[1].textContent=this.value">
+    </div>
+  `;
+}
+
+async function saveMbtiFromGame() {
+  if (!gamePetId) return;
+  const traits = {
+    eI: parseInt($('slider_ei').value),
+    sN: parseInt($('slider_sn').value),
+    tF: parseInt($('slider_tf').value),
+    jP: parseInt($('slider_jp').value),
+  };
+  try {
+    await api('PATCH', '/pets/' + gamePetId + '/traits', traits);
+    toast('✅ 性格参数已保存');
+    await loadPetStatus();
+  } catch(e) {
+    toast('❌ ' + e.message);
+  }
+}
+
+// Auto-refresh pet status every 60s when on pet game tab
+setInterval(() => {
+  if ($('panel-petgame') && $('panel-petgame').classList.contains('active') && gamePetId) {
+    loadPetStatus();
+  }
+}, 60000);
+
+// ==================== UI Polish: ripple + range fill ====================
+(function enhanceUI() {
+  function addRipple(e) {
+    var el = e.currentTarget, rect = el.getBoundingClientRect();
+    var size = Math.max(rect.width, rect.height);
+    var span = document.createElement('span');
+    span.className = 'ripple-span';
+    span.style.width = span.style.height = size + 'px';
+    span.style.left = (e.clientX - rect.left - size / 2) + 'px';
+    span.style.top = (e.clientY - rect.top - size / 2) + 'px';
+    el.appendChild(span);
+    setTimeout(function(){ span.remove(); }, 650);
+  }
+  function bindRipples() {
+    document.querySelectorAll('button, .btn, .chip, .nav-item, .mood-btn, .div-mode-btn, .mbti-entry, .mbti-q-option, .like-btn, .feed-item, .shop-item-card, .inventory-slot, .stat-tile, .div-back-btn').forEach(function(el){
+      if (el._rippleBound) return;
+      el._rippleBound = true;
+      el.addEventListener('pointerdown', addRipple);
+    });
+  }
+  function updateRangeFill(el) {
+    var min = parseFloat(el.min) || 0, max = parseFloat(el.max) || 100, val = parseFloat(el.value);
+    el.style.setProperty('--pct', ((val - min) / (max - min)) * 100 + '%');
+  }
+  function bindRanges() {
+    document.querySelectorAll('input[type=range]').forEach(function(el){
+      if (el._rangeBound) return;
+      el._rangeBound = true;
+      updateRangeFill(el);
+      el.addEventListener('input', function(){ updateRangeFill(el); });
+    });
+  }
+  function rebind(){ bindRipples(); bindRanges(); }
+  document.addEventListener('DOMContentLoaded', rebind);
+  if ('MutationObserver' in window) {
+    var mo = new MutationObserver(function(){ rebind(); });
+    document.addEventListener('DOMContentLoaded', function(){ mo.observe(document.body, { childList: true, subtree: true }); });
+  }
+  rebind();
+})();
+
+// ==================== 水晶球语音测试 Tab ====================
+const CB_MODE_NAMES = { standby:'待机', whitenoise:'白噪音', breathing:'呼吸引导', meditation:'冥想', divination:'占卜', alarm:'唤醒闹钟' };
+const CB_MODE_COLORS = {
+  standby:    {hi:'#8a8aa0',mid:'#5a5a7e',lo:'#2a2a4a',glow:'rgba(138,138,160,.3)'},
+  whitenoise: {hi:'#7ea8b8',mid:'#4e7e8e',lo:'#2a4a5a',glow:'rgba(126,168,184,.4)'},
+  breathing:  {hi:'#8fc4a8',mid:'#5e9e7e',lo:'#2a5a3a',glow:'rgba(143,196,168,.4)'},
+  meditation: {hi:'#8e6ea8',mid:'#5e3e7e',lo:'#2a1a4a',glow:'rgba(142,110,168,.5)'},
+  divination: {hi:'#b88ea8',mid:'#8e5e7e',lo:'#4a2a4a',glow:'rgba(184,142,168,.5)'},
+  alarm:      {hi:'#e0b568',mid:'#b08540',lo:'#5a4020',glow:'rgba(224,181,104,.5)'},
+};
+let cbWs = null, cbMicStream = null, cbRecorder = null, cbChunks = [], cbRecording = false;
+let cbAiSpeaking = false, cbAudioCtx = null, cbTtsSource = null;
+let cbChatAbort = null, cbTtsAbort = null;
+let cbWebSpeech = null, cbWebSpeechResult = '', cbInited = false;
+// VAD（语音活动检测）—— 静音 1.5s 自动结束录音
+let cbVadAnalyser = null, cbVadInterval = null, cbVadSilenceStart = 0, cbUserSpeaking = false;
+
+function cbInit(){
+  if (cbInited) { cbConnectWs(); return; }
+  cbInited = true;
+  cbConnectWs();
+  // 触屏长按麦克风
+  const btn = $('cbMicBtn');
+  btn.addEventListener('touchstart', async e => { e.preventDefault(); if(!cbRecording) await cbStartMic(); });
+  btn.addEventListener('touchend', e => { e.preventDefault(); if(cbRecording) cbStopMic(); });
+}
+
+function cbConnectWs(){
+  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  cbWs = new WebSocket(proto + '://' + location.host + '/ws/crystal');
+  cbWs.onopen = () => { $('cbConnStatus').innerHTML = '<span style="color:var(--green)">● 已连接</span>'; };
+  cbWs.onmessage = e => {
+    try { cbRenderState(JSON.parse(e.data)); } catch(_){}
+  };
+  cbWs.onclose = () => {
+    $('cbConnStatus').innerHTML = '<span style="color:var(--sub2)">● 重连中</span>';
+    setTimeout(cbConnectWs, 2000);
+  };
+  cbWs.onerror = () => { try{cbWs.close();}catch(_){} };
+}
+
+function cbRenderState(s){
+  const mode = s.mode || 'standby';
+  const c = CB_MODE_COLORS[mode] || CB_MODE_COLORS.standby;
+  const ball = $('crystalBall');
+  ball.style.setProperty('--cb-hi', c.hi);
+  ball.style.setProperty('--cb-mid', c.mid);
+  ball.style.setProperty('--cb-lo', c.lo);
+  ball.style.setProperty('--cb-glow', c.glow);
+  ball.classList.toggle('cb-listening', !!s.listening && !cbAiSpeaking);
+  ball.classList.toggle('cb-speaking', cbAiSpeaking);
+  $('cbModeName').textContent = CB_MODE_NAMES[mode] || mode;
+  $('cbStatus').textContent = cbAiSpeaking ? '水晶球在说话…（说话可打断）' :
+                              s.listening ? '我在听…' :
+                              s.ai_thinking ? '魔法涌动中…' : '轻触麦克风开始对话';
+  // ESP32 摇杆按键事件触发：listening=true 且当前没在录音 → 自动启动浏览器麦克风
+  // （完整链路：摇杆按下 → ESP32 POST /device/state → 网关 WS 广播 → 浏览器自动录音 → ASR → LLM → TTS）
+  if (s.listening && !cbRecording && !cbAiSpeaking) {
+    console.log('[Crystal] joystick press → auto start mic');
+    cbStartMic();
+  }
+  // 摇杆松开：listening=false 且当前在录音 → 自动停止并发送
+  if (!s.listening && cbRecording) {
+    console.log('[Crystal] joystick release → auto stop mic');
+    cbStopMic();
+  }
+}
+
+function cbAddBubble(role, text, streaming){
+  const d = $('cbDialog');
+  const b = document.createElement('div');
+  b.style.cssText = 'max-width:85%;padding:10px 14px;border-radius:16px;font-size:14px;line-height:1.6;word-break:break-word;opacity:0;animation:cbFade .3s forwards;align-self:' + (role==='user'?'flex-end':'flex-start') + ';background:' + (role==='user'?'rgba(184,168,232,.2)':'rgba(255,255,255,.06)') + ';border:1px solid ' + (role==='user'?'rgba(184,168,232,.3)':'rgba(255,255,255,.1)') + ';';
+  b.textContent = text;
+  if (streaming) b.classList.add('cb-streaming');
+  d.appendChild(b);
+  d.scrollTop = d.scrollHeight;
+  return b;
+}
+
+async function cbToggleMic(){
+  if (cbRecording) cbStopMic();
+  else await cbStartMic();
+}
+
+async function cbStartMic(){
+  try {
+    cbMicStream = await navigator.mediaDevices.getUserMedia({audio:{channelCount:1,echoCancellation:true,noiseSuppression:true}});
+  } catch(e) { $('cbStatus').textContent = '⚠️ 麦克风权限被拒'; return; }
+  cbChunks = [];
+  const mime = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/webm';
+  cbRecorder = new MediaRecorder(cbMicStream, {mimeType:mime});
+  cbRecorder.ondataavailable = e => { if(e.data.size>0) cbChunks.push(e.data); };
+  cbRecorder.onstop = () => cbHandleRecorded();
+  cbRecorder.start();
+  cbRecording = true;
+  $('cbMicBtn').classList.add('recording');
+  $('cbMicBtn').textContent = '⏹ 松开发送';
+  $('crystalBall').classList.add('cb-listening');
+  $('cbStatus').textContent = '🎤 我在听…（说完松开或静音自动结束）';
+  // 同步起 Web Speech 识别（作为 ASR，无需 key）
+  cbInitWebSpeech();
+  // 启动 VAD：检测静音 1.5s 自动结束录音
+  cbStartVAD();
+}
+
+/* VAD：基于频谱能量的语音活动检测。说话→静音 1.5s 自动结束录音。 */
+function cbStartVAD(){
+  if (!cbMicStream) return;
+  if (!cbAudioCtx || cbAudioCtx.state === 'closed') {
+    cbAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  const source = cbAudioCtx.createMediaStreamSource(cbMicStream);
+  cbVadAnalyser = cbAudioCtx.createAnalyser();
+  cbVadAnalyser.fftSize = 512;
+  source.connect(cbVadAnalyser);
+  const data = new Uint8Array(cbVadAnalyser.frequencyBinCount);
+  cbVadSilenceStart = 0;
+  cbUserSpeaking = false;
+  cbVadInterval = setInterval(() => {
+    if (!cbVadAnalyser) return;
+    cbVadAnalyser.getByteFrequencyData(data);
+    let sum = 0;
+    for (let i = 0; i < data.length; i++) sum += data[i];
+    const avg = sum / data.length;
+    const speaking = avg > 15;  // 阈值（与 crystal-ball.html 一致）
+    if (speaking) {
+      cbUserSpeaking = true;
+      cbVadSilenceStart = 0;
+    } else if (cbUserSpeaking) {
+      // 进入静音
+      if (cbVadSilenceStart === 0) cbVadSilenceStart = Date.now();
+      else if (Date.now() - cbVadSilenceStart > 1500) {
+        // 静音 1.5s，自动结束
+        console.log('[VAD] silence detected, auto-stop');
+        cbStopMic();
+      }
+    }
+  }, 100);
+}
+
+function cbStopVAD(){
+  if (cbVadInterval) { clearInterval(cbVadInterval); cbVadInterval = null; }
+  cbVadAnalyser = null;
+  cbVadSilenceStart = 0;
+  cbUserSpeaking = false;
+}
+
+function cbInitWebSpeech(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return;
+  cbWebSpeech = new SR();
+  cbWebSpeech.lang = 'zh-CN';
+  cbWebSpeech.continuous = true;
+  cbWebSpeech.interimResults = false;
+  cbWebSpeech.onresult = e => { for(let i=e.resultIndex;i<e.results.length;i++) if(e.results[i].isFinal) cbWebSpeechResult += e.results[i][0].transcript; };
+  cbWebSpeechResult = '';
+  try { cbWebSpeech.start(); } catch(_){}
+}
+
+async function cbStopMic(){
+  if (!cbRecording) return;
+  cbRecording = false;
+  $('cbMicBtn').classList.remove('recording');
+  $('cbMicBtn').textContent = '🎤 按住说话';
+  $('crystalBall').classList.remove('cb-listening');
+  cbStopVAD();
+  if (cbWebSpeech) { try{cbWebSpeech.stop();}catch(_){} }
+  if (cbRecorder && cbRecorder.state !== 'inactive') cbRecorder.stop();
+  if (cbMicStream) { cbMicStream.getTracks().forEach(t=>t.stop()); cbMicStream = null; }
+}
+
+async function cbHandleRecorded(){
+  // 优先用 Web Speech 结果，无则试后端 ASR
+  let text = (cbWebSpeechResult || '').trim();
+  cbWebSpeechResult = '';
+  if (!text && cbChunks.length > 0) {
+    const blob = new Blob(cbChunks, {type:'audio/webm'});
+    if (blob.size > 1000) {
+      try {
+        const fd = new FormData();
+        fd.append('audio', blob, 'speech.webm');
+        const r = await fetch(GW + '/voice/asr', {method:'POST', body:fd});
+        if (r.ok) { const d = await r.json(); text = (d.text||'').trim(); }
+      } catch(e){}
+    }
+  }
+  if (!text) { $('cbStatus').textContent = '没听清，请再说一次'; return; }
+  if (cbAiSpeaking) cbInterrupt();
+  cbAddBubble('user', text);
+  await cbStreamChatAndSpeak(text);
+}
+
+async function cbStreamChatAndSpeak(userText){
+  $('cbStatus').textContent = '✨ 魔法涌动中…';
+  $('cbThinking').style.display = 'flex';
+  const bubble = cbAddBubble('ai', '', true);
+  let full = '', buf = '';
+  const queue = [];
+  cbChatAbort = new AbortController();
+  cbTtsAbort = new AbortController();
+  try {
+    const resp = await fetch(GW + '/voice/chat-stream', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({messages:[
+        {role:'system', content:'你是好梦魔法水晶球，灌注睡眠魔法的魔法水晶球。说话温柔神秘带睡意，2-4句适合语音播报。绝不承认是AI/程序。'},
+        {role:'user', content:userText}
+      ]}),
+      signal: cbChatAbort.signal
+    });
+    if (!resp.ok) throw new Error('LLM HTTP ' + resp.status);
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let sbuf = '';
+    while(true){
+      const {value, done} = await reader.read();
+      if (done) break;
+      sbuf += decoder.decode(value, {stream:true});
+      const parts = sbuf.split('\n\n');
+      sbuf = parts.pop() || '';
+      for (const part of parts) {
+        const line = part.split('\n').find(l => l.startsWith('data:'));
+        if (!line) continue;
+        const data = line.slice(5).trim();
+        if (data === '[DONE]') continue;
+        try {
+          const delta = JSON.parse(data).delta || '';
+          if (delta) {
+            full += delta; buf += delta;
+            bubble.textContent = full;
+            $('cbDialog').scrollTop = $('cbDialog').scrollHeight;
+            if (/[。！？!?]/.test(buf) && buf.length > 5) {
+              queue.push(buf); buf = '';
+              if (!cbAiSpeaking) cbPlayTts(queue, cbTtsAbort);
+            }
+          }
+        } catch(_){}
+      }
+    }
+    if (buf.trim()) { queue.push(buf); if(!cbAiSpeaking) cbPlayTts(queue, cbTtsAbort); }
+    bubble.classList.remove('cb-streaming');
+    $('cbThinking').style.display = 'none';
+    if (queue.length > 0 || cbAiSpeaking) {
+      $('cbStatus').textContent = '🔮 水晶球在说话…（说话可打断）';
+      await new Promise(r => { const t = setInterval(()=>{ if(queue.length===0 && !cbAiSpeaking){clearInterval(t);r();} }, 200); });
+    }
+    $('cbStatus').textContent = '说完了，轻触麦克风继续';
+  } catch(e) {
+    bubble.textContent = e.name==='AbortError' ? full + ' [已打断]' : '❌ ' + e.message;
+    bubble.classList.remove('cb-streaming');
+    $('cbThinking').style.display = 'none';
+    $('cbStatus').textContent = '出错了';
+  }
+}
+
+async function cbPlayTts(queue, abortCtrl){
+  if (queue.length === 0 || abortCtrl.signal.aborted) { cbAiSpeaking = false; $('crystalBall').classList.remove('cb-speaking'); return; }
+  const sentence = queue.shift();
+  if (!sentence || !sentence.trim()) { cbPlayTts(queue, abortCtrl); return; }
+  cbAiSpeaking = true;
+  $('crystalBall').classList.add('cb-speaking');
+  $('crystalBall').classList.remove('cb-listening');
+  $('cbStatus').textContent = '🔮 水晶球在说话…（说话可打断）';
+  // 先试 ElevenLabs 后端 TTS，失败降级浏览器原生
+  const ok = await cbTryServerTts(sentence, abortCtrl);
+  if (!ok && !abortCtrl.signal.aborted) await cbNativeTts(sentence, abortCtrl);
+  if (!abortCtrl.signal.aborted) cbPlayTts(queue, abortCtrl);
+}
+
+async function cbTryServerTts(text, abortCtrl){
+  try {
+    const resp = await fetch(GW + '/voice/tts', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({text}),
+      signal: abortCtrl.signal
+    });
+    if (!resp.ok) return false;
+    const arr = await resp.arrayBuffer();
+    if (arr.byteLength < 1000) return false;
+    if (abortCtrl.signal.aborted) return true;
+    if (!cbAudioCtx || cbAudioCtx.state === 'closed') cbAudioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    const audioBuf = await cbAudioCtx.decodeAudioData(arr);
+    if (!audioBuf) return false;
+    return await new Promise(resolve => {
+      try {
+        cbTtsSource = cbAudioCtx.createBufferSource();
+        cbTtsSource.buffer = audioBuf;
+        cbTtsSource.connect(cbAudioCtx.destination);
+        cbTtsSource.onended = () => { cbTtsSource = null; resolve(true); };
+        cbTtsSource.start();
+      } catch(e) { resolve(false); }
+    });
+  } catch(e) { return e.name === 'AbortError' ? true : false; }
+}
+
+async function cbNativeTts(text, abortCtrl){
+  if (!('speechSynthesis' in window)) return;
+  return new Promise(resolve => {
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'zh-CN'; u.rate = 0.95; u.pitch = 1.1;
+    const vs = speechSynthesis.getVoices();
+    const zh = vs.find(v => v.lang.startsWith('zh') && /female|女/i.test(v.name)) || vs.find(v => v.lang.startsWith('zh'));
+    if (zh) u.voice = zh;
+    u.onend = () => resolve();
+    u.onerror = () => resolve();
+    if (abortCtrl.signal.aborted) { resolve(); return; }
+    abortCtrl.signal.addEventListener('abort', () => { speechSynthesis.cancel(); resolve(); }, {once:true});
+    speechSynthesis.speak(u);
+  });
+}
+
+function cbInterrupt(){
+  if (cbChatAbort) cbChatAbort.abort();
+  if (cbTtsAbort) cbTtsAbort.abort();
+  if (cbTtsSource) { try{cbTtsSource.stop();}catch(_){} cbTtsSource = null; }
+  cbAiSpeaking = false;
+  $('crystalBall').classList.remove('cb-speaking');
+  // 显示打断提示 toast
+  const toast = $('cbInterruptToast');
+  if (toast) {
+    toast.style.opacity = '1';
+    setTimeout(() => { toast.style.opacity = '0'; }, 1500);
+  }
+}
+
+async function cbSendCmd(cmd, params){
+  try {
+    await fetch(GW + '/device/command', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(Object.assign({cmd}, params || {}))
+    });
+    toast('已发送：' + cmd);
+  } catch(e) { toast('发送失败'); }
+}
+
+/* ==================== 硬件模拟器（无真硬件时调试 PS2 摇杆链路）==================== */
+// 模拟 ESP32 固件 POST /device/state 上报模式切换/语音状态变化
+const HW_MODES = ['standby','whitenoise','breathing','meditation','divination','alarm'];
+let hwCurrentModeIdx = 0;
+
+async function hwSimPostState(payload){
+  try {
+    await fetch(GW + '/device/state', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(Object.assign({device_id:'crystal_ball_01'}, payload))
+    });
+  } catch(e) { console.warn('[HWSim] POST /device/state failed', e); }
+}
+
+async function hwSimMode(dir){
+  if (dir === 'next') hwCurrentModeIdx = (hwCurrentModeIdx + 1) % HW_MODES.length;
+  else hwCurrentModeIdx = (hwCurrentModeIdx - 1 + HW_MODES.length) % HW_MODES.length;
+  const newMode = HW_MODES[hwCurrentModeIdx];
+  console.log('[HWSim] joystick → switch mode:', newMode);
+  await hwSimPostState({mode:newMode, listening:false, led:'white', ai_thinking:false});
+  toast('🎮 模式切换：' + (CB_MODE_NAMES[newMode] || newMode));
+}
+
+async function hwSimVoiceStart(){
+  const btn = $('hwSimVoiceBtn');
+  if (btn) { btn.classList.add('recording'); btn.textContent = '🎙 松开结束'; }
+  console.log('[HWSim] joystick pressed → listening=true');
+  await hwSimPostState({mode:HW_MODES[hwCurrentModeIdx], listening:true, led:'blue', ai_thinking:false});
+}
+
+async function hwSimVoiceStop(){
+  const btn = $('hwSimVoiceBtn');
+  if (btn) { btn.classList.remove('recording'); btn.textContent = '🎙 按住说话'; }
+  console.log('[HWSim] joystick released → listening=false');
+  await hwSimPostState({mode:HW_MODES[hwCurrentModeIdx], listening:false, led:'white', ai_thinking:false});
+}
+
+// ==================== Boot ====================
+init();
+</script>
+</body>
+</html>

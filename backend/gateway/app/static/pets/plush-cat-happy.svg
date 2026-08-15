@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- Plush Cat - happy expression -->
+  <defs>
+    <radialGradient id="catBody" cx="50%" cy="40%">
+      <stop offset="0%" stop-color="#FBB040"/>
+      <stop offset="100%" stop-color="#E8841C"/>
+    </radialGradient>
+    <radialGradient id="catBelly" cx="50%" cy="50%">
+      <stop offset="0%" stop-color="#FFE0B2"/>
+      <stop offset="100%" stop-color="#FFCC80"/>
+    </radialGradient>
+  </defs>
+  <!-- Ears -->
+  <path d="M55 55 L40 25 L72 48 Z" fill="url(#catBody)" stroke="#D4701A" stroke-width="2"/>
+  <path d="M145 55 L160 25 L128 48 Z" fill="url(#catBody)" stroke="#D4701A" stroke-width="2"/>
+  <path d="M55 50 L48 35 L65 46 Z" fill="#FFB74D" opacity="0.6"/>
+  <path d="M145 50 L152 35 L135 46 Z" fill="#FFB74D" opacity="0.6"/>
+  <!-- Head -->
+  <ellipse cx="100" cy="80" rx="52" ry="48" fill="url(#catBody)" stroke="#D4701A" stroke-width="2"/>
+  <!-- Belly patch -->
+  <ellipse cx="100" cy="90" rx="35" ry="30" fill="url(#catBelly)" opacity="0.5"/>
+  <!-- Eyes (happy, curved) -->
+  <path d="M72 78 Q80 68 88 78" fill="none" stroke="#3E2723" stroke-width="4" stroke-linecap="round"/>
+  <path d="M112 78 Q120 68 128 78" fill="none" stroke="#3E2723" stroke-width="4" stroke-linecap="round"/>
+  <!-- Cheeks -->
+  <circle cx="65" cy="92" r="7" fill="#FF8A65" opacity="0.4"/>
+  <circle cx="135" cy="92" r="7" fill="#FF8A65" opacity="0.4"/>
+  <!-- Nose -->
+  <path d="M95 93 L100 98 L105 93 Z" fill="#E91E63"/>
+  <!-- Mouth (happy smile) -->
+  <path d="M100 98 Q92 106 86 102" fill="none" stroke="#3E2723" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M100 98 Q108 106 114 102" fill="none" stroke="#3E2723" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Whiskers -->
+  <line x1="45" y1="95" x2="62" y2="96" stroke="#D4701A" stroke-width="1.5" opacity="0.6"/>
+  <line x1="45" y1="100" x2="62" y2="100" stroke="#D4701A" stroke-width="1.5" opacity="0.6"/>
+  <line x1="138" y1="96" x2="155" y2="95" stroke="#D4701A" stroke-width="1.5" opacity="0.6"/>
+  <line x1="138" y1="100" x2="155" y2="100" stroke="#D4701A" stroke-width="1.5" opacity="0.6"/>
+  <!-- Body hint -->
+  <ellipse cx="100" cy="165" rx="60" ry="30" fill="url(#catBody)" stroke="#D4701A" stroke-width="2"/>
+  <!-- Paws -->
+  <ellipse cx="70" cy="185" rx="14" ry="10" fill="url(#catBody)" stroke="#D4701A" stroke-width="2"/>
+  <ellipse cx="130" cy="185" rx="14" ry="10" fill="url(#catBody)" stroke="#D4701A" stroke-width="2"/>
+</svg>

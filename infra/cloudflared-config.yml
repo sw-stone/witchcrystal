@@ -1,0 +1,16 @@
+# cloudflared 配置（token 模式下，credentials 从 TUNNEL_TOKEN 自动解析）
+# 本地 ingress 规则覆盖 Dashboard 远程配置
+tunnel: 19c0df1a-7728-46ec-a66a-427a71b134e4
+
+ingress:
+  # Tarot Aura Web 应用（临时入口，tarot.sh.cn NS 生效前用）
+  - hostname: tarot.shitman666.top
+    service: http://nginx:80
+  # 原有主应用
+  - hostname: mbti.shitman666.top
+    service: http://nginx:80
+  # tarot.sh.cn（NS 迁移到 CF 生效后启用）
+  - hostname: tarot.sh.cn
+    service: http://nginx:80
+  # 兜底
+  - service: http_status:404

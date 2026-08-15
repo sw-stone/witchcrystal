@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#1A1626">
+<meta name="version" content="tarot-aura-v4-soft-lumina">
+<title>Tarot Aura · 星语塔罗</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✦</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400;0,500;1,400;1,500&family=Jost:wght@300;400;500;600&family=Noto+Serif+SC:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* =====================================================================
+   Tarot Aura v4 — Soft Lumina · 珍珠柔光舒缓版
+   Design tokens: Aurora UI + Liquid Glass + Soft UI Evo + Biomimetic
+   Fonts: Bodoni Moda (display/italic) + Jost (body)
+   ===================================================================== */
+:root{
+  /* 01 Color System — 珍珠柔光 */
+  --twilight-0:#2E2A42; --twilight-1:#241F36; --twilight-2:#1A1626; --surface:#3A3450;
+  --lavender:#B8A4E0; --mist:#8B9FD1; --rose:#E8B4A8; --moon:#DBC8A0; --sage:#9BCBB0;
+  --pearl:#DDD4C8; --pearl-2:#C8BFD0; --muted:#8A80A0; --muted-2:#7B6F8A; --dim:#6B6080; --faint:#5A5070;
+  /* Liquid Glass */
+  --glass-bg:rgba(255,255,255,0.05);
+  --glass-bg-2:rgba(255,255,255,0.07);
+  --glass-border:0.5px solid rgba(255,255,255,0.12);
+  --glass-edge-2:rgba(255,255,255,0.22);
+  --glass-shadow:0 8px 32px rgba(0,0,0,0.12);
+  /* Shape */
+  --r-card:24px; --r-btn:20px; --r-tag:12px; --r-sm:16px;
+  /* Spacing grid 24·32·48·80 */
+  /* Motion */
+  --ease-bio:cubic-bezier(0.4,0,0.2,1);
+  --ease-spring:cubic-bezier(0.34,1.56,0.64,1);
+  --ease-out:cubic-bezier(0.22,0.61,0.36,1);
+  --ease-expo:cubic-bezier(0.16,1,0.3,1);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Jost','Inter',"PingFang SC",sans-serif;
+  background:var(--twilight-2);color:var(--pearl);min-height:100vh;
+  font-weight:400;line-height:1.6;-webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+.display{font-family:'Bodoni Moda',Georgia,'Noto Serif SC',serif;font-style:italic;letter-spacing:.5px}
+.mono-up{font-family:'Jost',sans-serif;text-transform:uppercase;letter-spacing:2px}
+
+/* ===== Aurora background (3-layer radial · blur22 · screen blend) ===== */
+.aurora{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;background:radial-gradient(120% 90% at 42% 28%,var(--twilight-0),var(--twilight-1) 35%,var(--twilight-2) 100%)}
+.aurora .blob{position:absolute;border-radius:50%;filter:blur(22px);mix-blend-mode:screen;opacity:.5;will-change:transform}
+.aurora .b1{width:60vw;height:48vw;left:-10vw;top:-8vh;background:radial-gradient(circle,#B8A4E0,transparent 70%);animation:drift1 12s var(--ease-bio) infinite alternate}
+.aurora .b2{width:52vw;height:42vw;right:-8vw;top:18vh;background:radial-gradient(circle,#E8B4A8,transparent 70%);animation:drift2 10s var(--ease-bio) infinite alternate}
+.aurora .b3{width:64vw;height:48vw;left:8vw;bottom:-12vh;background:radial-gradient(circle,#DBC8A0,transparent 70%);animation:drift3 14s var(--ease-bio) infinite alternate}
+@keyframes drift1{from{transform:translate(0,0) scale(1)}to{transform:translate(40px,-20px) scale(1.08)}}
+@keyframes drift2{from{transform:translate(0,0) scale(1)}to{transform:translate(-36px,24px) scale(1.06)}}
+@keyframes drift3{from{transform:translate(0,0) scale(1)}to{transform:translate(28px,-18px) scale(1.1)}}
+
+/* Light particles */
+.particles{position:fixed;inset:0;z-index:1;pointer-events:none}
+.particles span{position:absolute;width:2px;height:2px;border-radius:50%;background:#E8DFFF;opacity:.5;animation:twinkle var(--d,3s) ease-in-out infinite}
+@keyframes twinkle{0%,100%{opacity:.15;transform:scale(.7)}50%{opacity:.8;transform:scale(1.2)}}
+
+/* ===== App shell ===== */
+.app{position:relative;z-index:5;max-width:480px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;padding-bottom:96px}
+.screen{display:none;flex:1;flex-direction:column;padding:0 20px}
+.screen.active{display:flex;animation:screenIn .45s var(--ease-out)}
+@keyframes screenIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+/* ===== Liquid Glass card ===== */
+.glass{
+  background:var(--glass-bg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border:var(--glass-border);border-radius:var(--r-card);box-shadow:var(--glass-shadow);
+  position:relative;overflow:hidden;
+}
+.glass::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--glass-edge-2),transparent 50%,rgba(255,255,255,0.14));opacity:.5;pointer-events:none;border-radius:inherit}
+
+/* Glow divider */
+.glow-div{display:flex;align-items:center;gap:12px;margin:20px 0}
+.glow-div::before,.glow-div::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.08)}
+.glow-div .node{width:6px;height:6px;border-radius:50%;background:var(--moon);box-shadow:0 0 8px var(--moon);opacity:.7}
+
+/* ===== Top bar ===== */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:calc(env(safe-area-inset-top,0px) + 16px) 4px 12px}
+.topbar .brand{font-family:'Bodoni Moda',serif;font-style:italic;font-size:18px;color:var(--pearl);letter-spacing:.5px}
+.topbar .brand small{display:block;font-family:'Jost',sans-serif;font-style:normal;font-size:8px;color:var(--muted-2);letter-spacing:3px;text-transform:uppercase;margin-top:1px}
+.topbar .conn{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--muted-2);font-family:'Jost',sans-serif}
+.topbar .conn .dot{width:7px;height:7px;border-radius:50%;background:var(--faint);transition:.3s}
+.topbar .conn.online .dot{background:var(--sage);box-shadow:0 0 6px var(--sage)}
+
+/* ============================== SCREEN 1: Home / Daily ============================== */
+.home-head{text-align:center;padding:8px 0 0}
+.moon-orb{position:relative;width:120px;height:120px;margin:0 auto 8px}
+.moon-orb .halo{position:absolute;inset:-20px;border-radius:50%;border:1px solid var(--moon);opacity:.3;animation:breath 5s var(--ease-bio) infinite}
+.moon-orb .halo2{position:absolute;inset:-10px;border-radius:50%;border:1px solid var(--moon);opacity:.18;animation:breath 5s var(--ease-bio) infinite reverse}
+.moon-orb .core{position:absolute;inset:24px;border-radius:50%;background:radial-gradient(circle at 38% 32%,#E6D5A8,var(--moon) 60%,#C4AE78);box-shadow:0 0 40px rgba(219,200,160,.4),inset 0 0 20px rgba(0,0,0,.2);animation:breath 4s var(--ease-bio) infinite}
+@keyframes breath{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(1.06);opacity:.3}}
+.date-line{font-size:9px;color:var(--muted);letter-spacing:2.5px;text-transform:uppercase;margin-top:2px}
+
+.daily-card{margin:18px auto 0;width:min(300px,82vw);padding:24px 20px 20px;text-align:center;cursor:pointer;transition:transform .4s var(--ease-spring),box-shadow .4s ease}
+.daily-card:active{transform:scale(.98)}
+.daily-card .card-art{position:relative;width:96px;height:96px;margin:0 auto 14px}
+.daily-card .card-art .ring{position:absolute;inset:0;border-radius:50%;border:1px solid var(--lavender);opacity:.4}
+.daily-card .card-art .glyph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.daily-card .card-art .glow{position:absolute;inset:-12px;border-radius:50%;background:radial-gradient(circle,rgba(184,164,224,.25),transparent 70%);filter:blur(8px)}
+.daily-card .cn{font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:2px}
+.daily-card .en{font-size:22px;color:var(--pearl);margin-bottom:4px}
+.daily-card .meta{font-size:10px;color:var(--muted-2);letter-spacing:1px}
+.daily-card .reveal-hint{font-size:9px;color:var(--dim);margin-top:14px;letter-spacing:.5px}
+.daily-card .reveal-hint::after{content:' ↗'}
+
+.kw-tags{display:flex;justify-content:center;gap:8px;margin-top:18px;flex-wrap:wrap}
+.kw-tag{padding:7px 16px;border-radius:var(--r-tag);font-size:11px;font-weight:500;background:var(--glass-bg);border:var(--glass-border);backdrop-filter:blur(10px)}
+.kw-tag.lav{color:var(--lavender)} .kw-tag.rose{color:var(--rose)} .kw-tag.moon{color:var(--moon)} .kw-tag.mist{color:var(--mist)} .kw-tag.sage{color:var(--sage)}
+
+/* Bottom nav */
+.bottomnav{position:fixed;bottom:0;left:0;right:0;z-index:20;max-width:480px;margin:0 auto}
+.bottomnav .bar{display:flex;justify-content:space-around;align-items:center;padding:14px 0 calc(env(safe-area-inset-bottom,0px) + 14px);background:rgba(26,22,38,.72);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:0.5px solid rgba(255,255,255,0.08)}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;color:var(--dim);font-size:9px;font-weight:500;letter-spacing:.5px;transition:color .3s;text-transform:uppercase}
+.nav-item .ico{width:22px;height:22px;display:flex;align-items:center;justify-content:center;opacity:.5;transition:.3s}
+.nav-item.active{color:var(--lavender)}
+.nav-item.active .ico{opacity:1;filter:drop-shadow(0 0 6px var(--lavender))}
+.nav-item:active{transform:scale(.92)}
+
+/* ============================== SCREEN 2: Spread Selection ============================== */
+.section-label{text-align:center;margin:6px 0 4px}
+.section-label .up{font-size:9px;color:var(--muted);letter-spacing:2.5px;text-transform:uppercase}
+.section-label .title{font-size:24px;color:var(--pearl);margin-top:4px}
+
+.spread-list{display:flex;flex-direction:column;gap:12px;margin-top:18px}
+.spread-card{display:flex;align-items:center;gap:14px;padding:18px 18px;cursor:pointer;transition:transform .3s var(--ease-spring),border-color .3s,background .3s}
+.spread-card:active{transform:scale(.985)}
+.spread-card .orb{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative}
+.spread-card .orb .d{width:9px;height:9px;border-radius:50%}
+.spread-card .orb .halo{position:absolute;inset:-6px;border-radius:50%;filter:blur(8px);opacity:.4}
+.spread-card .body{flex:1;min-width:0}
+.spread-card .nm{font-size:16px;color:var(--pearl);margin-bottom:1px}
+.spread-card .sub{font-size:11px;color:var(--muted);font-weight:300}
+.spread-card .info{font-size:9px;color:var(--dim);margin-top:3px;letter-spacing:.5px}
+.spread-card .check{width:22px;height:22px;border-radius:50%;border:1px solid rgba(255,255,255,0.15);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:.3s;opacity:.4}
+.spread-card.sel{background:linear-gradient(135deg,rgba(184,164,224,.14),rgba(139,159,209,.10));border-color:rgba(184,164,224,.5)}
+.spread-card.sel .check{background:linear-gradient(135deg,var(--lavender),var(--mist));border-color:transparent;opacity:1}
+.spread-card.sel .check svg{opacity:1}
+.spread-card .check svg{opacity:0;transition:.3s}
+
+.field{margin-top:16px}
+.field label{font-size:10px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;display:block;margin-bottom:8px}
+.field input,.field textarea{width:100%;padding:14px 16px;border-radius:var(--r-sm);font-size:14px;background:rgba(255,255,255,0.04);border:0.5px solid rgba(255,255,255,0.1);color:var(--pearl);font-family:inherit;font-weight:400;transition:.2s}
+.field input::placeholder,.field textarea::placeholder{color:var(--dim)}
+.field input:focus,.field textarea:focus{outline:none;border-color:var(--lavender);background:rgba(255,255,255,0.06);box-shadow:0 0 0 3px rgba(184,164,224,.12)}
+.field textarea{resize:vertical;min-height:64px;line-height:1.6}
+
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{padding:8px 14px;border-radius:var(--r-tag);font-size:11px;cursor:pointer;color:var(--muted);background:rgba(255,255,255,0.04);border:0.5px solid rgba(255,255,255,0.1);font-weight:500;transition:.25s var(--ease-out)}
+.chip:hover{border-color:var(--lavender);color:var(--pearl)}
+.chip.active{background:linear-gradient(135deg,var(--lavender),var(--mist));color:#fff;border-color:transparent;box-shadow:0 4px 16px rgba(184,164,224,.25)}
+
+/* Buttons */
+.btn{width:100%;padding:15px;border-radius:var(--r-btn);font-size:14px;font-weight:600;cursor:pointer;border:none;font-family:inherit;letter-spacing:1px;transition:.25s var(--ease-spring);display:flex;align-items:center;justify-content:center;gap:8px;margin-top:18px;text-transform:uppercase}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btn-primary{background:linear-gradient(135deg,var(--lavender),var(--mist));color:#fff;box-shadow:0 8px 28px rgba(139,159,209,.3)}
+.btn-primary:hover:not(:disabled){box-shadow:0 12px 36px rgba(139,159,209,.42);transform:translateY(-1px)}
+.btn-ghost{background:var(--glass-bg);border:var(--glass-border);color:var(--pearl-2);backdrop-filter:blur(12px)}
+
+/* ============================== SCREEN 3: Drawing ============================== */
+.draw-head{text-align:center;padding:8px 0 4px}
+.draw-head .up{font-size:9px;color:var(--muted);letter-spacing:2.5px;text-transform:uppercase}
+.draw-head .title{font-size:16px;color:var(--pearl);margin-top:6px}
+
+.fan-stage{position:relative;flex:1;display:flex;align-items:center;justify-content:center;min-height:340px;margin:10px 0}
+.fan-center{position:absolute;left:50%;top:58%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;z-index:0}
+.fan-center .pulse{width:54px;height:54px;border-radius:50%;background:radial-gradient(circle,rgba(219,200,160,.4),transparent 70%);margin:0 auto;animation:breath 4s var(--ease-bio) infinite}
+.fan-center .ring{position:absolute;inset:-18px;left:50%;top:0;transform:translateX(-50%);width:90px;height:90px;border-radius:50%;border:1px solid var(--moon);opacity:.3;animation:breath 4s var(--ease-bio) infinite}
+.fan-center .hint{font-size:10px;color:var(--dim);margin-top:10px;letter-spacing:1px}
+
+.fan{position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;perspective:900px}
+.fan-card{position:absolute;width:78px;height:122px;border-radius:10px;cursor:pointer;transform-style:preserve-3d;transition:transform .5s var(--ease-spring),filter .3s,opacity .4s;transform-origin:bottom center;will-change:transform}
+.fan-card .face{position:absolute;inset:0;border-radius:10px;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden;border:0.5px solid rgba(255,255,255,0.14);box-shadow:0 6px 20px rgba(0,0,0,.4)}
+.fan-card .back{background:linear-gradient(150deg,#2A2540,#1F1B30);display:flex;align-items:center;justify-content:center}
+.fan-card .back .gem{width:10px;height:10px;border-radius:50%;background:var(--moon);opacity:.5;filter:blur(1px)}
+.fan-card .front{transform:rotateY(180deg);overflow:hidden}
+.fan-card .front img{width:100%;height:100%;object-fit:cover;display:block}
+.fan-card:hover{filter:brightness(1.25)}
+.fan-card.picked{opacity:0;transform:translateY(-160px) scale(.6) rotate(var(--rot,0deg));pointer-events:none}
+.fan-card.flipping{animation:none}
+
+.draw-progress{text-align:center;padding:6px 0 4px}
+.draw-progress .count{font-size:11px;color:var(--muted);letter-spacing:1.5px;margin-bottom:8px}
+.draw-progress .dots{display:flex;justify-content:center;gap:8px}
+.draw-progress .dots .d{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.15);transition:.3s}
+.draw-progress .dots .d.done{background:var(--lavender);box-shadow:0 0 6px var(--lavender)}
+.draw-hint{text-align:center;font-size:10px;color:var(--dim);letter-spacing:1px;margin-top:6px}
+
+/* ============================== SCREEN 4: Reading ============================== */
+.read-head{text-align:center;padding:8px 0 0}
+.read-head .up{font-size:9px;color:var(--muted);letter-spacing:2.5px;text-transform:uppercase}
+
+.card-row{display:flex;justify-content:center;gap:10px;margin:14px 0 4px;flex-wrap:wrap;perspective:800px}
+.read-card{width:84px;cursor:pointer;animation:floatUp .5s var(--ease-expo) backwards}
+@keyframes floatUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.read-card .flip{position:relative;width:100%;aspect-ratio:7/12;transform-style:preserve-3d;transition:transform .6s var(--ease-expo)}
+.read-card .flip.revealed{transform:rotateY(180deg)}
+.read-card .face{position:absolute;inset:0;border-radius:10px;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden;border:0.5px solid rgba(255,255,255,0.14);box-shadow:0 4px 16px rgba(0,0,0,.4)}
+.read-card .back{background:linear-gradient(150deg,#2A2540,#1F1B30);display:flex;align-items:center;justify-content:center}
+.read-card .back .gem{width:8px;height:8px;border-radius:50%;background:var(--moon);opacity:.45}
+.read-card .front{transform:rotateY(180deg);overflow:hidden}
+.read-card .front img{width:100%;height:100%;object-fit:cover;display:block}
+.read-card.reversed .front img{transform:rotateZ(180deg)}
+.read-card .pos-tag{margin-top:8px;text-align:center;font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.read-card .pos-tag .nm{display:block;font-size:11px;color:var(--pearl-2);font-family:'Bodoni Moda',serif;font-style:italic;text-transform:none;letter-spacing:.5px;margin-top:1px}
+.read-card .orient{display:block;font-size:8px;margin-top:2px}
+.read-card .orient.up{color:var(--mist)} .read-card .orient.rev{color:var(--lavender)}
+.read-card.tap .pos-tag .tap-hint{display:block;font-size:8px;color:var(--dim);margin-top:2px}
+
+/* Interpretation card */
+.interp{margin-top:16px;padding:20px 18px;position:relative}
+.interp .edge{position:absolute;left:0;top:14px;bottom:14px;width:3px;border-radius:2px;background:linear-gradient(var(--lavender),var(--mist));opacity:.6}
+.interp .lead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:4px}
+.interp .lead .t{font-size:15px;color:var(--pearl)}
+.interp .lead .sub{font-size:10px;color:var(--muted)}
+.interp .kw-row{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 12px}
+.interp .kw{padding:4px 10px;border-radius:var(--r-tag);font-size:9px;font-weight:500;background:rgba(255,255,255,0.05);border:0.5px solid rgba(255,255,255,0.1)}
+.interp .body{font-size:13px;line-height:1.85;color:var(--pearl-2);font-weight:300;min-height:24px;white-space:pre-wrap}
+.interp .body .cursor::after{content:'▋';animation:blink .8s infinite;color:var(--lavender)}
+@keyframes blink{50%{opacity:0}}
+.interp .expand{margin-top:14px;font-size:11px;color:var(--lavender);cursor:pointer;letter-spacing:.5px;user-select:none}
+.interp .expand:hover{opacity:.8}
+
+.per-card{margin-top:14px;padding:16px 16px;display:none}
+.per-card.show{display:block;animation:screenIn .4s var(--ease-out)}
+.per-card .pc-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.per-card .pc-head .mini{width:34px;height:48px;border-radius:6px;overflow:hidden;border:0.5px solid rgba(255,255,255,0.14);flex-shrink:0}
+.per-card .pc-head .mini img{width:100%;height:100%;object-fit:cover;display:block}
+.per-card .pc-head .nm{font-size:13px;color:var(--pearl)}
+.per-card .pc-head .nm small{display:block;font-size:9px;color:var(--muted);margin-top:1px}
+.per-card .pc-body{font-size:12px;line-height:1.8;color:var(--pearl-2);font-weight:300;min-height:18px}
+.per-card .pc-body .cursor::after{content:'▋';animation:blink .8s infinite;color:var(--lavender)}
+.pc-load{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.pc-load .spin{width:12px;height:12px;border:1.5px solid rgba(184,164,224,.3);border-top-color:var(--lavender);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.read-actions{display:flex;gap:10px;margin-top:16px}
+.read-actions .btn{margin-top:0;font-size:12px;padding:13px;flex:1}
+
+/* Diary */
+.diary-list{margin-top:14px;display:flex;flex-direction:column;gap:12px}
+.diary-item{padding:16px;cursor:pointer;transition:transform .3s var(--ease-spring)}
+.diary-item:active{transform:scale(.98)}
+.diary-item .di-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.diary-item .di-type{font-size:11px;color:var(--lavender);letter-spacing:1px;text-transform:uppercase}
+.diary-item .di-date{font-size:9px;color:var(--dim)}
+.diary-item .di-q{font-size:12px;color:var(--pearl-2);margin-bottom:6px;font-weight:300}
+.diary-item .di-body{font-size:11px;color:var(--muted);line-height:1.6;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.empty{text-align:center;padding:40px 20px;color:var(--dim);font-size:12px}
+
+/* Toast */
+.toast{position:fixed;top:calc(env(safe-area-inset-top,0px) + 16px);left:50%;transform:translateX(-50%) translateY(-80px);background:rgba(58,52,80,.92);backdrop-filter:blur(16px);color:var(--pearl);padding:11px 22px;border-radius:var(--r-btn);font-size:12px;z-index:100;transition:transform .35s var(--ease-spring);border:0.5px solid rgba(255,255,255,0.1);box-shadow:var(--glass-shadow);pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+.loading-orb{display:flex;align-items:center;gap:10px;color:var(--lavender);font-size:13px}
+.loading-orb .spin{width:14px;height:14px;border:2px solid rgba(184,164,224,.25);border-top-color:var(--lavender);border-radius:50%;animation:spin .8s linear infinite}
+</style>
+</head>
+<body>
+
+<!-- Aurora background + particles -->
+<div class="aurora"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
+<div class="particles" id="particles"></div>
+
+<div class="app">
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <div class="brand">Tarot Aura<small>Soft Lumina · 星语</small></div>
+    <div class="conn" id="conn"><span class="dot"></span><span id="connTxt">连接中</span></div>
+  </div>
+
+  <!-- ============ SCREEN 1: Home / Daily ============ -->
+  <section class="screen active" id="screen-home">
+    <div class="home-head">
+      <div class="moon-orb">
+        <div class="halo"></div><div class="halo2"></div><div class="core"></div>
+      </div>
+      <div class="date-line" id="dateLine">— · —</div>
+    </div>
+
+    <div class="glass daily-card" id="dailyCard" onclick="revealDaily()">
+      <div class="card-art">
+        <div class="glow"></div>
+        <div class="ring"></div>
+        <div class="glyph" id="dailyGlyph">✦</div>
+      </div>
+      <div class="cn" id="dailyCn">凝视星空中…</div>
+      <div class="en display" id="dailyEn">The Star</div>
+      <div class="meta" id="dailyMeta">XVII · 希望 · 疗愈</div>
+      <div class="reveal-hint">轻触揭示今日牌</div>
+    </div>
+
+    <div class="kw-tags" id="dailyKw"></div>
+
+    <div style="flex:1"></div>
+    <div class="glass" style="padding:14px 16px;margin:14px 0 0;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="goSpread()">
+      <div style="width:38px;height:38px;border-radius:50%;background:radial-gradient(circle,rgba(184,164,224,.3),transparent 70%);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <span style="font-size:16px">✧</span>
+      </div>
+      <div style="flex:1">
+        <div style="font-size:13px;color:var(--pearl)" class="display">Begin a Reading</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:1px">选择牌阵 · 深度解读</div>
+      </div>
+      <span style="color:var(--dim)">→</span>
+    </div>
+  </section>
+
+  <!-- ============ SCREEN 2: Spread Selection ============ -->
+  <section class="screen" id="screen-spread">
+    <div class="section-label">
+      <div class="up">Choose Spread</div>
+      <div class="title display">选择牌阵</div>
+    </div>
+
+    <div class="spread-list" id="spreadList"></div>
+
+    <div class="field">
+      <label>你想问什么？</label>
+      <input type="text" id="qInput" placeholder="例如：我的事业发展如何？（可留空）">
+    </div>
+
+    <div class="field">
+      <label>占卜前的心境</label>
+      <div class="chips" id="emoChips">
+        <div class="chip active" data-emo="">无</div>
+        <div class="chip" data-emo="joy">😊 喜悦</div>
+        <div class="chip" data-emo="calm">😌 平静</div>
+        <div class="chip" data-emo="anxiety">😰 焦虑</div>
+        <div class="chip" data-emo="sadness">😢 悲伤</div>
+        <div class="chip" data-emo="anger">😡 愤怒</div>
+        <div class="chip" data-emo="fear">😨 恐惧</div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="beginBtn" onclick="beginReading()">Begin Reading</button>
+  </section>
+
+  <!-- ============ SCREEN 3: Drawing ============ -->
+  <section class="screen" id="screen-draw">
+    <div class="draw-head">
+      <div class="up">Focus &amp; Draw</div>
+      <div class="title display">深呼吸，选择你的牌</div>
+    </div>
+
+    <div class="fan-stage">
+      <div class="fan-center">
+        <div style="position:relative">
+          <div class="ring"></div>
+          <div class="pulse"></div>
+        </div>
+        <div class="hint">感受它的能量</div>
+      </div>
+      <div class="fan" id="fan"></div>
+    </div>
+
+    <div class="draw-progress">
+      <div class="count" id="drawCount">Draw 1 of 3</div>
+      <div class="dots" id="drawDots"></div>
+    </div>
+    <div class="draw-hint">轻触一张牌</div>
+  </section>
+
+  <!-- ============ SCREEN 4: Reading ============ -->
+  <section class="screen" id="screen-read">
+    <div class="read-head">
+      <div class="up" id="readUp">Three Card Reading</div>
+    </div>
+
+    <div class="card-row" id="cardRow"></div>
+
+    <div class="glow-div"><div class="node"></div></div>
+
+    <div class="glass interp" id="interpCard">
+      <div class="edge"></div>
+      <div class="lead">
+        <div class="t display" id="interpTitle">星语凝视中…</div>
+        <div class="sub" id="interpSub"></div>
+      </div>
+      <div class="kw-row" id="interpKw"></div>
+      <div class="body" id="interpBody"><span class="loading-orb"><span class="spin"></span>🔮 星语正在凝视牌面…</span></div>
+      <div class="expand" id="interpExpand" style="display:none" onclick="togglePerCard()">展开单牌深度解读 ↓</div>
+    </div>
+
+    <div id="perCardWrap"></div>
+
+    <div class="read-actions">
+      <button class="btn btn-ghost" onclick="restartReading()">重新抽牌</button>
+      <button class="btn btn-primary" onclick="goHome()">完成</button>
+    </div>
+  </section>
+
+  <!-- ============ SCREEN 5: Diary ============ -->
+  <section class="screen" id="screen-diary">
+    <div class="section-label">
+      <div class="up">Diary</div>
+      <div class="title display">占卜日记</div>
+    </div>
+    <div class="diary-list" id="diaryList">
+      <div class="empty">登录后查看你的占卜历史</div>
+    </div>
+  </section>
+
+</div>
+
+<!-- Bottom nav -->
+<div class="bottomnav">
+  <div class="bar">
+    <div class="nav-item active" data-nav="home" onclick="navTo('home')">
+      <div class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/></svg></div>
+      Today
+    </div>
+    <div class="nav-item" data-nav="spread" onclick="navTo('spread')">
+      <div class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="6" width="18" height="14" rx="2"/><path d="M3 10h18M8 6V4"/></svg></div>
+      Spread
+    </div>
+    <div class="nav-item" data-nav="diary" onclick="navTo('diary')">
+      <div class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 5a2 2 0 012-2h12a2 2 0 012 2v16l-8-3-8 3z"/><path d="M8 7h8M8 11h6"/></svg></div>
+      Diary
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =====================================================================
+   Tarot Aura — app logic
+   Wires to existing backend: /divination/tarot/* (public, no login needed)
+   ===================================================================== */
+const GW = location.origin;
+const $ = id => document.getElementById(id);
+const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+let UID = localStorage.getItem('tarot_uid') || ('aura_' + Math.random().toString(36).slice(2,10));
+localStorage.setItem('tarot_uid', UID);
+let AUTH_TOKEN = localStorage.getItem('auth_token') || '';
+
+/* ===== Card image maps (reuse /static/tarot/*.webp, same as console.html) ===== */
+const TAROT_CARD_BACK = '/static/tarot/' + encodeURIComponent('背面牌') + '.webp';
+const TAROT_CARD_MAP = {
+  'The Fool':'0-愚人','The Magician':'1-魔术师','The High Priestess':'2-女祭司','The Empress':'3-女皇',
+  'The Emperor':'4-皇帝','The Hierophant':'5-教皇','The Lovers':'6-恋人','The Chariot':'7-战车',
+  'Strength':'8-力量','The Hermit':'9-隐士','Wheel of Fortune':'10-命运之轮','Justice':'11-正义',
+  'The Hanged Man':'12-倒吊人','Death':'13-死神','Temperance':'14-节制','The Devil':'15-恶魔',
+  'The Tower':'16-高塔','The Star':'17-星星','The Moon':'18-月亮','The Sun':'19-太阳',
+  'Judgement':'20-审判','The World':'21-世界',
+  'Ace of Wands':'权杖1','Two of Wands':'权杖2','Three of Wands':'权杖3','Four of Wands':'权杖4',
+  'Five of Wands':'权杖5','Six of Wands':'权杖6','Seven of Wands':'权杖7','Eight of Wands':'权杖8',
+  'Nine of Wands':'权杖9','Ten of Wands':'权杖10','Page of Wands':'权杖侍从','Knight of Wands':'权杖骑士',
+  'Queen of Wands':'权杖皇后','King of Wands':'权杖国王',
+  'Ace of Cups':'圣杯1','Two of Cups':'圣杯2','Three of Cups':'圣杯3','Four of Cups':'圣杯4',
+  'Five of Cups':'圣杯5','Six of Cups':'圣杯6','Seven of Cups':'圣杯7','Eight of Cups':'圣杯8',
+  'Nine of Cups':'圣杯9','Ten of Cups':'圣杯10','Page of Cups':'圣杯侍从','Knight of Cups':'圣杯骑士',
+  'Queen of Cups':'圣杯皇后','King of Cups':'圣杯国王',
+  'Ace of Swords':'宝剑1','Two of Swords':'宝剑2','Three of Swords':'宝剑3','Four of Swords':'宝剑4',
+  'Five of Swords':'宝剑5','Six of Swords':'宝剑6','Seven of Swords':'宝剑7','Eight of Swords':'宝剑8',
+  'Nine of Swords':'宝剑9','Ten of Swords':'宝剑10','Page of Swords':'宝剑侍从','Knight of Swords':'宝剑骑士',
+  'Queen of Swords':'宝剑皇后','King of Swords':'宝剑国王',
+  'Ace of Pentacles':'星币1','Two of Pentacles':'星币2','Three of Pentacles':'星币3','Four of Pentacles':'星币4',
+  'Five of Pentacles':'星币5','Six of Pentacles':'星币6','Seven of Pentacles':'星币7','Eight of Pentacles':'星币8',
+  'Nine of Pentacles':'星币9','Ten of Pentacles':'星币10','Page of Pentacles':'星币侍从','Knight of Pentacles':'星币骑士',
+  'Queen of Pentacles':'星币皇后','King of Pentacles':'星币国王',
+};
+const TAROT_NAME_TO_ID = {
+  'The Fool':0,'The Magician':1,'The High Priestess':2,'The Empress':3,'The Emperor':4,
+  'The Hierophant':5,'The Lovers':6,'The Chariot':7,'Strength':8,'The Hermit':9,
+  'Wheel of Fortune':10,'Justice':11,'The Hanged Man':12,'Death':13,'Temperance':14,
+  'The Devil':15,'The Tower':16,'The Star':17,'The Moon':18,'The Sun':19,
+  'Judgement':20,'The World':21,
+  'Ace of Wands':22,'Two of Wands':23,'Three of Wands':24,'Four of Wands':25,
+  'Five of Wands':26,'Six of Wands':27,'Seven of Wands':28,'Eight of Wands':29,
+  'Nine of Wands':30,'Ten of Wands':31,'Page of Wands':32,'Knight of Wands':33,
+  'Queen of Wands':34,'King of Wands':35,
+  'Ace of Cups':36,'Two of Cups':37,'Three of Cups':38,'Four of Cups':39,
+  'Five of Cups':40,'Six of Cups':41,'Seven of Cups':42,'Eight of Cups':43,
+  'Nine of Cups':44,'Ten of Cups':45,'Page of Cups':46,'Knight of Cups':47,
+  'Queen of Cups':48,'King of Cups':49,
+  'Ace of Swords':50,'Two of Swords':51,'Three of Swords':52,'Four of Swords':53,
+  'Five of Swords':54,'Six of Swords':55,'Seven of Swords':56,'Eight of Swords':57,
+  'Nine of Swords':58,'Ten of Swords':59,'Page of Swords':60,'Knight of Swords':61,
+  'Queen of Swords':62,'King of Swords':63,
+  'Ace of Pentacles':64,'Two of Pentacles':65,'Three of Pentacles':66,'Four of Pentacles':67,
+  'Five of Pentacles':68,'Six of Pentacles':69,'Seven of Pentacles':70,'Eight of Pentacles':71,
+  'Nine of Pentacles':72,'Ten of Pentacles':73,'Page of Pentacles':74,'Knight of Pentacles':75,
+  'Queen of Pentacles':76,'King of Pentacles':77,
+};
+const ROMAN = ['0','I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII','XIV','XV','XVI','XVII','XVIII','XIX','XX','XXI'];
+const ALL_NAMES = Object.keys(TAROT_CARD_MAP);
+function getTarotImg(name){ const f=TAROT_CARD_MAP[name]; return f?`/static/tarot/${encodeURIComponent(f)}.webp`:''; }
+function findCardId(name){ if(name in TAROT_NAME_TO_ID) return TAROT_NAME_TO_ID[name]; const v=TAROT_CARD_MAP[name]; if(v){const n=parseInt(String(v).split('-')[0],10);if(!isNaN(n))return n;} return null; }
+function cnName(name){ const m=TAROT_CARD_MAP[name]; return m?m.split('-').slice(1).join('-'):name; }
+
+/* ===== Spreads (mirror backend SPREAD_SIZES / SPREAD_POSITIONS) ===== */
+const SPREADS = [
+  { id:'single',        en:'Single Card',       cn:'单张指引',       desc:'今日指引',           cards:1,  time:'30s', col:'lav' },
+  { id:'three_card',    en:'Three Card Spread', cn:'三牌阵',         desc:'过去 · 现在 · 未来', cards:3,  time:'2min', col:'mist' },
+  { id:'celtic_cross',  en:'Celtic Cross',      cn:'凯尔特十字',     desc:'深度解读',           cards:10, time:'5min', col:'moon' },
+  { id:'relationship',  en:'Relationship',      cn:'关系牌阵',       desc:'双人指引',           cards:7,  time:'3min', col:'rose' },
+];
+const SPREAD_POS = {
+  single:['今日指引'],
+  three_card:['过去','现在','未来'],
+  celtic_cross:['现状','挑战','基础','近期过去','可能结果','近期未来','自我','环境','希望与恐惧','最终结果'],
+  relationship:['你自己','对方','关系现状','你的期待','对方的期待','潜在影响','最终指引'],
+};
+
+let selectedSpread = 'three_card';
+let selectedEmo = '';
+let drawState = { deck:[], picked:[], target:3, spread:'three_card', question:'', apiCards:null, interp:'', perCard:[] };
+
+/* ===== Particles ===== */
+(function initParticles(){
+  const c = $('particles'); const n = 18;
+  for(let i=0;i<n;i++){
+    const s=document.createElement('span');
+    s.style.left=Math.random()*100+'%';
+    s.style.top=Math.random()*100+'%';
+    s.style.setProperty('--d',(2+Math.random()*3)+'s');
+    s.style.animationDelay=(Math.random()*3)+'s';
+    const colors=['#E8DFFF','#F0D4C4','#B8A4E0','#DBC8A0','#8B9FD1'];
+    s.style.background=colors[i%colors.length];
+    c.appendChild(s);
+  }
+})();
+
+/* ===== Toast ===== */
+let toastT;
+function toast(msg){
+  const t=$('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),2400);
+}
+
+/* ===== Navigation ===== */
+function navTo(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const map={home:'screen-home',spread:'screen-spread',diary:'screen-diary'};
+  const sn=map[name]||'screen-home';
+  $(sn).classList.add('active');
+  document.querySelector(`.nav-item[data-nav="${name}"]`).classList.add('active');
+  if(name==='home') loadDaily();
+  if(name==='diary') loadDiary();
+  window.scrollTo(0,0);
+}
+function goSpread(){ navTo('spread'); }
+function goHome(){ navTo('home'); }
+
+/* ===== Date line ===== */
+function setDateLine(){
+  const d=new Date();
+  const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  $('dateLine').textContent=`${days[d.getDay()]} · ${months[d.getMonth()]} ${d.getDate()}`;
+}
+
+/* ===== Daily card (deterministic by date) ===== */
+let dailyCardName = null;
+async function loadDaily(){
+  setDateLine();
+  if(dailyCardName) return; // already loaded
+  // Deterministic pick by date so the "today" card is stable all day
+  const d=new Date(); const seed=d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate();
+  dailyCardName = ALL_NAMES[seed % ALL_NAMES.length];
+  renderDaily();
+  // Try enriching with keyword from backend
+  try{
+    const r=await fetch(GW+'/divination/tarot/cards');
+    if(r.ok){ const j=await r.json(); const c=(j.cards||[]).find(x=>x.name_en===dailyCardName); if(c){ renderDaily(c.keyword_upright); } }
+  }catch(e){}
+}
+function renderDaily(kw){
+  const name=dailyCardName; const id=findCardId(name);
+  const roman = (id!=null && id<=21) ? ROMAN[id] : '';
+  $('dailyCn').textContent = cnName(name);
+  $('dailyEn').textContent = name;
+  $('dailyMeta').textContent = (roman?roman+' · ':'') + (kw||'');
+  $('dailyGlyph').textContent = (id!=null && id<=21) ? '✦' : '◈';
+  // keyword tags
+  const tags=$('dailyKw'); tags.innerHTML='';
+  if(kw){ kw.split(/[·,，\s]+/).filter(Boolean).slice(0,3).forEach((k,i)=>{
+    const cls=['lav','rose','moon'][i%3];
+    const t=document.createElement('div'); t.className='kw-tag '+cls; t.textContent=k; tags.appendChild(t);
+  }); }
+}
+function revealDaily(){
+  // Daily card → start a single-card reading of that exact card
+  selectedSpread='single';
+  const id=findCardId(dailyCardName);
+  drawState={ deck:[], picked:[], target:1, spread:'single', question:'今日指引', apiCards:null, interp:'', perCard:[] };
+  // Pre-place the daily card as the single picked card
+  drawState.picked=[{ name:dailyCardName, reversed:Math.random()<0.5 }];
+  goToReading();
+}
+
+/* ===== Spread selection ===== */
+function renderSpreads(){
+  const list=$('spreadList'); list.innerHTML='';
+  SPREADS.forEach(sp=>{
+    const col={lav:'var(--lavender)',mist:'var(--mist)',moon:'var(--moon)',rose:'var(--rose)'}[sp.col];
+    const el=document.createElement('div');
+    el.className='glass spread-card'+(sp.id===selectedSpread?' sel':'');
+    el.onclick=()=>{ selectedSpread=sp.id; renderSpreads(); };
+    el.innerHTML=`
+      <div class="orb" style="background:radial-gradient(circle,${col}33,transparent 70%)">
+        <div class="halo" style="background:radial-gradient(circle,${col}55,transparent 70%)"></div>
+        <div class="d" style="background:${col}"></div>
+      </div>
+      <div class="body">
+        <div class="nm display">${escapeHtml(sp.en)}</div>
+        <div class="sub">${escapeHtml(sp.cn)} · ${escapeHtml(sp.desc)}</div>
+        <div class="info">${sp.cards} card${sp.cards>1?'s':''} · ${sp.time}</div>
+      </div>
+      <div class="check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg></div>`;
+    list.appendChild(el);
+  });
+}
+// Emotion chips
+(function(){
+  $('emoChips').querySelectorAll('.chip').forEach(c=>c.onclick=()=>{
+    $('emoChips').querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));
+    c.classList.add('active'); selectedEmo=c.dataset.emo;
+  });
+})();
+
+function beginReading(){
+  const sp=SPREADS.find(s=>s.id===selectedSpread);
+  drawState={ deck:buildDeck(), picked:[], target:sp.cards, spread:selectedSpread, question:$('qInput').value.trim(), apiCards:null, interp:'', perCard:[] };
+  renderFan();
+  $('drawCount').textContent=`Draw 1 of ${sp.cards}`;
+  renderDots(0);
+  navTo('draw'); // custom: draw is not in bottom nav
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  $('screen-draw').classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+}
+
+/* ===== Deck build + shuffle ===== */
+function buildDeck(){
+  const all=ALL_NAMES.map(name=>({name,reversed:Math.random()<0.5}));
+  for(let i=all.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[all[i],all[j]]=[all[j],all[i]];}
+  return all;
+}
+
+/* ===== Fan rendering (Screen 3) ===== */
+function renderFan(){
+  const fan=$('fan'); fan.innerHTML='';
+  const n=Math.min(drawState.deck.length, 9); // show 9 fanned cards
+  const spread=26; // angle spread
+  const step = n>1 ? spread/(n-1) : 0;
+  drawState.deck.slice(0,n).forEach((card,i)=>{
+    const rot = -spread/2 + step*i;
+    const el=document.createElement('div');
+    el.className='fan-card';
+    el.style.setProperty('--rot',rot+'deg');
+    el.style.transform=`rotate(${rot}deg) translateY(${-Math.abs(rot)*0.4}px)`;
+    el.style.zIndex=i;
+    el.innerHTML=`<div class="face back"><div class="gem"></div></div>`;
+    el.onclick=()=>pickFromFan(i);
+    fan.appendChild(el);
+  });
+}
+function renderDots(done){
+  const dots=$('drawDots'); dots.innerHTML='';
+  for(let i=0;i<drawState.target;i++){
+    const d=document.createElement('div'); d.className='d'+(i<done?' done':''); dots.appendChild(d);
+  }
+}
+function pickFromFan(idx){
+  if(drawState.picked.length>=drawState.target) return;
+  const card=drawState.deck[idx];
+  // animate the fanned card flying away
+  const el=$('fan').children[idx]; if(el){ el.classList.add('picked'); }
+  drawState.picked.push(card);
+  const done=drawState.picked.length;
+  $('drawCount').textContent=`Draw ${Math.min(done+1,drawState.target)} of ${drawState.target}`;
+  renderDots(done);
+  if(done>=drawState.target){
+    setTimeout(()=>goToReading(), 550);
+  }
+}
+
+/* ===== Reading screen (Screen 4) ===== */
+function goToReading(){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  $('screen-read').classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const sp=SPREADS.find(s=>s.id===drawState.spread);
+  $('readUp').textContent = sp.en + ' Reading';
+  renderCardRow();
+  $('interpBody').innerHTML='<span class="loading-orb"><span class="spin"></span>🔮 星语正在凝视牌面…</span>';
+  $('interpExpand').style.display='none';
+  $('perCardWrap').innerHTML='';
+  callInterpretStream();
+}
+
+function renderCardRow(){
+  const row=$('cardRow'); row.innerHTML='';
+  const positions=SPREAD_POS[drawState.spread]||[];
+  drawState.picked.forEach((card,i)=>{
+    const pos=positions[i]||('牌'+(i+1));
+    const img=getTarotImg(card.name);
+    const el=document.createElement('div');
+    el.className='read-card'+(card.reversed?' reversed':'')+(i>=3?' wrap':'');
+    el.style.animationDelay=(i*0.08)+'s';
+    el.innerHTML=`
+      <div class="flip">
+        <div class="face back"><div class="gem"></div></div>
+        <div class="face front"><img src="${img}" alt="${escapeHtml(card.name)}"></div>
+      </div>
+      <div class="pos-tag">${escapeHtml(pos)}<span class="nm display">${escapeHtml(cnName(card.name))}</span><span class="orient ${card.reversed?'rev':'up'}">${card.reversed?'逆位':'正位'}</span></div>`;
+    row.appendChild(el);
+    // Reveal with stagger (80ms) after a beat
+    setTimeout(()=>{ el.querySelector('.flip').classList.add('revealed'); }, 200 + i*80);
+  });
+}
+
+/* ===== Streaming interpretation ===== */
+async function callInterpretStream(){
+  const headers={'Content-Type':'application/json'};
+  if(AUTH_TOKEN) headers['Authorization']='Bearer '+AUTH_TOKEN;
+  const body={
+    userId:UID,
+    question:drawState.question||'请为我解读这个牌阵',
+    spread:drawState.spread,
+    cards:drawState.picked.map((c,i)=>({
+      name_en:c.name, name_cn:cnName(c.name), reversed:c.reversed,
+      position:(SPREAD_POS[drawState.spread]||[])[i]||('牌'+(i+1))
+    })),
+  };
+  if(selectedEmo) body.emotionBefore=selectedEmo;
+  const span=$('interpBody');
+  try{
+    const resp=await fetch(GW+'/divination/tarot/interpret-stream',{method:'POST',headers,body:JSON.stringify(body)});
+    if(!resp.ok){ const t=await resp.text(); throw new Error('HTTP '+resp.status+(t?': '+t.slice(0,160):'')); }
+    span.innerHTML='<span class="cursor"></span>';
+    let acc='';
+    const reader=resp.body.getReader(); const dec=new TextDecoder('utf-8'); let buf='';
+    while(true){
+      const{value,done}=await reader.read(); if(done)break;
+      buf+=dec.decode(value,{stream:true});
+      const parts=buf.split('\n\n'); buf=parts.pop()||'';
+      for(const part of parts){
+        const evt=parseSse(part); if(!evt)continue;
+        if(evt.event==='cards'){ try{drawState.apiCards=JSON.parse(evt.data);}catch(_){} }
+        else if(evt.event==='delta'){ acc+=evt.data; span.textContent=acc; span.insertAdjacentHTML('beforeend','<span class="cursor"></span>'); }
+        else if(evt.event==='done'){ acc=evt.data; span.textContent=acc; }
+        else if(evt.event==='error'){ throw new Error(evt.data); }
+      }
+    }
+    drawState.interp=acc;
+    renderInterpMeta();
+    $('interpExpand').style.display='block';
+    saveHistory(acc);
+  }catch(e){
+    span.textContent='❌ '+e.message;
+  }
+}
+function parseSse(chunk){
+  const lines=chunk.split('\n'); let event='message',data='';
+  for(const line of lines){
+    if(line.startsWith('event:'))event=line.slice(6).trim();
+    else if(line.startsWith('data:'))data+=(data?'\n':'')+line.slice(5).replace(/^ /,'');
+  }
+  return{event,data};
+}
+function renderInterpMeta(){
+  const cards=drawState.apiCards||drawState.picked.map((c,i)=>({name:c.name,name_cn:cnName(c.name),reversed:c.reversed,position:(SPREAD_POS[drawState.spread]||[])[i]||('牌'+(i+1)),keyword:''}));
+  if(cards.length){
+    const c0=cards[0];
+    $('interpTitle').textContent = c0.name_cn || cnName(c0.name||c0.name_en);
+    const orient=c0.reversed?'逆位':'正位';
+    $('interpSub').textContent = (c0.position||'')+(c0.position?' · ':'')+orient;
+  }
+  const kw=$('interpKw'); kw.innerHTML='';
+  cards.slice(0,3).forEach(c=>{
+    if(c.keyword){ c.keyword.split(/[·,，\s]+/).filter(Boolean).slice(0,2).forEach(k=>{
+      const t=document.createElement('div'); t.className='kw'; t.textContent=k; kw.appendChild(t);
+    }); }
+  });
+}
+
+/* ===== Per-card deep reading ===== */
+let perCardOpen=false;
+function togglePerCard(){
+  perCardOpen=!perCardOpen;
+  $('interpExpand').textContent = perCardOpen ? '收起单牌解读 ↑' : '展开单牌深度解读 ↓';
+  const wrap=$('perCardWrap');
+  if(perCardOpen){
+    const cards=drawState.apiCards||drawState.picked.map((c,i)=>({name:c.name,name_en:c.name,name_cn:cnName(c.name),reversed:c.reversed,position:(SPREAD_POS[drawState.spread]||[])[i]||('牌'+(i+1))}));
+    wrap.innerHTML='';
+    cards.forEach((c,i)=>{
+      const img=getTarotImg(c.name_en||c.name);
+      const el=document.createElement('div');
+      el.className='glass per-card show';
+      el.style.animationDelay=(i*0.06)+'s';
+      el.innerHTML=`<div class="pc-head"><div class="mini"><img src="${img}" alt=""></div><div class="nm display">${escapeHtml(c.name_cn||cnName(c.name_en||c.name))}<small>${escapeHtml(c.position||'')} · ${c.reversed?'逆位':'正位'}</small></div></div><div class="pc-body" id="pcBody-${i}"><span class="pc-load"><span class="spin"></span>星语凝视中…</span></div>`;
+      wrap.appendChild(el);
+      fetchCardReading(c,i);
+    });
+  }else{
+    wrap.innerHTML='';
+  }
+}
+async function fetchCardReading(c,i){
+  const body={ cardId:findCardId(c.name_en||c.name), name:c.name_cn||cnName(c.name_en||c.name), reversed:!!c.reversed, question:drawState.question||'', userId:UID };
+  const headers={'Content-Type':'application/json'}; if(AUTH_TOKEN)headers['Authorization']='Bearer '+AUTH_TOKEN;
+  const span=$('pcBody-'+i); if(!span)return;
+  try{
+    const r=await fetch(GW+'/divination/tarot/card-reading',{method:'POST',headers,body:JSON.stringify(body)});
+    const d=await r.json(); if(!r.ok)throw new Error(d.detail||('HTTP '+r.status));
+    span.textContent=d.interpretation||'';
+    drawState.perCard[i]=d.interpretation||'';
+  }catch(e){ span.textContent='❌ '+e.message; }
+}
+
+/* ===== Save history (best-effort) ===== */
+async function saveHistory(interp){
+  try{
+    const headers={'Content-Type':'application/json'}; if(AUTH_TOKEN)headers['Authorization']='Bearer '+AUTH_TOKEN;
+    await fetch(GW+'/divination/history',{method:'POST',headers,body:JSON.stringify({
+      userId:UID, divType:'tarot', question:drawState.question||null, interpretation:interp,
+      cards:drawState.picked.map((c,i)=>({id:findCardId(c.name),name:cnName(c.name),rev:c.reversed,pos:(SPREAD_POS[drawState.spread]||[])[i]||('牌'+(i+1))})),
+      emotionBefore:selectedEmo||null,
+    })});
+  }catch(e){}
+}
+
+/* ===== Diary ===== */
+async function loadDiary(){
+  const list=$('diaryList'); list.innerHTML='<div class="empty"><span class="loading-orb"><span class="spin"></span>加载中…</span></div>';
+  try{
+    const headers={}; if(AUTH_TOKEN)headers['Authorization']='Bearer '+AUTH_TOKEN;
+    const r=await fetch(GW+`/divination/history/${UID}?limit=20`,{headers});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const items=await r.json();
+    if(!items||!items.length){ list.innerHTML='<div class="empty">还没有占卜记录，去抽一张牌吧 ✦</div>'; return; }
+    list.innerHTML='';
+    items.forEach(it=>{
+      const ts=it.created_at?new Date(it.created_at*1000):new Date();
+      const ds=ts.toLocaleDateString('zh-CN',{month:'short',day:'numeric'})+' '+ts.toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'});
+      const el=document.createElement('div');
+      el.className='glass diary-item';
+      el.innerHTML=`<div class="di-top"><div class="di-type">${escapeHtml(it.div_type||'tarot')}</div><div class="di-date">${escapeHtml(ds)}</div></div>${it.question?`<div class="di-q">${escapeHtml(it.question)}</div>`:''}<div class="di-body">${escapeHtml((it.interpretation||'').slice(0,180))}</div>`;
+      list.appendChild(el);
+    });
+  }catch(e){ list.innerHTML=`<div class="empty">⚠️ ${escapeHtml(e.message)}</div>`; }
+}
+
+/* ===== Restart ===== */
+function restartReading(){
+  const sp=SPREADS.find(s=>s.id===drawState.spread);
+  drawState.deck=buildDeck(); drawState.picked=[]; drawState.apiCards=null; drawState.interp=''; drawState.perCard=[];
+  renderFan(); $('drawCount').textContent=`Draw 1 of ${sp.cards}`; renderDots(0);
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  $('screen-draw').classList.add('active');
+}
+
+/* ===== Connectivity ===== */
+async function checkConn(){
+  try{
+    const r=await fetch(GW+'/health');
+    if(r.ok){ $('conn').classList.add('online'); $('connTxt').textContent='已连接'; return; }
+  }catch(e){}
+  $('connTxt').textContent='离线';
+}
+
+/* ===== Init ===== */
+renderSpreads();
+checkConn();
+loadDaily();
+</script>
+</body>
+</html>

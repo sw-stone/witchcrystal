@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- Plush Bear - happy expression -->
+  <defs>
+    <radialGradient id="bearBody" cx="50%" cy="40%">
+      <stop offset="0%" stop-color="#A1887F"/>
+      <stop offset="100%" stop-color="#6D4C41"/>
+    </radialGradient>
+    <radialGradient id="bearBelly" cx="50%" cy="50%">
+      <stop offset="0%" stop-color="#D7CCC8"/>
+      <stop offset="100%" stop-color="#BCAAA4"/>
+    </radialGradient>
+  </defs>
+  <!-- Round ears -->
+  <circle cx="60" cy="50" r="18" fill="url(#bearBody)" stroke="#4E342E" stroke-width="2"/>
+  <circle cx="140" cy="50" r="18" fill="url(#bearBody)" stroke="#4E342E" stroke-width="2"/>
+  <circle cx="60" cy="50" r="10" fill="#8D6E63" opacity="0.5"/>
+  <circle cx="140" cy="50" r="10" fill="#8D6E63" opacity="0.5"/>
+  <!-- Head -->
+  <ellipse cx="100" cy="85" rx="54" ry="50" fill="url(#bearBody)" stroke="#4E342E" stroke-width="2"/>
+  <!-- Snout area -->
+  <ellipse cx="100" cy="100" rx="30" ry="22" fill="url(#bearBelly)"/>
+  <!-- Eyes (happy, dots) -->
+  <circle cx="78" cy="78" r="8" fill="#3E2723"/>
+  <circle cx="122" cy="78" r="8" fill="#3E2723"/>
+  <circle cx="81" cy="75" r="3" fill="#fff"/>
+  <circle cx="125" cy="75" r="3" fill="#fff"/>
+  <!-- Cheeks -->
+  <circle cx="60" cy="95" r="8" fill="#FF8A65" opacity="0.3"/>
+  <circle cx="140" cy="95" r="8" fill="#FF8A65" opacity="0.3"/>
+  <!-- Nose -->
+  <ellipse cx="100" cy="92" rx="9" ry="7" fill="#3E2723"/>
+  <!-- Mouth (gentle smile) -->
+  <path d="M100 99 L100 107" stroke="#3E2723" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M100 107 Q90 113 84 107" fill="none" stroke="#3E2723" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M100 107 Q110 113 116 107" fill="none" stroke="#3E2723" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Body hint -->
+  <ellipse cx="100" cy="165" rx="62" ry="30" fill="url(#bearBody)" stroke="#4E342E" stroke-width="2"/>
+  <ellipse cx="100" cy="162" rx="38" ry="22" fill="url(#bearBelly)" opacity="0.5"/>
+  <!-- Paws -->
+  <ellipse cx="68" cy="185" rx="15" ry="10" fill="url(#bearBody)" stroke="#4E342E" stroke-width="2"/>
+  <ellipse cx="132" cy="185" rx="15" ry="10" fill="url(#bearBody)" stroke="#4E342E" stroke-width="2"/>
+  <!-- Paw pads -->
+  <ellipse cx="68" cy="185" rx="6" ry="4" fill="#8D6E63" opacity="0.5"/>
+  <ellipse cx="132" cy="185" rx="6" ry="4" fill="#8D6E63" opacity="0.5"/>
+</svg>

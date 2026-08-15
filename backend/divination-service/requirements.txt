@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+httpx
+pytest
+openai
+anthropic
+psycopg[binary]>=3.2.0
+psycopg-pool>=3.2.0

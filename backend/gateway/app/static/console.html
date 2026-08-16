@@ -3816,7 +3816,7 @@ const CB_MODE_COLORS = {
 let cbWs = null, cbMicStream = null, cbRecorder = null, cbChunks = [], cbRecording = false;
 let cbAiSpeaking = false, cbAudioCtx = null, cbTtsSource = null;
 let cbChatAbort = null, cbTtsAbort = null;
-let cbWebSpeech = null, cbWebSpeechResult = '', cbInited = false;
+let cbWebSpeech = null, cbWebSpeechResult = '', cbWebSpeechInterim = '', cbInited = false;
 // VAD（语音活动检测）—— 静音 1.5s 自动结束录音
 let cbVadAnalyser = null, cbVadInterval = null, cbVadSilenceStart = 0, cbUserSpeaking = false;
 
@@ -3927,14 +3927,14 @@ function cbStartVAD(){
     let sum = 0;
     for (let i = 0; i < data.length; i++) sum += data[i];
     const avg = sum / data.length;
-    const speaking = avg > 15;  // 阈值（与 crystal-ball.html 一致）
+    const speaking = avg > 8;  // 阈值（原 15 → 8：小声/远距也能触发）
     if (speaking) {
       cbUserSpeaking = true;
       cbVadSilenceStart = 0;
     } else if (cbUserSpeaking) {
       // 进入静音
       if (cbVadSilenceStart === 0) cbVadSilenceStart = Date.now();
-      else if (Date.now() - cbVadSilenceStart > 1500) {
+      else if (Date.now() - cbVadSilenceStart > 2200) {
         // 静音 1.5s，自动结束
         console.log('[VAD] silence detected, auto-stop');
         cbStopMic();
@@ -3956,9 +3956,19 @@ function cbInitWebSpeech(){
   cbWebSpeech = new SR();
   cbWebSpeech.lang = 'zh-CN';
   cbWebSpeech.continuous = true;
-  cbWebSpeech.interimResults = false;
-  cbWebSpeech.onresult = e => { for(let i=e.resultIndex;i<e.results.length;i++) if(e.results[i].isFinal) cbWebSpeechResult += e.results[i][0].transcript; };
-  cbWebSpeechResult = '';
+  cbWebSpeech.interimResults = true;   // 收中间结果：短句不被丢
+  cbWebSpeech.maxAlternatives = 1;
+  cbWebSpeech.onresult = e => {
+    for (let i=e.resultIndex;i<e.results.length;i++) {
+      if (e.results[i].isFinal) { cbWebSpeechResult += e.results[i][0].transcript; cbWebSpeechInterim=''; }
+      else cbWebSpeechInterim = e.results[i][0].transcript;
+    }
+  };
+  cbWebSpeech.onend = () => {
+    // Chrome 自动掐断 continuous 会话：录音还在就重启，避免漏听后段
+    if (cbRecording) { try{cbWebSpeech.start();}catch(_){} }
+  };
+  cbWebSpeechResult = ''; cbWebSpeechInterim = '';
   try { cbWebSpeech.start(); } catch(_){}
 }
 
@@ -3975,12 +3985,12 @@ async function cbStopMic(){
 }
 
 async function cbHandleRecorded(){
-  // 优先用 Web Speech 结果，无则试后端 ASR
-  let text = (cbWebSpeechResult || '').trim();
-  cbWebSpeechResult = '';
+  // 优先用 Web Speech 结果（正式 > 中间），无则试后端 ASR
+  let text = (cbWebSpeechResult || '').trim() || (cbWebSpeechInterim || '').trim();
+  cbWebSpeechResult = ''; cbWebSpeechInterim = '';
   if (!text && cbChunks.length > 0) {
     const blob = new Blob(cbChunks, {type:'audio/webm'});
-    if (blob.size > 1000) {
+    if (blob.size > 500) {
       try {
         const fd = new FormData();
         fd.append('audio', blob, 'speech.webm');
@@ -3989,7 +3999,7 @@ async function cbHandleRecorded(){
       } catch(e){}
     }
   }
-  if (!text) { $('cbStatus').textContent = '没听清，请再说一次'; return; }
+  if (!text) { $('cbStatus').textContent = '没识别到，靠近麦克风稍大点声试试'; return; }
   if (cbAiSpeaking) cbInterrupt();
   cbAddBubble('user', text);
   await cbStreamChatAndSpeak(text);

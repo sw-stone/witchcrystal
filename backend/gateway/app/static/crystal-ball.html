@@ -203,7 +203,7 @@ async function startMicRecording(){
 
   // 同步启动浏览器原生 Web Speech 识别（作为 ASR 主力，无需 key）
   if (initWebSpeech()) {
-    webSpeechResult = '';
+    webSpeechResult = ''; webSpeechInterim = '';
     try { webSpeechRecognition.start(); } catch(_){}  // 重复 start 会抛错，忽略
   }
 
@@ -227,7 +227,7 @@ function startVAD(){
     let sum = 0;
     for (let i = 0; i < data.length; i++) sum += data[i];
     const avg = sum / data.length;
-    const speaking = avg > 15;  // 阈值
+    const speaking = avg > 8;  // 阈值（原 15 → 8：小声/远距也能触发）
 
     if (speaking) {
       isUserSpeaking = true;
@@ -235,8 +235,8 @@ function startVAD(){
     } else if (isUserSpeaking) {
       // 进入静音
       if (vadSilenceStart === 0) vadSilenceStart = Date.now();
-      else if (Date.now() - vadSilenceStart > 1500) {
-        // 静音 1.5s，自动结束
+      else if (Date.now() - vadSilenceStart > 2200) {
+        // 静音 2.2s 自动结束（原 1.5s：说话慢/停顿思考不被掐断）
         console.log('[VAD] silence detected, auto-stop');
         stopMicAndSend();
       }
@@ -267,7 +267,7 @@ async function stopMicAndSend(){
 async function handleRecordingComplete(){
   if (audioChunks.length === 0) return;
   const blob = new Blob(audioChunks, { type: 'audio/webm' });
-  if (blob.size < 1000) { setStatus('录音太短，请再说一次'); return; }
+  if (blob.size < 500) { setStatus('录音太短，请再说一次'); return; }
 
   // 0. 如果 AI 正在说话 → 打断
   if (aiSpeaking) {
@@ -311,32 +311,39 @@ async function tryServerASR(blob){
  * 录音结束时用识别到的文本。若浏览器不支持则提示。 */
 let webSpeechRecognition = null;
 let webSpeechResult = '';
+let webSpeechInterim = '';
 function initWebSpeech(){
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SR) return false;
   webSpeechRecognition = new SR();
   webSpeechRecognition.lang = 'zh-CN';
   webSpeechRecognition.continuous = true;
-  webSpeechRecognition.interimResults = false;
+  webSpeechRecognition.interimResults = true;   // 收中间结果：短句/快语不被丢
+  webSpeechRecognition.maxAlternatives = 1;
   webSpeechRecognition.onresult = e => {
     for (let i = e.resultIndex; i < e.results.length; i++) {
-      if (e.results[i].isFinal) webSpeechResult += e.results[i][0].transcript;
+      if (e.results[i].isFinal) {
+        webSpeechResult += e.results[i][0].transcript;
+        webSpeechInterim = '';
+      } else {
+        webSpeechInterim = e.results[i][0].transcript;
+      }
     }
   };
   webSpeechRecognition.onerror = e => { console.warn('[WebSpeech] err', e.error); };
+  webSpeechRecognition.onend = () => {
+    // Chrome 会自动掐断 continuous 会话：录音还在就重启，避免漏听后段
+    if (isRecording) { try { webSpeechRecognition.start(); } catch(_){} }
+  };
   return true;
 }
 
 async function nativeWebSpeechASR(blob){
-  // 若录音期间已跑 SpeechRecognition，直接用其结果
-  if (webSpeechResult && webSpeechResult.trim()) {
-    const t = webSpeechResult.trim();
-    webSpeechResult = '';
-    return t;
-  }
-  // 否则提示浏览器不支持
-  setStatus('⚠️ 浏览器不支持语音识别，请用 Chrome 或配 Whisper');
-  return '';
+  // 优先正式结果；空则用中间结果兜底（VAD 提前结束时 final 可能没来得及出）
+  let t = (webSpeechResult || '').trim() || (webSpeechInterim || '').trim();
+  webSpeechResult = ''; webSpeechInterim = '';
+  if (!t) setStatus('⚠️ 没识别到语音，请靠近麦克风、稍大点声再试');
+  return t;
 }
 
 /* ====== LLM 流式 + TTS 播放（可打断）====== */

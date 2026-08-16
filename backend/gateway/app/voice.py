@@ -57,12 +57,20 @@ async def voice_asr(audio: UploadFile = File(...)):
     if not audio_bytes:
         raise HTTPException(status_code=400, detail="empty audio")
 
-    url = p["base_url"].rstrip("/") + "/audio/transcriptions"
+    # ElevenLabs Scribe：/v1/speech-to-text + xi-api-key（extra.asr_style=scribe）
+    # Whisper 兼容：/audio/transcriptions + Bearer（默认）
+    asr_style = p.get("extra", {}).get("asr_style", "whisper")
     files = {
         "file": (audio.filename or "audio.webm", audio_bytes, audio.content_type or "audio/webm"),
     }
-    data = {"model": p["model"] or "whisper-1", "response_format": "json"}
-    headers = {"Authorization": f"Bearer {p['api_key']}"}
+    if asr_style == "scribe":
+        url = p["base_url"].rstrip("/") + "/speech-to-text"
+        data = {"model_id": p["model"] or "scribe_v1"}
+        headers = {"xi-api-key": p["api_key"]}
+    else:
+        url = p["base_url"].rstrip("/") + "/audio/transcriptions"
+        data = {"model": p["model"] or "whisper-1", "response_format": "json"}
+        headers = {"Authorization": f"Bearer {p['api_key']}"}
     async with httpx.AsyncClient(timeout=30.0) as client:
         try:
             resp = await client.post(url, files=files, data=data, headers=headers)

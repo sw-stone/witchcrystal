@@ -3985,10 +3985,9 @@ async function cbStopMic(){
 }
 
 async function cbHandleRecorded(){
-  // 优先用 Web Speech 结果（正式 > 中间），无则试后端 ASR
-  let text = (cbWebSpeechResult || '').trim() || (cbWebSpeechInterim || '').trim();
-  cbWebSpeechResult = ''; cbWebSpeechInterim = '';
-  if (!text && cbChunks.length > 0) {
+  // 优先后端 ASR（ElevenLabs Scribe，不挑浏览器），失败降级 Web Speech 结果
+  let text = '';
+  if (cbChunks.length > 0) {
     const blob = new Blob(cbChunks, {type:'audio/webm'});
     if (blob.size > 500) {
       try {
@@ -3996,8 +3995,13 @@ async function cbHandleRecorded(){
         fd.append('audio', blob, 'speech.webm');
         const r = await fetch(GW + '/voice/asr', {method:'POST', body:fd});
         if (r.ok) { const d = await r.json(); text = (d.text||'').trim(); }
+        else if (r.status === 400) text = '';   // 无 provider → 走 Web Speech
       } catch(e){}
     }
+  }
+  if (!text) {
+    text = (cbWebSpeechResult || '').trim() || (cbWebSpeechInterim || '').trim();
+    cbWebSpeechResult = ''; cbWebSpeechInterim = '';
   }
   if (!text) { $('cbStatus').textContent = '没识别到，靠近麦克风稍大点声试试'; return; }
   if (cbAiSpeaking) cbInterrupt();

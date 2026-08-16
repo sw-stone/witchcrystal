@@ -275,15 +275,14 @@ async function handleRecordingComplete(){
   }
 
   setStatus('🔮 识别中…');
-  // 1. ASR：优先用后端 /voice/asr（若配了 Whisper）；
-  //    失败/未配则降级到浏览器原生 Web Speech API（实时识别，无需 key）
+  // 1. ASR：优先后端 /voice/asr（ElevenLabs Scribe，不挑浏览器）；
+  //    失败/未配则降级到浏览器 Web Speech 结果
   let text = '';
   const asrOk = await tryServerASR(blob);
-  if (asrOk === null) {
-    // 后端 ASR 不可用 → 用浏览器原生 Web Speech
-    text = await nativeWebSpeechASR(blob);
-  } else {
+  if (asrOk !== null) {
     text = asrOk;
+  } else {
+    text = await nativeWebSpeechASR(blob);
   }
   if (!text) { setStatus('没听清，请再说一次'); return; }
 
@@ -301,7 +300,9 @@ async function tryServerASR(blob){
     if (r.status === 400) return null;  // no active asr provider → 降级
     if (!r.ok) return null;
     const d = await r.json();
-    return (d.text || '').trim();
+    const t = (d.text || '').trim();
+    // 后端识别成功但为空 → 返回空串（走"没识别到"提示），不再静默降级
+    return t;
   } catch(e) { return null; }
 }
 

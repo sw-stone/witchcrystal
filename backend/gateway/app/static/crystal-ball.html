@@ -399,9 +399,10 @@ async function streamChatAndSpeak(userText){
             sentenceBuf += delta;
             aiBubble.textContent = fullText;
             $('dialog').scrollTop = $('dialog').scrollHeight;
-            // 按句切分送 TTS（句号/问号/感叹号/换行）
-            const sentenceEnd = /[。！？!?]/;
-            if (sentenceEnd.test(sentenceBuf) && sentenceBuf.length > 5) {
+            // 按句切分送 TTS：句末标点立即切；逗号/省略号攒 12 字也切（降首响延迟）
+            const m = sentenceBuf.match(/[。！？!?；;]/);
+            const soft = sentenceBuf.match(/[，,…]/);
+            if ((m && sentenceBuf.length > 3) || (soft && sentenceBuf.length >= 12) || sentenceBuf.length >= 30) {
               ttsQueue.push(sentenceBuf);
               sentenceBuf = '';
               // 启动 TTS 播放（如果没在播）
@@ -467,18 +468,17 @@ async function playNextTTS(queue, abortCtrl){
 /* 后端 ElevenLabs TTS。返回 true=成功播放，false=失败（应降级） */
 async function tryServerTTS(text, abortCtrl){
   try {
-    // 在官方提供的两个音色间轮换，让水晶球「星语」的嗓音更有层次
-    const voice = ELEVENLABS_VOICE_IDS[ttsVoiceIdx % ELEVENLABS_VOICE_IDS.length];
-    ttsVoiceIdx++;
+    // 守夜女巫固定音色 + 慢语速
+    const voice = ELEVENLABS_VOICE_IDS[0];
     const resp = await fetch(GW + '/voice/tts', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text, voice, ...TTS_VOICE_SETTINGS }),
       signal: abortCtrl.signal,
     });
-    if (!resp.ok) return false;
+    if (!resp.ok) { console.warn('[TTS] server HTTP', resp.status); return false; }
     const arrayBuf = await resp.arrayBuffer();
-    if (arrayBuf.byteLength < 1000) return false;  // 可能是错误 JSON
+    if (arrayBuf.byteLength < 1000) { console.warn('[TTS] too small, maybe error JSON:', new TextDecoder().decode(arrayBuf.slice(0,120))); return false; }
     if (abortCtrl.signal.aborted) return true;
 
     if (!audioCtx || audioCtx.state === 'closed') {
@@ -486,6 +486,7 @@ async function tryServerTTS(text, abortCtrl){
     }
     const audioBuffer = await audioCtx.decodeAudioData(arrayBuf);
     if (!audioBuffer) return false;
+    console.log('[TTS] ElevenLabs playing', text.slice(0, 12), audioBuffer.duration.toFixed(1) + 's');
     return await new Promise(resolve => {
       try {
         currentTTSSource = audioCtx.createBufferSource();
@@ -498,6 +499,7 @@ async function tryServerTTS(text, abortCtrl){
     });
   } catch(e) {
     if (e.name === 'AbortError') return true;  // 被打断算正常结束
+    console.warn('[TTS] err', e);
     return false;
   }
 }

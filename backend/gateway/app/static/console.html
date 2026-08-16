@@ -4048,7 +4048,10 @@ async function cbStreamChatAndSpeak(userText){
             full += delta; buf += delta;
             bubble.textContent = full;
             $('cbDialog').scrollTop = $('cbDialog').scrollHeight;
-            if (/[。！？!?]/.test(buf) && buf.length > 5) {
+            // 句末标点立即切；逗号/省略号攒 12 字也切（降首响延迟）
+            const hardS = /[。！？!?；;]/.test(buf);
+            const softS = /[，,…]/.test(buf);
+            if ((hardS && buf.length > 3) || (softS && buf.length >= 12) || buf.length >= 30) {
               queue.push(buf); buf = '';
               if (!cbAiSpeaking) cbPlayTts(queue, cbTtsAbort);
             }

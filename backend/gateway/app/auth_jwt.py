@@ -30,7 +30,9 @@ PUBLIC_PATHS = {
     "/auth/refresh", "/auth/service-token", "/docs", "/openapi.json",
     "/tuya/callback", "/device/touch-report", "/static",
     # 静态 Web 应用入口页（显式 GET 路由，但 catch-all 鉴权会拦，需显式放行）
-    "/crystal", "/tarot",
+    "/crystal", "/tarot", "/sleep-isle",
+    # 屿眠 Sleep Isle 链路：硬件信号 / 软件信号 / 状态查询（ESP32 与页面均匿名访问）
+    "/device/signal", "/app/signal", "/sleep-flow",
     # Public AI tarot endpoints (server-side key, used by the showcase site).
     "/divination/tarot/interpret-stream", "/divination/tarot/card-reading",
     "/divination/tarot/cards",

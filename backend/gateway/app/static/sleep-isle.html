@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>屿眠 · Sleep Isle</title>
+<style>
+:root{--cream:#f7e5bc;--gold:#e8b65e}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#000;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","PingFang SC",sans-serif;color:var(--cream)}
+/* ============ 视频层（全屏） ============ */
+#videoLayer{position:fixed;inset:0;background:#000;z-index:10}
+#videoLayer video{width:100%;height:100%;object-fit:cover;display:block}
+/* ============ 模块层（iframe） ============ */
+#moduleLayer{position:fixed;inset:0;z-index:20;display:none;background:#0a0c10}
+#moduleFrame{width:100%;height:100%;border:0}
+/* 模块页顶部悬浮：AI 说话小窗（说话动态覆盖规则） */
+#aiMini{position:fixed;right:14px;top:max(14px,env(safe-area-inset-top));width:110px;height:150px;border-radius:14px;overflow:hidden;z-index:30;display:none;border:1px solid rgba(232,182,94,.4);box-shadow:0 8px 30px rgba(0,0,0,.6);pointer-events:none}
+#aiMini video{width:100%;height:100%;object-fit:cover}
+/* 塔罗卡牌上浮动画层 */
+#tarotReveal{position:fixed;inset:0;z-index:25;display:none;align-items:flex-end;justify-content:center;pointer-events:none}
+#tarotReveal .card{width:170px;height:264px;border-radius:14px;margin-bottom:16vh;box-shadow:0 20px 60px rgba(216,180,254,.35);animation:rise 1.4s cubic-bezier(.2,.9,.25,1) forwards;background:linear-gradient(150deg,#2A2540,#1F1B30);display:grid;place-items:center}
+#tarotReveal .card img{width:100%;height:100%;object-fit:cover;border-radius:14px}
+#tarotReveal .card .gem{width:14px;height:14px;border-radius:50%;background:var(--gold);opacity:.7;filter:blur(1px)}
+@keyframes rise{from{transform:translateY(110vh) rotate(4deg);opacity:0}to{transform:translateY(0) rotate(0);opacity:1}}
+/* ============ 底部调试条（可隐藏） ============ */
+#debug{position:fixed;left:0;right:0;bottom:0;z-index:40;display:flex;gap:6px;overflow-x:auto;padding:8px 10px calc(8px + env(safe-area-inset-bottom));background:linear-gradient(transparent,rgba(0,0,0,.75));transition:opacity .3s}
+#debug.hide{opacity:0;pointer-events:none}
+#debug button{flex:0 0 auto;border:1px solid rgba(255,224,163,.25);background:rgba(0,0,0,.5);color:rgba(247,229,188,.8);border-radius:999px;padding:8px 14px;font-size:12px;cursor:pointer;font-family:inherit}
+#debug button.on{color:#fff0cb;border-color:rgba(232,182,94,.7);background:rgba(232,182,94,.2)}
+#statePill{position:fixed;left:50%;transform:translateX(-50%);top:max(10px,env(safe-area-inset-top));z-index:40;font-size:10px;letter-spacing:.15em;color:rgba(247,229,188,.5);background:rgba(0,0,0,.4);border-radius:999px;padding:4px 12px;transition:opacity .3s}
+#statePill.hide{opacity:0}
+#alarmAudio{display:none}
+</style>
+</head>
+<body>
+
+<div id="videoLayer"><video id="mainVideo" playsinline muted></video></div>
+
+<div id="moduleLayer"><iframe id="moduleFrame" src="about:blank" allow="autoplay"></iframe></div>
+
+<div id="aiMini"><video id="aiVideo" playsinline muted loop></video></div>
+
+<div id="tarotReveal"><div class="card"><span class="gem"></span></div></div>
+
+<div id="statePill">BLACK STANDBY</div>
+
+<audio id="alarmAudio" loop>
+  <source src="/static/video/alarm-tone.mp3" type="audio/mpeg">
+</audio>
+
+<div id="debug">
+  <button onclick="hw('joy_front')">前·引入</button>
+  <button onclick="hw('joy_back')">后·黑屏</button>
+  <button onclick="hw('joy_down')">下·底座/停闹钟</button>
+  <button onclick="enterModule('meditation')">冥想</button>
+  <button onclick="enterModule('whitenoise')">白噪音</button>
+  <button onclick="enterModule('breathing')">呼吸</button>
+  <button onclick="enterModule('tarot')">塔罗</button>
+  <button onclick="appSig('tarot_voice_draw')">语音抽卡</button>
+  <button onclick="appSig('alarm_fire')">闹钟</button>
+  <button onclick="aiVoice(true)">AI说话</button>
+  <button onclick="aiVoice(false)">AI停</button>
+  <button onclick="toggleDebug()">隐藏</button>
+</div>
+
+<script>
+/* ============================================================
+ * 屿眠 Sleep Isle · 主控页面（手机插入底座后浏览器打开本页）
+ * 规则（《软件与硬件交互逻辑说明》）：
+ *   - 黑屏待机=纯黑；AI待机=循环 AI待机.mp4；AI说话时=AI说话.mp4（互斥）
+ *   - 引入/锁定/塔罗转场/欢呼=单次播放，播完由页面回报进入下一态
+ *   - 摇杆-后 强制黑屏（最高优先级）
+ *   - 闹钟=闹钟.mp4循环+闹钟音频；停止信号→欢呼→AI待机
+ * ============================================================ */
+const V = {
+  onboarding:  '/static/video/引入.mp4',
+  locked:      '/static/video/锁定.mp4',
+  ai_standby:  '/static/video/AI待机.mp4',
+  ai_speaking: '/static/video/AI说话.mp4',
+  tarot_cast:  '/static/video/塔罗转场.mp4',
+  alarm:       '/static/video/闹钟.mp4',
+  celebrate:   '/static/video/欢呼.mp4'
+};
+const MODULE_URL = {
+  meditation: '/static/meditation/meditation.html',
+  whitenoise: '/static/whitenoise/whitenoise.html',
+  breathing:  '/static/breathing/breathing-orbit.html',
+  tarot:      '/static/tarot.html'
+};
+const STATE_LABEL = {
+  black_standby:'BLACK STANDBY', onboarding:'ONBOARDING', locked:'LOCKED',
+  ai_standby:'AI STANDBY', ai_speaking:'AI SPEAKING', module:'MODULE',
+  tarot_cast:'TAROT CAST', alarm:'ALARM', celebrating:'CELEBRATE'
+};
+
+const mainVideo = document.getElementById('mainVideo');
+const aiVideo   = document.getElementById('aiVideo');
+const videoLayer= document.getElementById('videoLayer');
+const moduleLayer=document.getElementById('moduleLayer');
+const moduleFrame=document.getElementById('moduleFrame');
+const aiMini    = document.getElementById('aiMini');
+const tarotReveal=document.getElementById('tarotReveal');
+const statePill = document.getElementById('statePill');
+const alarmAudio= document.getElementById('alarmAudio');
+
+let lastSeq = -1;
+
+/* ---------- 视频播放工具 ---------- */
+function playMain(url, loop, onEnd) {
+  videoLayer.style.display = 'block';
+  moduleLayer.style.display = 'none';
+  if (!url) { mainVideo.pause(); mainVideo.removeAttribute('src'); mainVideo.load(); return; }
+  mainVideo.loop = !!loop;
+  mainVideo.onended = onEnd || null;
+  mainVideo.src = url;
+  mainVideo.play().catch(()=>{ /* 首次手势解锁后重试 */ });
+}
+function hideMain() { mainVideo.pause(); mainVideo.removeAttribute('src'); mainVideo.load(); }
+
+/* ---------- AI 说话小窗（模块页内叠加） ---------- */
+function setAiMini(on) {
+  if (on) { aiVideo.src = V.ai_speaking; aiVideo.play().catch(()=>{}); aiMini.style.display='block'; }
+  else    { aiVideo.pause(); aiMini.style.display='none'; }
+}
+
+/* ---------- 状态应用 ---------- */
+function applyFlow(f) {
+  if (f.seq === lastSeq) return;
+  const prevSeq = lastSeq; lastSeq = f.seq;
+  statePill.textContent = STATE_LABEL[f.state] || f.state;
+
+  switch (f.state) {
+    case 'black_standby':
+      stopEverything();
+      playMain(null);
+      break;
+
+    case 'onboarding':
+      stopEverything();
+      playMain(V.onboarding, false, () => appSig('module_exit')); // 播完等待下一条信号：回 AI 待机
+      break;
+
+    case 'locked':
+      stopEverything();
+      playMain(V.locked, false, () => { /* 播完 → AI 待机 */ setFlowLocal('ai_standby'); playMain(V.ai_standby, true); statePill.textContent='AI STANDBY'; });
+      break;
+
+    case 'ai_standby':
+      stopEverything();
+      playMain(V.ai_standby, true);
+      break;
+
+    case 'ai_speaking':
+      if (f.prev_state === 'module' || f.prev_state === 'tarot_cast') {
+        // 模块/塔罗页内：小窗显示说话动态（页面仍显示）
+        setAiMini(true);
+      } else {
+        playMain(V.ai_speaking, false, () => appSig('ai_voice', {speaking:false}));
+      }
+      break;
+
+    case 'module':
+      openModule(f.module);
+      break;
+
+    case 'tarot_cast':
+      // 顺序：转场视频 → 卡牌上浮（通知塔罗页执行）→ AI 解读（塔罗页触发 ai_voice）
+      openModule('tarot');
+      playMain(V.tarot_cast, false, () => {
+        videoLayer.style.display='none';
+        tarotReveal.style.display='none';       // 主控层不再自绘卡牌，交给塔罗页
+        moduleFrame.contentWindow?.postMessage({type:'sleep-tarot-reveal'}, '*');
+      });
+      break;
+
+    case 'alarm':
+      playMain(V.alarm, true);
+      alarmAudio.src = '/static/video/alarm-tone.mp3';
+      alarmAudio.play().catch(()=>{});
+      break;
+
+    case 'celebrating':
+      alarmAudio.pause();
+      playMain(V.celebrate, false, () => appSig('module_exit')); // 播完 → AI 待机
+      break;
+  }
+}
+
+function stopEverything() {
+  alarmAudio.pause();
+  setAiMini(false);
+  tarotReveal.style.display='none';
+  moduleLayer.style.display='none';
+  moduleFrame.src = 'about:blank';
+  hideMain();
+}
+
+function setFlowLocal(state) { lastSeq = -1; /* 允许重放 */ }
+
+function openModule(key) {
+  videoLayer.style.display='none';
+  moduleLayer.style.display='block';
+  const url = MODULE_URL[key] || MODULE_URL['meditation'];
+  if (!moduleFrame.src.endsWith(url)) moduleFrame.src = url;
+}
+
+/* ---------- 塔罗卡牌上浮（备用：无塔罗页时主控自绘） ---------- */
+function showTarotReveal() {
+  tarotReveal.querySelector('.card').innerHTML = '<span class="gem"></span>';
+  tarotReveal.style.display='flex';
+  setTimeout(() => { appSig('ai_voice', {speaking:true}); }, 1500);
+}
+
+/* ---------- 与 gateway 通信 ---------- */
+async function hw(event) {
+  await fetch('/device/signal', {method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({device_id:'debug_panel', event})});
+}
+async function appSig(event, extra={}) {
+  await fetch('/app/signal', {method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({event, ...extra})});
+}
+function aiVoice(speaking) { appSig('ai_voice', {speaking}); }
+function enterModule(m) { appSig('enter_module', {module:m}); }
+function toggleDebug() {
+  document.getElementById('debug').classList.toggle('hide');
+  statePill.classList.toggle('hide');
+}
+
+/* ---------- WebSocket ---------- */
+let ws;
+function connectWS() {
+  ws = new WebSocket((location.protocol==='https:'?'wss://':'ws://') + location.host + '/ws/crystal');
+  ws.onmessage = (e) => {
+    try {
+      const d = JSON.parse(e.data);
+      if (d.type === 'sleep_flow') applyFlow(d);
+    } catch(_) {}
+  };
+  ws.onclose = () => setTimeout(connectWS, 2000);
+}
+connectWS();
+
+/* 页面加载即对齐当前状态 */
+fetch('/sleep-flow').then(r=>r.json()).then(f=>applyFlow({...f, type:'sleep_flow'})).catch(()=>{});
+
+/* 首次手势解锁视频自动播放（移动端要求） */
+document.addEventListener('pointerdown', () => { mainVideo.play().catch(()=>{}); }, {once:true});
+
+/* 接收 iframe（塔罗页）的消息：语音抽卡 / AI 语音状态 */
+window.addEventListener('message', (e) => {
+  if (e.data?.type === 'tarot-voice-draw') appSig('tarot_voice_draw');
+  if (e.data?.type === 'ai-voice') appSig('ai_voice', {speaking: !!e.data.speaking});
+});
+</script>
+</body>
+</html>

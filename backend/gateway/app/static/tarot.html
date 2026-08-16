@@ -876,6 +876,69 @@ async function checkConn(){
 renderSpreads();
 checkConn();
 loadDaily();
+
+/* ============================================================
+ * 屿眠 Sleep Isle 集成（嵌入 /sleep-isle iframe 时启用）
+ * - 语音抽卡：Web Speech 识别"请为我抽一张卡"→ postMessage
+ *   → 主控页播 塔罗转场.mp4 → 本页执行卡牌上浮 → AI 语音解读
+ * - AI 语音状态回报：ai-voice {speaking}
+ * ============================================================ */
+const inSleepIsle = () => { try { return window.parent !== window; } catch(_) { return false; } };
+
+/* 语音抽卡监听（仅嵌入模式） */
+if (inSleepIsle() && ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const rec = new SR();
+  rec.lang = 'zh-CN'; rec.continuous = false; rec.interimResults = false;
+  let recActive = false;
+  window.__tarotStartVoiceDraw = () => {
+    if (recActive) return;
+    recActive = true;
+    try { rec.start(); } catch(_) { recActive = false; }
+  };
+  rec.onresult = (e) => {
+    const text = e.results[0][0].transcript || '';
+    if (/抽.{0,4}(一)?张|帮我抽|抽卡|抽牌/.test(text)) {
+      window.parent.postMessage({type:'tarot-voice-draw'}, '*');
+    }
+  };
+  rec.onend = () => { recActive = false; };
+  rec.onerror = () => { recActive = false; };
+}
+
+/* 主控页通知：转场视频结束 → 执行卡牌自下而上出现 + AI 解读 */
+window.addEventListener('message', async (e) => {
+  if (e.data?.type === 'sleep-tarot-reveal') {
+    // 1) 卡牌自下而上出现（单张，single 牌阵）
+    selectedSpread = 'single';
+    beginReading();
+    // 2) 自动抽一张（等效点击 fan 第一张）
+    setTimeout(() => { if (typeof pickFromFan === 'function') pickFromFan(0); }, 600);
+    // 3) AI 解读（goToReading → callInterpretStream 已含流式解读）
+    window.parent.postMessage({type:'ai-voice', speaking:true}, '*');
+  }
+});
+
+/* 流式解读开始/结束回报给主控页（驱动 AI说话.mp4 / AI待机.mp4 切换） */
+(function(){
+  const origFetch = window.fetch;
+  window.fetch = async function(...args) {
+    const resp = await origFetch.apply(this, args);
+    const url = typeof args[0] === 'string' ? args[0] : args[0]?.url || '';
+    if (inSleepIsle() && /interpret|reading|divination/i.test(url)) {
+      window.parent.postMessage({type:'ai-voice', speaking:true}, '*');
+      // 流读完后视为说话结束
+      const reader = resp.body?.getReader?.();
+      if (reader) {
+        (async () => { try { while (true) { const {done} = await reader.read(); if (done) break; } } catch(_){} 
+          window.parent.postMessage({type:'ai-voice', speaking:false}, '*'); })();
+      } else {
+        setTimeout(() => window.parent.postMessage({type:'ai-voice', speaking:false}, '*'), 3000);
+      }
+    }
+    return resp;
+  };
+})();
 </script>
 </body>
 </html>

@@ -60,6 +60,7 @@ _client = httpx.AsyncClient(timeout=30.0)
 _CONSOLE_HTML = Path(__file__).parent / "static" / "console.html"
 _CRYSTAL_HTML = Path(__file__).parent / "static" / "crystal-ball.html"
 _TAROT_HTML = Path(__file__).parent / "static" / "tarot.html"
+_SLEEP_ISLE_HTML = Path(__file__).parent / "static" / "sleep-isle.html"
 
 _HOP_BY_HOP = {
     "connection", "keep-alive", "proxy-authenticate", "proxy-authorization",
@@ -130,6 +131,12 @@ async def crystal_ball_page():
 async def tarot_aura_page():
     """Tarot Aura · Soft Lumina 塔罗占卜 Web 应用（v4 柔光舒缓版样机落地）"""
     return FileResponse(_TAROT_HTML, media_type="text/html")
+
+
+@app.get("/sleep-isle")
+async def sleep_isle_page():
+    """屿眠 Sleep Isle 主控页（手机插底座后打开；摇杆信号经 WS 驱动产品链路）"""
+    return FileResponse(_SLEEP_ISLE_HTML, media_type="text/html")
 
 
 # 静态资源（塔罗牌图片等）——不需要鉴权

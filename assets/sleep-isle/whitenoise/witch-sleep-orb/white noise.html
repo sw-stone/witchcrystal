@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0c101b">
+    <title>晚安水晶球</title>
+    <link rel="stylesheet" href="css/style.css">
+  </head>
+  <body data-theme="rain">
+    <div class="ambient" aria-hidden="true"></div>
+
+    <main class="app">
+      <header class="brand">
+        <p class="eyebrow">GOOD NIGHT ORB</p>
+        <h1>晚安水晶球</h1>
+        <p class="tagline">挑一个今晚想进入的小世界。</p>
+      </header>
+
+      <div class="experience">
+        <section class="scene-stage" aria-labelledby="sceneTitle">
+          <div class="orb-space">
+            <div class="crystal-orb" id="crystalOrb">
+              <div class="orb-aura" aria-hidden="true"></div>
+              <div class="orb-shell">
+                <div class="orb-core">
+                  <div class="orb-video-mask">
+                    <video
+                      id="sceneVideo"
+                      autoplay
+                      loop
+                      muted
+                      playsinline
+                      preload="metadata"
+                      aria-hidden="true"
+                    ></video>
+                    <div class="orb-fallback" id="orbFallback" aria-hidden="true">
+                      <span>✦</span>
+                      <p>场景正在沉睡</p>
+                    </div>
+                  </div>
+                  <div class="orb-inner-haze" aria-hidden="true"></div>
+                  <div class="orb-inner-vignette" aria-hidden="true"></div>
+                </div>
+                <div class="orb-shell-highlight" aria-hidden="true"></div>
+                <div class="orb-shell-highlight-secondary" aria-hidden="true"></div>
+                <div class="orb-shell-rim" aria-hidden="true"></div>
+                <div class="orb-shell-shadow" aria-hidden="true"></div>
+              </div>
+            </div>
+            <div class="orb-base" aria-hidden="true"></div>
+          </div>
+
+          <div class="now-playing" aria-live="polite">
+            <p class="now-label">此刻的小世界</p>
+            <h2 id="sceneTitle">窗边细雨</h2>
+            <p id="sceneDescription">让雨声慢慢覆盖一天的杂念。</p>
+          </div>
+        </section>
+
+        <section class="control-panel" aria-label="声音与播放控制">
+          <div class="control-section categories-section">
+            <div class="section-heading">
+              <p class="step-label">01</p>
+              <h2>选择声音</h2>
+            </div>
+            <div class="category-tabs" id="categoryTabs" role="group" aria-label="声音分类"></div>
+            <div class="scene-list" id="sceneList"></div>
+          </div>
+
+          <div class="control-section playback-section">
+            <div class="section-heading">
+              <p class="step-label">02</p>
+              <h2>安静入睡</h2>
+            </div>
+
+            <div class="player-row">
+              <button class="play-button" id="playButton" type="button" aria-label="播放当前声音">
+                <span class="play-icon" aria-hidden="true">▶</span>
+                <span class="play-text">播放</span>
+              </button>
+
+              <label class="volume-control" for="volumeRange">
+                <span>音量</span>
+                <input id="volumeRange" type="range" min="0" max="1" step="0.01" value="0.55">
+                <output id="volumeValue" for="volumeRange">55%</output>
+              </label>
+            </div>
+
+            <audio id="sceneAudio" loop preload="metadata"></audio>
+
+            <div class="timer-control">
+              <div class="timer-heading">
+                <span>睡眠计时</span>
+                <span class="timer-countdown" id="timerCountdown" aria-live="polite">未开启</span>
+              </div>
+              <div class="timer-options" id="timerOptions" role="group" aria-label="睡眠计时">
+                <button type="button" data-minutes="0" aria-pressed="true">关闭</button>
+                <button type="button" data-minutes="15" aria-pressed="false">15 分钟</button>
+                <button type="button" data-minutes="30" aria-pressed="false">30 分钟</button>
+                <button type="button" data-minutes="60" aria-pressed="false">60 分钟</button>
+              </div>
+            </div>
+
+            <p class="status-message" id="statusMessage" role="status" aria-live="polite">声音尚未播放</p>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <script src="js/sounds.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>

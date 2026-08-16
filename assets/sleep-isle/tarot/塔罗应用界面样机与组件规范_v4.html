@@ -1,0 +1,313 @@
+<svg viewBox="0 0 680 960" xmlns="http://www.w3.org/2000/svg" style="font-family: 'Bodoni Moda', Georgia, serif">
+  <defs>
+    <radialGradient id="bgG2" cx="42%" cy="28%" r="100%">
+      <stop offset="0%" stop-color="#2E2A42"/>
+      <stop offset="35%" stop-color="#241F36"/>
+      <stop offset="100%" stop-color="#1A1626"/>
+    </radialGradient>
+    <radialGradient id="pGlow2" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#E8DFFF" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#7B6BA0" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="rGlow2" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#F0D4C4" stop-opacity="0.09"/>
+      <stop offset="100%" stop-color="#D4A89A" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="gGlow2" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#E6D5A8" stop-opacity="0.07"/>
+      <stop offset="100%" stop-color="#C4A96A" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="gFill2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.07"/>
+      <stop offset="50%" stop-color="#FFFFFF" stop-opacity="0.03"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.05"/>
+    </linearGradient>
+    <linearGradient id="gEdge2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.20"/>
+      <stop offset="50%" stop-color="#FFFFFF" stop-opacity="0.06"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.12"/>
+    </linearGradient>
+    <linearGradient id="lavMist2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#B8A4E0"/>
+      <stop offset="100%" stop-color="#8B9FD1"/>
+    </linearGradient>
+    <linearGradient id="roseG2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E8B4A8"/>
+      <stop offset="100%" stop-color="#D4A088"/>
+    </linearGradient>
+    <linearGradient id="moonG2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#DBC8A0"/>
+      <stop offset="100%" stop-color="#C4AE78"/>
+    </linearGradient>
+    <filter id="sBlur2" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="20"/>
+    </filter>
+    <filter id="mBlur2" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3"/>
+    </filter>
+    <!-- phone frame -->
+    <clipPath id="phoneClip">
+      <rect x="0" y="0" width="260" height="540" rx="28"/>
+    </clipPath>
+  </defs>
+
+  <rect width="680" height="960" fill="url(#bgG2)"/>
+  <ellipse cx="180" cy="200" rx="260" ry="180" fill="url(#pGlow2)"/>
+  <ellipse cx="520" cy="500" rx="240" ry="200" fill="url(#rGlow2)"/>
+  <ellipse cx="340" cy="820" rx="280" ry="180" fill="url(#gGlow2)"/>
+
+  <!-- 标题 -->
+  <text x="40" y="48" font-size="20" fill="#DDD4C8" font-weight="500" style="font-family:'Bodoni Moda',Georgia,serif">Tarot Aura</text>
+  <text x="40" y="66" font-size="9" fill="#9A8FAA" letter-spacing="3" style="font-family:'Jost',sans-serif; text-transform:uppercase">Screen Mockups & Components v4 — Soft Lumina</text>
+  <line x1="40" y1="78" x2="640" y2="78" stroke="#FFFFFF" stroke-opacity="0.08" stroke-width="0.6"/>
+
+  <!-- ========== Screen 1: 首页 / 今日塔罗 ========== -->
+  <g transform="translate(20,92)">
+    <text x="130" y="14" text-anchor="middle" font-size="8" fill="#8A80A0" letter-spacing="2" style="font-family:'Jost',sans-serif; text-transform:uppercase">01 · Home / Daily Draw</text>
+    <g transform="translate(0,22)">
+      <rect width="260" height="480" rx="28" fill="#221E33"/>
+      <rect width="260" height="480" rx="28" fill="url(#gEdge2)" opacity="0.25"/>
+      <g clip-path="url(#phoneClip)">
+        <!-- 极光背景 -->
+        <ellipse cx="130" cy="120" rx="100" ry="80" fill="#B8A4E0" opacity="0.10" filter="url(#sBlur2)"/>
+        <ellipse cx="180" cy="200" rx="80" ry="60" fill="#E8B4A8" opacity="0.07" filter="url(#sBlur2)"/>
+
+        <!-- 月相光球 -->
+        <circle cx="130" cy="90" r="30" fill="#DBC8A0" opacity="0.12" filter="url(#sBlur2)"/>
+        <circle cx="130" cy="90" r="16" fill="#DBC8A0" opacity="0.22" filter="url(#mBlur2)"/>
+        <circle cx="130" cy="90" r="8" fill="#E6D5A8" opacity="0.5"/>
+        <circle cx="130" cy="90" r="20" fill="none" stroke="#DBC8A0" stroke-width="0.5" opacity="0.25">
+          <animate attributeName="r" values="18;24;18" dur="5s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.3;0.12;0.3" dur="5s" repeatCount="indefinite"/>
+        </circle>
+
+        <!-- 日期 -->
+        <text x="130" y="148" text-anchor="middle" font-size="7" fill="#8A80A0" letter-spacing="2.5" style="font-family:'Jost',sans-serif; text-transform:uppercase">Friday · Aug 14</text>
+
+        <!-- 今日牌（玻璃卡片） -->
+        <rect x="60" y="165" width="140" height="180" rx="18" fill="url(#gFill2)" stroke="url(#gEdge2)" stroke-width="0.6"/>
+        <ellipse cx="130" cy="235" rx="50" ry="35" fill="url(#pGlow2)"/>
+        <!-- 抽象牌面图标 -->
+        <circle cx="130" cy="235" r="22" fill="none" stroke="#B8A4E0" stroke-width="0.6" opacity="0.4"/>
+        <path d="M 118,235 Q 130,218 142,235 Q 130,252 118,235 Z" fill="#B8A4E0" opacity="0.3"/>
+        <circle cx="130" cy="235" r="4" fill="#DBC8A0" opacity="0.6"/>
+        <text x="130" y="285" text-anchor="middle" font-size="13" fill="#DDD4C8" style="font-family:'Bodoni Moda',serif" font-style="italic">The Star</text>
+        <text x="130" y="300" text-anchor="middle" font-size="7" fill="#8A80A0" style="font-family:'Jost',sans-serif">XVII · 希望 · 疗愈</text>
+        <text x="130" y="332" text-anchor="middle" font-size="6.5" fill="#7B6F8A" style="font-family:'Jost',sans-serif">tap to reveal ↗</text>
+
+        <!-- 关键词标签 -->
+        <rect x="48" y="360" width="56" height="22" rx="11" fill="url(#gFill2)" stroke="url(#gEdge2)" stroke-width="0.5"/>
+        <text x="76" y="374" text-anchor="middle" font-size="7" fill="#B8A4E0" style="font-family:'Jost',sans-serif">Hope</text>
+        <rect x="110" y="360" width="56" height="22" rx="11" fill="url(#gFill2)" stroke="url(#gEdge2)" stroke-width="0.5"/>
+        <text x="138" y="374" text-anchor="middle" font-size="7" fill="#E8B4A8" style="font-family:'Jost',sans-serif">Renewal</text>
+        <rect x="172" y="360" width="56" height="22" rx="11" fill="url(#gFill2)" stroke="url(#gEdge2)" stroke-width="0.5"/>
+        <text x="200" y="374" text-anchor="middle" font-size="7" fill="#DBC8A0" style="font-family:'Jost',sans-serif">Faith</text>
+
+        <!-- 底部导航 -->
+        <line x1="24" y1="410" x2="236" y2="410" stroke="#FFFFFF" stroke-opacity="0.06" stroke-width="0.5"/>
+        <circle cx="60" cy="438" r="4" fill="#B8A4E0" opacity="0.7"/>
+        <text x="60" y="458" text-anchor="middle" font-size="6.5" fill="#B8A4E0" style="font-family:'Jost',sans-serif">Today</text>
+        <circle cx="130" cy="438" r="3" fill="#FFFFFF" opacity="0.2"/>
+        <text x="130" y="458" text-anchor="middle" font-size="6.5" fill="#7B6F8A" style="font-family:'Jost',sans-serif">Spread</text>
+        <circle cx="200" cy="438" r="3" fill="#FFFFFF" opacity="0.2"/>
+        <text x="200" y="458" text-anchor="middle" font-size="6.5" fill="#7B6F8A" style="font-family:'Jost',sans-serif">Diary</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ========== Screen 2: 牌阵选择 ========== -->
+  <g transform="translate(300,92)">
+    <text x="130" y="14" text-anchor="middle" font-size="8" fill="#8A80A0" letter-spacing="2" style="font-family:'Jost',sans-serif; text-transform:uppercase">02 · Spread Selection</text>
+    <g transform="translate(0,22)">
+      <rect width="260" height="480" rx="28" fill="#221E33"/>
+      <rect width="260" height="480" rx="28" fill="url(#gEdge2)" opacity="0.25"/>
+      <g clip-path="url(#phoneClip)">
+        <ellipse cx="130" cy="60" rx="90" ry="50" fill="#8B9FD1" opacity="0.08" filter="url(#sBlur2)"/>
+
+        <text x="130" y="48" text-anchor="middle" font-size="7" fill="#8A80A0" letter-spacing="2" style="font-family:'Jost',sans-serif; text-transform:uppercase">Choose Spread</text>
+        <text x="130" y="72" text-anchor="middle" font-size="16" fill="#DDD4C8" style="font-family:'Bodoni Moda',serif" font-style="italic">选择牌阵</text>
+
+        <!-- 单张 -->
+        <rect x="30" y="92" width="200" height="66" rx="16" fill="url(#gFill2)" stroke="url(#gEdge2)" stroke-width="0.6"/>
+        <circle cx="58" cy="125" r="10" fill="#B8A4E0" opacity="0.2" filter="url(#mBlur2)"/>
+        <circle cx="58" cy="125" r="5" fill="#B8A4E0" opacity="0.5"/>
+        <text x="80" y="120" font-size="11" fill="#DDD4C8" style="font-family:'Bodoni Moda',serif" font-style="italic">Single Card</text>
+        <text x="80" y="134" font-size="7" fill="#8A80A0" style="font-family:'Jost',sans-serif">单张 · 今日指引</text>
+        <text x="80" y="146" font-size="6.5" fill="#6B6080" style="font-family:'Jost',sans-serif">1 card · 30s</text>
+
+        <!-- 三牌（选中态） -->
+        <rect x="30" y="170" width="200" height="66" rx="16" fill="url(#lavMist2)" opacity="0.12"/>
+        <rect x="30" y="170" width="200" height="66" rx="16" fill="none" stroke="url(#lavMist2)" stroke-width="1.2" opacity="0.7"/>
+        <circle cx="58" cy="203" r="10" fill="#B8A4E0" opacity="0.3" filter="url(#mBlur2)"/>
+        <circle cx="58" cy="203" r="5" fill="#B8A4E0" opacity="0.7"/>
+        <text x="80" y="198" font-size="11" fill="#DDD4C8" style="font-family:'Bodoni Moda',serif" font-style="italic">Three Card Spread</text>
+        <text x="80" y="212" font-size="7" fill="#B8A4E0" style="font-family:'Jost',sans-serif">三牌 · 过去·现在·未来</text>
+        <text x="80" y="224" font-size="6.5" fill="#8A80A0" style="font-family:'Jost',sans-serif">3 cards · 2min · selected</text>
+        <!-- 选中指示 -->
+        <circle cx="214" cy="203" r="6" fill="url(#lavMist2)" opacity="0.8"/>
+        <path d="M 211,203 L 213,205 L 217,201" fill="none" stroke="#fff" stroke-width="1" opacity="0.9"/>
+
+        <!-- 凯尔特十字 -->
+        <rect x="30" y="248" width="200" height="66" rx="16" fill="url(#gFill2)" stroke="url(#gEdge2)" stroke-width="0.6"/>
+        <circle cx="58" cy="281" r="10" fill="#DBC8A0" opacity="0.18" filter="url(#mBlur2)"/>
+        <circle cx="58" cy="281" r="5" fill="#DBC8A0" opacity="0.45"/>
+        <text x="80" y="276" font-size="11" fill="#DDD4C8" style="font-family:'Bodoni Moda',serif" font-style="italic">Celtic Cross</text>
+        <text x="80" y="290" font-size="7" fill="#8A80A0" style="font-family:'Jost',sans-serif">凯尔特十字 · 深度解读</text>
+        <text x="80" y="302" font-size="6.5" fill="#6B6080" style="font-family:'Jost',sans-serif">10 cards · 5min</text>
+
+        <!-- 关系牌阵 -->
+        <rect x="30" y="326" width="200" height="66" rx="16" fill="url(#gFill2)" stroke="url(#gEdge2)" stroke-width="0.6"/>
+        <circle cx="58" cy="359" r="10" fill="#E8B4A8" opacity="0.18" filter="url(#mBlur2)"/>
+        <circle cx="58" cy="359" r="5" fill="#E8B4A8" opacity="0.45"/>
+        <text x="80" y="354" font-size="11" fill="#DDD4C8" style="font-family:'Bodoni Moda',serif" font-style="italic">Relationship</text>
+        <text x="80" y="368" font-size="7" fill="#8A80A0" style="font-family:'Jost',sans-serif">关系牌阵 · 双人指引</text>
+        <text x="80" y="380" font-size="6.5" fill="#6B6080" style="font-family:'Jost',sans-serif">7 cards · 3min</text>
+
+        <!-- 确认按钮 -->
+        <rect x="30" y="410" width="200" height="44" rx="22" fill="url(#lavMist2)" opacity="0.8"/>
+        <text x="130" y="437" text-anchor="middle" font-size="10" fill="#fff" style="font-family:'Jost',sans-serif" letter-spacing="1">Begin Reading</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ========== Screen 3: 抽牌 ========== -->
+  <g transform="translate(20,590)">
+    <text x="130" y="14" text-anchor="middle" font-size="8" fill="#8A80A0" letter-spacing="2" style="font-family:'Jost',sans-serif; text-transform:uppercase">03 · Drawing Cards</text>
+    <g transform="translate(0,22)">
+      <rect width="260" height="330" rx="28" fill="#221E33"/>
+      <rect width="260" height="330" rx="28" fill="url(#gEdge2)" opacity="0.25"/>
+      <g clip-path="url(#phoneClip)">
+        <!-- 氛围光 -->
+        <ellipse cx="130" cy="140" rx="120" ry="90" fill="#B8A4E0" opacity="0.06" filter="url(#sBlur2)"/>
+        <ellipse cx="130" cy="100" rx="60" ry="40" fill="#DBC8A0" opacity="0.05" filter="url(#sBlur2)"/>
+
+        <text x="130" y="38" text-anchor="middle" font-size="7" fill="#8A80A0" letter-spacing="2" style="font-family:'Jost',sans-serif; text-transform:uppercase">Focus & Draw</text>
+        <text x="130" y="60" text-anchor="middle" font-size="11" fill="#DDD4C8" style="font-family:'Bodoni Moda',serif" font-style="italic">深呼吸，选择你的牌</text>
+
+        <!-- 扇形牌背 -->
+        <g transform="translate(130,170)">
+          <g transform="rotate(-24)">
+            <rect x="-22" y="-65" width="44" height="90" rx="8" fill="url(#gFill2)" stroke="url(#gEdge2)" stroke-width="0.5"/>
+            <circle cx="0" cy="-20" r="6" fill="#DBC8A0" opacity="0.2" filter="url(#mBlur2)"/>
+            <circle cx="0" cy="-20" r="2.5" fill="#DBC8A0" opacity="0.5"/>
+          </g>
+          <g transform="rotate(-8)">
+            <rect x="-22" y="-70" width="44" height="95" rx="8" fill="url(#gFill2)" stroke="url(#gEdge2)" stroke-width="0.5"/>
+            <circle cx="0" cy="-25" r="6" fill="#B8A4E0" opacity="0.2" filter="url(#mBlur2)"/>
+            <circle cx="0" cy="-25" r="2.5" fill="#B8A4E0" opacity="0.5"/>
+          </g>
+          <g transform="rotate(8)">
+            <rect x="-22" y="-70" width="44" height="95" rx="8" fill="url(#gFill2)" stroke="url(#gEdge2)" stroke-width="0.5"/>
+            <circle cx="0" cy="-25" r="6" fill="#E8B4A8" opacity="0.2" filter="url(#mBlur2)"/>
+            <circle cx="0" cy="-25" r="2.5" fill="#E8B4A8" opacity="0.5"/>
+          </g>
+          <g transform="rotate(24)">
+            <rect x="-22" y="-65" width="44" height="90" rx="8" fill="url(#gFill2)" stroke="url(#gEdge2)" stroke-width="0.5"/>
+            <circle cx="0" cy="-20" r="6" fill="#8B9FD1" opacity="0.2" filter="url(#mBlur2)"/>
+            <circle cx="0" cy="-20" r="2.5" fill="#8B9FD1" opacity="0.5"/>
+          </g>
+          <!-- 中心引导光 -->
+          <circle cx="0" cy="0" r="14" fill="#DBC8A0" opacity="0.12" filter="url(#sBlur2)"/>
+          <circle cx="0" cy="0" r="6" fill="#DBC8A0" opacity="0.35"/>
+          <circle cx="0" cy="0" r="16" fill="none" stroke="#DBC8A0" stroke-width="0.4" opacity="0.3">
+            <animate attributeName="r" values="14;20;14" dur="4s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="0.4;0.1;0.4" dur="4s" repeatCount="indefinite"/>
+          </circle>
+        </g>
+
+        <!-- 进度 -->
+        <text x="130" y="260" text-anchor="middle" font-size="7.5" fill="#8A80A0" style="font-family:'Jost',sans-serif">Draw 1 of 3</text>
+        <circle cx="118" cy="274" r="3" fill="#B8A4E0" opacity="0.8"/>
+        <circle cx="130" cy="274" r="3" fill="#FFFFFF" opacity="0.15"/>
+        <circle cx="142" cy="274" r="3" fill="#FFFFFF" opacity="0.15"/>
+
+        <!-- 提示 -->
+        <text x="130" y="300" text-anchor="middle" font-size="7" fill="#7B6F8A" style="font-family:'Jost',sans-serif">轻触一张牌 · 感受它的能量</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ========== Screen 4: 牌阵+解读 ========== -->
+  <g transform="translate(300,590)">
+    <text x="130" y="14" text-anchor="middle" font-size="8" fill="#8A80A0" letter-spacing="2" style="font-family:'Jost',sans-serif; text-transform:uppercase">04 · Reading & Interpretation</text>
+    <g transform="translate(0,22)">
+      <rect width="260" height="330" rx="28" fill="#221E33"/>
+      <rect width="260" height="330" rx="28" fill="url(#gEdge2)" opacity="0.25"/>
+      <g clip-path="url(#phoneClip)">
+        <ellipse cx="130" cy="80" rx="100" ry="60" fill="#B8A4E0" opacity="0.06" filter="url(#sBlur2)"/>
+
+        <text x="130" y="34" text-anchor="middle" font-size="7" fill="#8A80A0" letter-spacing="2" style="font-family:'Jost',sans-serif; text-transform:uppercase">Three Card Reading</text>
+
+        <!-- 三牌布局 -->
+        <!-- Card 1: Past (已翻) -->
+        <g transform="translate(40,48)">
+          <rect width="52" height="72" rx="8" fill="url(#gFill2)" stroke="url(#gEdge2)" stroke-width="0.5"/>
+          <ellipse cx="26" cy="36" rx="18" ry="14" fill="url(#pGlow2)"/>
+          <circle cx="26" cy="32" r="7" fill="none" stroke="#8B9FD1" stroke-width="0.5" opacity="0.4"/>
+          <circle cx="26" cy="32" r="3" fill="#8B9FD1" opacity="0.5"/>
+          <text x="26" y="56" text-anchor="middle" font-size="5.5" fill="#8B9FD1" style="font-family:'Jost',sans-serif">Upright</text>
+          <text x="26" y="66" text-anchor="middle" font-size="6" fill="#DDD4C8" style="font-family:'Bodoni Moda',serif" font-style="italic">Sun</text>
+          <!-- 正位标签 -->
+          <rect x="8" y="-10" width="36" height="14" rx="7" fill="#8B9FD1" opacity="0.2" stroke="#8B9FD1" stroke-width="0.4" stroke-opacity="0.4"/>
+          <text x="26" y="0" text-anchor="middle" font-size="5.5" fill="#8B9FD1" style="font-family:'Jost',sans-serif">Past</text>
+        </g>
+
+        <!-- Card 2: Present (已翻·逆位) -->
+        <g transform="translate(104,48)">
+          <rect width="52" height="72" rx="8" fill="url(#gFill2)" stroke="url(#gEdge2)" stroke-width="0.5"/>
+          <ellipse cx="26" cy="36" rx="18" ry="14" fill="url(#rGlow2)"/>
+          <g transform="rotate(180 26 36)">
+            <path d="M 20,28 Q 26,22 32,28 Q 26,42 20,28 Z" fill="#E8B4A8" opacity="0.35"/>
+            <circle cx="26" cy="30" r="2.5" fill="#DBC8A0" opacity="0.5"/>
+          </g>
+          <text x="26" y="56" text-anchor="middle" font-size="5.5" fill="#B8A4E0" style="font-family:'Jost',sans-serif">Reversed</text>
+          <text x="26" y="66" text-anchor="middle" font-size="6" fill="#DDD4C8" style="font-family:'Bodoni Moda',serif" font-style="italic">Moon</text>
+          <rect x="6" y="-10" width="40" height="14" rx="7" fill="#B8A4E0" opacity="0.2" stroke="#B8A4E0" stroke-width="0.4" stroke-opacity="0.4"/>
+          <text x="26" y="0" text-anchor="middle" font-size="5.5" fill="#B8A4E0" style="font-family:'Jost',sans-serif">Present</text>
+        </g>
+
+        <!-- Card 3: Future (未翻) -->
+        <g transform="translate(168,48)">
+          <rect width="52" height="72" rx="8" fill="url(#lavMist2)" opacity="0.12" stroke="url(#lavMist2)" stroke-width="0.5" stroke-opacity="0.3"/>
+          <circle cx="26" cy="36" r="8" fill="#DBC8A0" opacity="0.15" filter="url(#mBlur2)"/>
+          <circle cx="26" cy="36" r="3" fill="#DBC8A0" opacity="0.4">
+            <animate attributeName="opacity" values="0.2;0.6;0.2" dur="3s" repeatCount="indefinite"/>
+          </circle>
+          <text x="26" y="56" text-anchor="middle" font-size="5.5" fill="#7B6F8A" style="font-family:'Jost',sans-serif">Tap to flip</text>
+          <rect x="10" y="-10" width="32" height="14" rx="7" fill="url(#gFill2)" stroke="url(#gEdge2)" stroke-width="0.5"/>
+          <text x="26" y="0" text-anchor="middle" font-size="5.5" fill="#7B6F8A" style="font-family:'Jost',sans-serif">Future</text>
+        </g>
+
+        <!-- 分隔 -->
+        <line x1="30" y1="140" x2="230" y2="140" stroke="#FFFFFF" stroke-opacity="0.06" stroke-width="0.5"/>
+        <circle cx="130" cy="140" r="2.5" fill="#DBC8A0" opacity="0.4"/>
+
+        <!-- 牌义解读卡 -->
+        <rect x="20" y="155" width="220" height="145" rx="14" fill="url(#gFill2)" stroke="url(#gEdge2)" stroke-width="0.5"/>
+        <!-- 左侧极光竖条 -->
+        <rect x="20" y="155" width="3" height="145" rx="1.5" fill="url(#lavMist2)" opacity="0.6"/>
+
+        <text x="34" y="176" font-size="9.5" fill="#DDD4C8" style="font-family:'Bodoni Moda',serif" font-style="italic">The Sun XIX</text>
+        <text x="34" y="188" font-size="6.5" fill="#8A80A0" style="font-family:'Jost',sans-serif">太阳 · 正位 · 过去</text>
+
+        <text x="34" y="206" font-size="7" fill="#B8A4E0" style="font-family:'Jost',sans-serif">关键词</text>
+        <rect x="34" y="210" width="38" height="14" rx="7" fill="url(#gFill2)" stroke="url(#gEdge2)" stroke-width="0.4"/>
+        <text x="53" y="220" text-anchor="middle" font-size="5.5" fill="#DBC8A0" style="font-family:'Jost',sans-serif">Joy</text>
+        <rect x="76" y="210" width="44" height="14" rx="7" fill="url(#gFill2)" stroke="url(#gEdge2)" stroke-width="0.4"/>
+        <text x="98" y="220" text-anchor="middle" font-size="5.5" fill="#9BCBB0" style="font-family:'Jost',sans-serif">Vitality</text>
+        <rect x="124" y="210" width="48" height="14" rx="7" fill="url(#gFill2)" stroke="url(#gEdge2)" stroke-width="0.4"/>
+        <text x="148" y="220" text-anchor="middle" font-size="5.5" fill="#E8B4A8" style="font-family:'Jost',sans-serif">Success</text>
+
+        <text x="34" y="240" font-size="7" fill="#7B6F8A" style="font-family:'Jost',sans-serif">过去你经历了内心的温暖与</text>
+        <text x="34" y="252" font-size="7" fill="#7B6F8A" style="font-family:'Jost',sans-serif">充实，这段经历为现在奠定</text>
+        <text x="34" y="264" font-size="7" fill="#7B6F8A" style="font-family:'Jost',sans-serif">了光明的根基…</text>
+
+        <text x="34" y="286" font-size="6.5" fill="#B8A4E0" style="font-family:'Jost',sans-serif">展开完整解读 →</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ========== 组件规范区 ========== -->
+  <line x1="40" y1="940" x2="640" y2="940" stroke="#FFFFFF" stroke-opacity="0.06" stroke-width="0.5"/>
+  <text x="40" y="954" font-size="7" fill="#5A5070" style="font-family:'Jost',sans-serif">v4 Soft Lumina · 柔光舒缓 · 高智感高质感 · 灵动呼吸 · Bodoni Moda + Jost · UI-UX Pro Max Engineered</text>
+</svg>

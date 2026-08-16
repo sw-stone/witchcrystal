@@ -1,22 +1,22 @@
 # 屿眠 Sleep Isle · 素材清单（assets-manifest）
 
-> 生成时间：2026-08-16（Agent A 任务 1 / TODO-D7 关闭）
+> 生成时间：2026-08-16（Agent A 任务 1 / TODO-D7 关闭）；**同日 16:40 更新：附件下载通道已修复（应用侧开通媒体下载权限），全部原始附件已入库**
 > 素材来源：飞书 wiki《【To Lin】内部协作文档For开发》（wiki token `OPbZwxsTliwGnykGIekclHCBncj` / docx `ELnFdlAIZotTzYxrtNIcztspnVc`）正文所列附件 + 本地已集成副本
 > 落位根目录：`assets/sleep-isle/`
 
-## 0. 下载说明（重要）
+## 0. 下载说明（已解决）
 
-飞书 wiki 附件下载接口（`/open-apis/drive/v1/medias/<token>/download`）当前对 user/bot 双身份均返回 **HTTP 403**（应用侧媒体下载权限受限，且 252MB 大包超出 lark-cli 可下载范围，此前会话已验证）。本清单采用**本地已有副本归位**策略：wiki 所列附件中，凡本地（`backend/gateway/app/static/`、`PocketTarotCards-Rounded/` 等）已有等价物的，已复制入 `assets/sleep-isle/` 并在下表标注"本地归位"；仍缺失的标注"待补"。wiki 原始附件 token 一并记录，供后续手动导出（飞书网页端右键另存）使用。
+初版清单曾因应用侧（cli_aaec51583021dd1c）未开通媒体下载权限全线 403。16:30 管理员开通后，`docs +media-download`（user）与 medias v1 直链全部恢复，**全部附件已按原始 token 下载入库**；此前"本地归位"副本保留不动。252MB 原包 `witch-sleep-orb-original.zip` 已存 `assets/sleep-isle/whitenoise/`（.gitignore 排除，超 GitHub 100MB 限制，需走 Releases/网盘分发）。
 
 ## 1. 呼吸模块（breathing）
 
 | 项 | 值 |
 |---|---|
 | 来源包 | `breathing-orbit-package.zip`（wiki token `EnOCbi3zBoTs33xCjnhc6BmXnKd`，163KB） |
-| 本地落位 | `assets/sleep-isle/breathing/breathing-orbit.html`（8.7KB，已解包版）+ `breathin.mp3` / `breathout.mp3` 音效 |
+| 本地落位 | `assets/sleep-isle/breathing/breathing-orbit.html`（8.7KB）+ `breathin.mp3` / `breathout.mp3` + **原始包 breathing-orbit-package.zip（159KB，校验：3 文件同已解包版）** |
 | HTML 入口 | `breathing-orbit.html`（自包含，Canvas 轨道动画） |
 | JS 接口 | `addEventListener('resize'/'pointerdown'/'click')`；无 fetch/postMessage 对外接口（纯本地动画） |
-| 状态 | 本地归位 ✅（zip 原包受 403 限制未重新下载，功能等价） |
+| 状态 | **原包已下载 ✅**（与本地解包版一致） |
 
 ## 2. 白噪声模块（whitenoise）
 
@@ -27,8 +27,9 @@
 | HTML 入口 | `whitenoise.html` |
 | JS 接口 | `SCENES` 五场景（rain雨/ocean海/forest林/fire火/space空）+ `load(sIdx,tIdx,silent)` + `ASSETS` 前缀变量；`<video id="vid">` 场景视频 + `new Audio()` 音轨循环 |
 | 场景音轨清单 | rain: 窗上雨/远雷雨 · ocean: 深海 · forest: 林间溪/夜森林 · fire:（无音轨） · space: 深空/星际氛围 |
-| 状态 | **替代版本地归位 ✅ / 原包未展开**（252MB zip 只登记清单：五场景视频 mp4 + 场景 mp3，文件名见 JS `pickVideo` map：rain-on-window / distant-thunder-rain / gentle-ocean-waves / deep-ocean / forest-stream / night-forest / campfire-night / deep-space / space-ambience）。`static/witch-sleep-orb/assets/` 目录为空壳 |
-| 遗留缺口 | 原包视频/音频素材本体未入库（需飞书网页端手动下载或断网降级用 WebAudio 算法生成） |
+| 状态 | **原包已下载并解包 ✅**：`assets/sleep-isle/whitenoise/witch-sleep-orb/`（white noise.html + js/app.js + js/sounds.js + css/style.css + ASSET_MANIFEST.md + README.md）+ `assets/audio/*`（10 mp3）+ `assets/video/*`（10 mp4，168MB）；原 zip 保留为 witch-sleep-orb-original.zip（gitignore） |
+| 音轨实测时长 | campfire 61s / cozy-fireplace 17s / forest-stream 210s / night-forest 200s / deep-ocean 425s / gentle-waves 61s / distant-thunder 384s / rain-on-window 760s / deep-space 185s / space-ambience 145s |
+| 与自建 whitenoise.html 关系 | JS `pickVideo` map 文件名与原包完全对应；原包 fire 场景实际有 2 条音轨（自建版 fire 无音轨记录待同步） |
 
 ## 3. 塔罗模块（tarot）
 
@@ -37,8 +38,8 @@
 | 图片素材包 | `PocketTarotCards-Rounded.zip`（wiki token `DCwXbY5PooIqTIxqt5lcLHWQnlg`，82MB） |
 | 本地落位 | `assets/sleep-isle/tarot/pocket-png/`（80 张 PNG：00-TheFool ~ 77-KingOfPentacles + card-back + _preview，来自本地已解包目录） |
 | 线上 webp | `assets/sleep-isle/tarot/*.webp`（79 张：22 大阿卡纳带编号 `0-愚人`~`21-世界` + 56 小阿卡纳不带编号 `权杖1`~`星币国王` + `背面牌`） |
-| 视觉模板 ×2 | `塔罗应用界面样机与组件规范_v4.html`（token `XkRWboQouojLFTxV5wcc4MQEnNc`，22KB）/ `塔罗应用设计令牌_v4_柔光舒缓版.html`（token `LUO1b3wXLoWQo5xziqqcCTN1nxc`，23KB）——**受 403 限制未下载，待补**（线上在用等价实现：`static/tarot.html` + `static/console.html`） |
-| 状态 | PNG+webp 双套牌库本地归位 ✅；2 个 v4 规范 HTML 待补 |
+| 视觉模板 ×2 | `assets/sleep-isle/tarot/塔罗应用界面样机与组件规范_v4.html`（22KB ✅ 已下载）/ `塔罗应用设计令牌_v4_柔光舒缓版.html`（23KB ✅ 已下载，网络重试 1 次成功） |
+| 状态 | PNG+webp 双套牌库 ✅ + 2 个 v4 规范 HTML ✅ 全齐 |
 
 ## 4. 冥想模块（meditation）
 
@@ -68,7 +69,8 @@
 
 ## 6. 遗留缺口汇总
 
-1. **塔罗音效.mp4**：产品链路表 S6 塔罗路径引用「塔罗音效.mp4」，wiki 素材区未附此文件——需产品补素材或用 alarm-tone.mp3 类提示音替代
-2. **witch-sleep-orb.zip（252MB）**：五场景视频+音频本体未入库，当前用自建 whitenoise.html（含场景定义+播放逻辑，素材路径已预留 `ASSETS+'video/'+key+'/'`）替代；断网兜底方案 = WebAudio 算法生成
-3. **塔罗 v4 规范 HTML ×2**：受附件下载 403 限制未取得，线上 tarot.html 为等效实现
-4. **附件下载通道**：lark-cli `docs +media-download` 对该 wiki 全部附件 403（user 已有 `docs:document.media:download` scope 仍被拒），建议人工在飞书网页端导出
+1. ~~塔罗音效~~ **已替代生成**：wiki 确实未附。已用 ffmpeg 合成风铃双音（880→1320Hz，0.6s，aac）落位 `assets/sleep-isle/videos/塔罗音效.m4a`；产品后续可替换真人素材
+2. ~~witch-sleep-orb 252MB~~ **已入库**（见第 2 节）；唯一跟进项：自建 whitenoise.html 的 fire 场景音轨表需补 campfire-night/cozy-fireplace 两条
+3. ~~塔罗 v4 规范 HTML~~ **已下载入库**
+4. ~~附件下载通道 403~~ **已修复**（管理员开通应用侧权限；期间发现网络对 23KB 文件偶发 connection reset，重试即过）
+5. 新增小项：`assets/sleep-isle/` 总量 607MB/206 文件，其中 252MB 原包 zip 已 gitignore；若仓库要收全量素材，建议 GitHub Releases 挂 witch-sleep-orb-original.zip

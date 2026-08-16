@@ -91,3 +91,6 @@ logs/
 *.bak
 *.backup
 /tmp/
+
+# 大素材包（252MB 超 git 限制，走网盘/ Releases）
+assets/sleep-isle/whitenoise/witch-sleep-orb-original.zip

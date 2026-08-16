@@ -4074,9 +4074,10 @@ async function cbPlayTts(queue, abortCtrl){
 
 async function cbTryServerTts(text, abortCtrl){
   try {
+    // 守夜女巫固定音色：低语女声 + 慢语速（人格文档 ~80 词/分钟）
     const resp = await fetch(GW + '/voice/tts', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({text}),
+      body: JSON.stringify({text, voice:'Z3R5wn05IrDiVCyEkUrK', speed:0.85, stability:0.65, similarity_boost:0.8}),
       signal: abortCtrl.signal
     });
     if (!resp.ok) return false;

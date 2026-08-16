@@ -112,8 +112,10 @@ let audioCtx = null;
 let ttsAbortController = null;      // TTS fetch 可中断
 let chatAbortController = null;     // LLM SSE 可中断
 
-// ElevenLabs 官方音色 ID（水晶球语音交互轮换使用，增加音色层次）
-const ELEVENLABS_VOICE_IDS = ['Z3R5wn05IrDiVCyEkUrK', 'nDJIICjR9zfJExIFeSCN'];
+// 守夜女巫固定音色（符合人格文档：低语者、慢语速 ~80 词/分钟、结尾下沉）
+// Z3R5wn05IrDiVCyEkUrK = 温柔低语女声；speed 0.85 + stability 0.65 = 从容不催促
+const ELEVENLABS_VOICE_IDS = ['Z3R5wn05IrDiVCyEkUrK'];
+const TTS_VOICE_SETTINGS = { speed: 0.85, stability: 0.65, similarity_boost: 0.8 };
 let ttsVoiceIdx = 0;
 let vadAnalyser = null;             // VAD 频谱分析器
 let vadInterval = null;
@@ -463,7 +465,7 @@ async function tryServerTTS(text, abortCtrl){
     const resp = await fetch(GW + '/voice/tts', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text, voice }),
+      body: JSON.stringify({ text, voice, ...TTS_VOICE_SETTINGS }),
       signal: abortCtrl.signal,
     });
     if (!resp.ok) return false;

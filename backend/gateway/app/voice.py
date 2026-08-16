@@ -94,7 +94,8 @@ async def voice_tts(request: Request):
     if not text:
         raise HTTPException(status_code=400, detail="text required")
     voice = body.get("voice") or p["model"] or "default"
-    tts_path = p.get("extra", {}).get("tts_path", f"/v1/text-to-speech/{voice}")
+    tts_path_tpl = p.get("extra", {}).get("tts_path", "/v1/text-to-speech/{voice}")
+    tts_path = tts_path_tpl.replace("{voice}", voice)
     url = p["base_url"].rstrip("/") + tts_path
 
     payload = {

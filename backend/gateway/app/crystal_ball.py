@@ -188,6 +188,26 @@ async def device_signal(sig: SignalReport):
     return {"ok": True, **_sleep_flow}
 
 
+async def _handle_signal(sig_type: str, **kw) -> dict:
+    """内部：按信号类型驱动状态机（供 MCP apply_tool_effect 复用）。"""
+    if sig_type == "enter_module" and kw.get("module") in MODULES:
+        _set_flow("module", module=kw["module"])
+    elif sig_type == "module_exit":
+        _set_flow("ai_standby")
+    elif sig_type == "ai_voice":
+        target = "ai_speaking" if kw.get("speaking", True) else "ai_standby"
+        _set_flow(target)
+    elif sig_type == "tarot_voice_draw":
+        if _sleep_flow["state"] == "module" and _sleep_flow.get("module") == "tarot":
+            _set_flow("tarot_cast")
+    elif sig_type == "alarm_fire":
+        _set_flow("alarm")
+    else:
+        return {"ok": False, "detail": f"unknown signal: {sig_type}"}
+    await _broadcast_flow()
+    return {"ok": True, **_sleep_flow}
+
+
 @router.post("/app/signal")
 async def app_signal(sig: AppSignal):
     """软件/页面侧信号 → 链路状态机。"""
@@ -277,3 +297,69 @@ async def ws_crystal(ws: WebSocket):
     finally:
         _web_clients.discard(ws)
         logger.info("[Crystal] web client disconnected, total=%d", len(_web_clients))
+
+
+# ==================== MCP 工具执行支撑（app/mcp_server.py 依赖）====================
+
+_MODE_LED = {  # 各模式对应的灯光（工具切模式时同步灯光状态）
+    "standby": "white", "whitenoise": "midnight", "breathing": "green",
+    "meditation": "purple", "divination": "gold", "alarm": "rainbow",
+}
+
+# MCP 工具 → 屿眠链路 app 信号映射（走同一状态机，保证 web/硬件一致）
+_TOOL_SIGNAL = {
+    "start_whitenoise":  ("enter_module", {"module": "whitenoise"}),
+    "start_breathing":   ("enter_module", {"module": "breathing"}),
+    "start_meditation":  ("enter_module", {"module": "meditation"}),
+    "start_divination":  ("enter_module", {"module": "tarot"}),
+    "stop_module":       ("module_exit", {}),
+    "ai_start_speaking": ("ai_voice", {"speaking": True}),
+    "ai_stop_speaking":  ("ai_voice", {"speaking": False}),
+    "tarot_voice_draw":  ("tarot_voice_draw", {}),
+    "alarm_fire":        ("alarm_fire", {}),
+}
+
+
+def get_state_dict() -> dict:
+    """读当前水晶球状态（供 MCP get_current_mode 等查询）"""
+    return _current_state
+
+
+async def broadcast_current_state() -> None:
+    await _broadcast(_current_state)
+
+
+def apply_tool_effect(name: str, args: dict):
+    """MCP 工具真实执行：映射到屿眠链路信号（同步 web 端）。
+
+    返回给 LLM 的文本结果；未知工具返回 None（由调用方报错）。
+    注：_handle_signal 是 async，这里跑同步版本直接操作 _set_flow。
+    """
+    import asyncio
+    mapping = _TOOL_SIGNAL.get(name)
+    if mapping is None:
+        return None
+    sig_type, kw = mapping
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        loop = None
+
+    if loop and loop.is_running():
+        # 在运行中的事件循环里（FastAPI 请求上下文）安全投递
+        fut = asyncio.ensure_future(_handle_signal(sig_type, **kw))
+        # 不等待完成，fire-and-forget；_handle_signal 内部已广播
+        _ = fut
+        result = f"已触发链路信号 {sig_type} {kw or ''}".strip()
+    else:
+        result = asyncio.run(_handle_signal(sig_type, **kw))
+    if isinstance(result, dict):
+        result = result.get("detail") or str(result)
+    return str(result)
+
+
+def queue_device_command(name: str, args: dict) -> None:
+    """入队 MCP 工具命令，设备轮询 /device/command/pending 拉取执行。"""
+    payload = {"cmd": name, "args": args, "ts": int(time.time())}
+    _pending_commands.append(payload)
+    logger.info("[MCP] command queued: %s", payload)

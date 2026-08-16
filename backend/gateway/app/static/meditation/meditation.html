@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>屿眠 · 睡前冥想</title>
+<style>
+:root{--bg:#0a0c10;--cream:#f7e5bc;--gold:#e8b65e;--dim:rgba(247,229,188,.55)}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--cream);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue","PingFang SC",sans-serif}
+body{display:flex;flex-direction:column;align-items:center;padding:max(18px,env(safe-area-inset-top)) 18px 30px;overflow-x:hidden}
+h1{font-size:19px;font-weight:500;letter-spacing:.14em;margin:8px 0 2px;color:#f6e8ca}
+.sub{font-size:12px;color:var(--dim);letter-spacing:.3em;margin-bottom:22px}
+.deck{width:min(560px,100%);display:flex;flex-direction:column;gap:12px}
+.card{position:relative;border:1px solid rgba(255,224,163,.14);border-radius:18px;background:linear-gradient(180deg,rgba(255,232,187,.05),rgba(255,232,187,.015));padding:16px 18px;cursor:pointer;transition:border-color .3s, transform .3s}
+.card:hover{border-color:rgba(255,224,163,.32)}
+.card.active{border-color:rgba(232,182,94,.55);box-shadow:0 0 24px rgba(232,182,94,.08)}
+.card .no{position:absolute;right:16px;top:14px;font-size:11px;color:rgba(232,182,94,.5);font-variant-numeric:tabular-nums}
+.card .en{font-size:12px;color:rgba(247,229,188,.45);letter-spacing:.08em}
+.card .zh{font-size:16px;margin-top:3px;color:#f6e8ca}
+.card .desc{font-size:12px;color:var(--dim);margin-top:6px}
+.player{width:min(560px,100%);margin-top:18px;border:1px solid rgba(255,224,163,.14);border-radius:20px;padding:20px;background:radial-gradient(ellipse at 50% -20%,rgba(190,124,37,.12),transparent 60%),rgba(255,232,187,.03)}
+.now{font-size:13px;color:var(--dim);text-align:center;letter-spacing:.1em;min-height:18px}
+.orb-wrap{position:relative;width:150px;height:150px;margin:16px auto}
+.orb{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 50% 45%,rgba(255,250,219,.95) 0 8%,rgba(255,228,157,.85) 24%,rgba(247,190,82,.55) 45%,rgba(122,66,20,.18) 72%,transparent 100%);filter:blur(2px);transition:transform 1.2s ease-in-out,opacity 1.2s}
+.playing .orb{transform:scale(1.12);animation:breathe 12s ease-in-out infinite}
+@keyframes breathe{0%,100%{transform:scale(1.04)}50%{transform:scale(1.16)}}
+.controls{display:flex;justify-content:center;align-items:center;gap:26px;margin-top:6px}
+button{border:0;background:none;color:var(--cream);cursor:pointer;font-family:inherit}
+.ctl{width:52px;height:52px;border-radius:50%;border:1px solid rgba(255,224,163,.25);background:rgba(255,232,187,.06);font-size:20px;display:grid;place-items:center;transition:all .3s}
+.ctl.main{width:64px;height:64px;font-size:24px;border-color:rgba(232,182,94,.5)}
+.ctl:hover{background:rgba(255,232,187,.14)}
+.seek{width:100%;margin-top:16px;-webkit-appearance:none;appearance:none;height:3px;border-radius:2px;background:rgba(255,224,163,.15);outline:none}
+.seek::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--gold);box-shadow:0 0 10px rgba(232,182,94,.6);cursor:pointer}
+.time{display:flex;justify-content:space-between;font-size:11px;color:var(--dim);margin-top:6px;font-variant-numeric:tabular-nums}
+.script{width:min(560px,100%);margin-top:18px;max-height:0;overflow:hidden;transition:max-height .6s ease;border-radius:18px}
+.script.open{max-height:4000px}
+.script-inner{border:1px solid rgba(255,224,163,.12);border-radius:18px;padding:20px 22px;background:rgba(255,232,187,.02)}
+.script-inner p{font-size:14px;line-height:2.1;color:rgba(247,229,188,.82);margin-bottom:2px}
+.toggle{margin-top:16px;font-size:12px;color:rgba(232,182,94,.65);letter-spacing:.2em}
+.hint{margin-top:22px;font-size:11px;color:rgba(247,229,188,.3);letter-spacing:.12em;text-align:center}
+</style>
+</head>
+<body>
+<h1>睡前冥想</h1>
+<div class="sub">沉下去吧……</div>
+<div class="deck" id="deck"></div>
+<div class="player" id="player">
+  <div class="now" id="now">选择一段冥想，交给夜晚</div>
+  <div class="orb-wrap"><div class="orb" id="orb"></div></div>
+  <div class="controls">
+    <button class="ctl" id="back" title="后退15秒">↺</button>
+    <button class="ctl main" id="play">▶</button>
+    <button class="ctl" id="fwd" title="前进15秒">↻</button>
+  </div>
+  <input type="range" class="seek" id="seek" value="0" min="0" max="1000" step="1">
+  <div class="time"><span id="tcur">00:00</span><span id="ttotal">00:00</span></div>
+  <button class="toggle" id="toggleScript">查看引导文字 ▾</button>
+</div>
+<div class="script" id="script"><div class="script-inner" id="scriptInner"></div></div>
+<div class="hint">屿眠 Sleep Isle · 守夜女巫与你同在</div>
+<script>
+const TRACKS=[
+{f:"meditation1-release-the-day.mp3",en:"Release the Day",zh:"放下今天",desc:"仪式感反刍 · 适合思绪停不下来"},
+{f:"meditation2-relax-your-body.mp3",en:"Relax Your Body",zh:"身体扫描",desc:"最通用的睡前冥想"},
+{f:"meditation3-breathe-into-sleep.mp3",en:"Breathe Into Sleep",zh:"慢呼吸",desc:"快速安静下来"},
+{f:"meditation4-soften-the-tension.mp3",en:"Soften the Tension",zh:"渐进式肌肉放松",desc:"释放身体压力"},
+{f:"meditation5-you-are-safe-here.mp3",en:"You're Safe Here",zh:"慈心与安全感",desc:"孤独、焦虑、情绪低落"}];
+const SCRIPTS={
+"meditation1-release-the-day.mp3":["今天已经走到这里了。","现在，你不需要再完成什么，也不需要再想清楚什么。","那些还没有回复的消息，没有做完的事情，没有得到答案的问题，都可以暂时留在今天。","轻轻吸一口气。","再慢慢呼出来。","想象你正站在一天的尽头。","手里抱着很多细小的东西：一句没有说出口的话，一个反复回想的瞬间，一件还没有解决的事，一点懊恼，也许还有一点不甘心。","现在，把它们一件一件放下来。","不是丢掉它们。","只是告诉自己：今晚，我不需要继续拿着。","明天的你，会有明天的时间去处理。","现在的你，只需要休息。","再吸一口气。","呼气的时候，想象今天慢慢离开你的身体。","肩膀松一点。","眉头松一点。","牙齿也不要再咬紧。","今天发生过的一切，都已经发生了。","你不需要在脑海里重新经历一次，才能证明它重要。","这一刻，没有什么需要解决。","今天到这里，就可以了。","让夜晚接过剩下的事情。","你只需要慢慢地，回到睡眠里。"],
+"meditation2-relax-your-body.mp3":["找一个舒服的位置躺下来。","不需要刻意保持姿势。","让床承接你的重量。","先把注意力放到额头。","如果那里还有一点紧绷，让它慢慢展开。","眼睛周围，也松下来。","你已经不需要再看什么了。","放松下巴。","让舌头自然地落在嘴里。","现在，把注意力移到肩膀。","想象肩膀上的重量，正在一点一点向下沉。","你不需要再撑住今天。","手臂放松。","手掌放松。","每一根手指，都可以安静下来。","慢慢来到胸口和腹部。","不需要改变呼吸。","只是感觉身体正在自己呼吸。","吸气。","身体轻轻起伏。","呼气。","身体又沉回床面。","现在来到腰部、臀部、大腿。","让这些地方变得越来越重。","膝盖放松。","小腿放松。","脚踝放松。","最后，是你的脚。","从头到脚，不需要任何地方保持警觉。","如果还有某个地方没有完全放松，也没有关系。","你不需要努力入睡。","只需要躺在这里。","让身体比刚才更重一点。","再重一点。","床正在托住你。","现在，什么都不用做了。"],
+"meditation3-breathe-into-sleep.mp3":["现在，不需要做一个很深的呼吸。","只是慢一点。","轻轻吸气。","一、二、三、四。","稍微停一下。","然后慢慢呼气。","一、二、三、四、五、六。","很好。","再来一次。","吸气的时候，不需要用力。","只是让空气自然地进来。","一、二、三、四。","呼气。","一、二、三、四、五、六。","想象每一次呼气，都在告诉身体：","可以慢下来了。","你不需要强迫自己平静。","也不需要赶走脑海里的想法。","如果一个念头出现，就让它出现。","然后，把注意力轻轻带回呼吸。","吸气。","空气进入身体。","呼气。","身体向下沉。","每一次呼气，都比吸气稍微长一点。","就像海浪来到岸边，然后慢慢退去。","你不需要追着海浪走。","只需要待在这里。","吸气。","呼气。","如果你开始忘记数字，也没有关系。","如果你的注意力已经变得模糊，那很好。","接下来，不需要再数了。","让呼吸自己继续。","慢慢地。","轻轻地。","一口呼吸之后，再一口呼吸。","直到你不再需要听见我的声音。"],
+"meditation4-soften-the-tension.mp3":["有时候，身体还紧绷着，我们自己却已经没有注意到。","现在，我们试着把这些力量一点一点还给夜晚。","先轻轻握紧双手。","不用很用力。","感受手掌和手指里的紧张。","保持一下。","然后，松开。","注意松开的那一刻。","再轻轻抬起肩膀，让肩膀靠近耳朵。","停一下。","然后呼气。","让肩膀落下来。","很好。","现在轻轻绷紧双腿。","感受大腿和小腿里的力量。","不用坚持。","然后，全部松开。","让双腿沉进床里。","接下来，轻轻皱一下眉头。","停一下。","再把额头完全放松。","你会发现，有时候我们并不需要“努力放松”。","我们只需要先意识到自己在哪里用力。","然后，允许那股力量离开。","再检查一下身体。","下巴有没有咬紧？","肩膀有没有偷偷抬起来？","手指是不是还抓着什么？","如果有，就松开一点。","不需要一次全部做到。","每一次呼气，都松一点。","每一次呼气，都少用一点力。","现在，身体不需要保护你去面对任何事情。","今晚的任务只有一个。","躺下来。","变得柔软。","然后休息。"],
+"meditation5-you-are-safe-here.mp3":["现在，你已经来到这里了。","这一小段时间，不需要证明自己很好。","也不需要表现得坚强。","如果今天有一点难过，一点孤单，一点不安，都可以留在这里。","你不需要马上把它们变好。","先感觉一下身下的床。","它正在托住你的身体。","感觉被子覆盖在身上。","感觉空气轻轻进入鼻尖，再慢慢离开。","此刻，你就在这里。","这一分钟，没有人要求你回答什么。","没有事情需要马上完成。","你可以安静地存在。","如果脑海里还有声音在说：","“我是不是做得不够好？”","“明天怎么办？”","“为什么我还是这么累？”","不用和它争论。","只是轻轻回答它：","我听见了。","但是现在，我们先休息。","把一只手轻轻放在胸口，或者腹部。","感受自己的温度。","然后在心里对自己说：","我可以慢一点。","我可以不用现在想明白所有事情。","我值得拥有这一晚的休息。","这一刻，我在这里。","这一刻，我是安全的。","夜晚不要求你成为任何人。","所以现在，闭上眼睛。","让自己被床、被黑夜、被这一小段安静轻轻接住。","今晚，你可以休息了。"]};
+const deck=document.getElementById('deck'),player=document.getElementById('player'),now=document.getElementById('now'),
+playBtn=document.getElementById('play'),seek=document.getElementById('seek'),tcur=document.getElementById('tcur'),ttotal=document.getElementById('ttotal'),
+scriptEl=document.getElementById('script'),scriptInner=document.getElementById('scriptInner'),toggleBtn=document.getElementById('toggleScript');
+let audio=null,cur=-1;
+function fmt(s){if(!isFinite(s))return'00:00';const m=Math.floor(s/60),x=Math.floor(s%60);return String(m).padStart(2,'0')+':'+String(x).padStart(2,'0')}
+function load(i){if(audio){audio.pause();audio.src='';}
+cur=i;const t=TRACKS[i];
+audio=new Audio('audio/'+t.f);audio.preload='auto';
+now.textContent=t.zh+' · '+t.en;
+scriptInner.innerHTML=SCRIPTS[t.f].map(l=>'<p>'+l+'</p>').join('');
+scriptEl.classList.remove('open');toggleBtn.textContent='查看引导文字 ▾';
+document.querySelectorAll('.card').forEach((c,j)=>c.classList.toggle('active',j===i));
+audio.addEventListener('timeupdate',()=>{if(audio.duration){seek.value=Math.round(audio.currentTime/audio.duration*1000);tcur.textContent=fmt(audio.currentTime)}});
+audio.addEventListener('loadedmetadata',()=>{ttotal.textContent=fmt(audio.duration)});
+audio.addEventListener('ended',()=>{player.classList.remove('playing');playBtn.textContent='▶'});
+audio.play().then(()=>{player.classList.add('playing');playBtn.textContent='❙❙'}).catch(()=>{playBtn.textContent='▶'});
+}
+TRACKS.forEach((t,i)=>{const c=document.createElement('div');c.className='card';c.innerHTML='<div class="no">0'+(i+1)+'</div><div class="en">'+t.en+'</div><div class="zh">'+t.zh+'</div><div class="desc">'+t.desc+'</div>';c.onclick=()=>load(i);deck.appendChild(c);});
+playBtn.onclick=()=>{if(!audio)return;if(audio.paused){audio.play();player.classList.add('playing');playBtn.textContent='❙❙'}else{audio.pause();player.classList.remove('playing');playBtn.textContent='▶'}};
+document.getElementById('back').onclick=()=>{if(audio)audio.currentTime=Math.max(0,audio.currentTime-15)};
+document.getElementById('fwd').onclick=()=>{if(audio&&audio.duration)audio.currentTime=Math.min(audio.duration,audio.currentTime+15)};
+seek.oninput=()=>{if(audio&&audio.duration)audio.currentTime=seek.value/1000*audio.duration};
+toggleBtn.onclick=()=>{const open=scriptEl.classList.toggle('open');toggleBtn.textContent=open?'收起引导文字 ▴':'查看引导文字 ▾'};
+</script>
+</body>
+</html>

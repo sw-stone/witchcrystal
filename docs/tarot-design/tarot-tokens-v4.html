@@ -1,0 +1,314 @@
+<svg viewBox="0 0 680 920" xmlns="http://www.w3.org/2000/svg" style="font-family: 'Bodoni Moda', 'Playfair Display', Georgia, serif">
+  <defs>
+    <!-- 柔光基底渐变：暖灰紫黄昏 -->
+    <radialGradient id="bgGrad" cx="42%" cy="28%" r="100%">
+      <stop offset="0%" stop-color="#2E2A42"/>
+      <stop offset="35%" stop-color="#241F36"/>
+      <stop offset="100%" stop-color="#1A1626"/>
+    </radialGradient>
+    <!-- 珍珠光晕 -->
+    <radialGradient id="pearlGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#E8DFFF" stop-opacity="0.14"/>
+      <stop offset="40%" stop-color="#C9B8E8" stop-opacity="0.06"/>
+      <stop offset="100%" stop-color="#7B6BA0" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="roseGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#F0D4C4" stop-opacity="0.10"/>
+      <stop offset="100%" stop-color="#D4A89A" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="goldGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#E6D5A8" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#C4A96A" stop-opacity="0"/>
+    </radialGradient>
+    <!-- 液态玻璃材质 -->
+    <linearGradient id="glassFill" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.07"/>
+      <stop offset="50%" stop-color="#FFFFFF" stop-opacity="0.03"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.05"/>
+    </linearGradient>
+    <linearGradient id="glassEdge" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.22"/>
+      <stop offset="50%" stop-color="#FFFFFF" stop-opacity="0.06"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.14"/>
+    </linearGradient>
+    <!-- 主色渐变：薰衣草→雾蓝 -->
+    <linearGradient id="lavenderMist" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#B8A4E0"/>
+      <stop offset="100%" stop-color="#8B9FD1"/>
+    </linearGradient>
+    <!-- 暖色渐变：玫瑰金→蜜桃 -->
+    <linearGradient id="roseGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E8B4A8"/>
+      <stop offset="100%" stop-color="#D4A088"/>
+    </linearGradient>
+    <!-- 月光金 -->
+    <linearGradient id="moonGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#DBC8A0"/>
+      <stop offset="100%" stop-color="#C4AE78"/>
+    </linearGradient>
+    <!-- 弥散光滤镜 -->
+    <filter id="softBlur" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="22"/>
+    </filter>
+    <filter id="microBlur" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3"/>
+    </filter>
+  </defs>
+
+  <!-- 基底 -->
+  <rect width="680" height="920" fill="url(#bgGrad)"/>
+  <!-- 柔光氛围层 -->
+  <ellipse cx="200" cy="180" rx="280" ry="200" fill="url(#pearlGlow)"/>
+  <ellipse cx="520" cy="350" rx="220" ry="180" fill="url(#roseGlow)"/>
+  <ellipse cx="340" cy="700" rx="300" ry="200" fill="url(#goldGlow)"/>
+
+  <!-- ========== 标题区 ========== -->
+  <text x="40" y="52" font-size="22" fill="#DDD4C8" font-weight="500" letter-spacing="1.5" style="font-family:'Bodoni Moda',Georgia,serif">Tarot Aura</text>
+  <text x="40" y="72" font-size="9.5" fill="#9A8FAA" letter-spacing="3.2" style="font-family:'Jost','Inter',sans-serif; text-transform:uppercase">Design Tokens v4 — Soft Lumina · 珍珠柔光舒缓版</text>
+  <line x1="40" y1="84" x2="640" y2="84" stroke="#FFFFFF" stroke-opacity="0.08" stroke-width="0.6"/>
+  <text x="640" y="52" text-anchor="end" font-size="8.5" fill="#7B6F8A" letter-spacing="1.5" style="font-family:'Jost',sans-serif">Aurora UI + Liquid Glass + Soft UI Evo + Biomimetic</text>
+
+  <!-- ========== 01 配色体系 ========== -->
+  <text x="40" y="116" font-size="10" fill="#B0A6C0" letter-spacing="2.5" style="font-family:'Jost',sans-serif; text-transform:uppercase">01 · Color System — 珍珠柔光</text>
+  
+  <!-- 色卡行1 -->
+  <g transform="translate(40,130)">
+    <!-- 深暮底色 -->
+    <rect width="84" height="78" rx="14" fill="#241F36"/>
+    <rect width="84" height="78" rx="14" fill="url(#glassEdge)" opacity="0.5"/>
+    <text x="8" y="70" font-size="7" fill="#8A80A0" style="font-family:'Jost',sans-serif">Base</text>
+    <text x="42" y="30" text-anchor="middle" font-size="11" fill="#DDD4C8" style="font-family:'Bodoni Moda',serif" font-style="italic">Twilight</text>
+    <text x="42" y="44" text-anchor="middle" font-size="7.5" fill="#7B6F8A" style="font-family:'Jost',sans-serif">#241F36</text>
+
+    <!-- 主色：薰衣草雾 -->
+    <rect x="98" width="84" height="78" rx="14" fill="#B8A4E0"/>
+    <rect x="98" width="84" height="78" rx="14" fill="url(#glassEdge)" opacity="0.3"/>
+    <text x="106" y="70" font-size="7" fill="#7B6BA0" style="font-family:'Jost',sans-serif">Primary</text>
+    <text x="140" y="30" text-anchor="middle" font-size="11" fill="#fff" style="font-family:'Bodoni Moda',serif" font-style="italic">Lavender</text>
+    <text x="140" y="44" text-anchor="middle" font-size="7.5" fill="#FFFFFF" fill-opacity="0.65" style="font-family:'Jost',sans-serif">#B8A4E0</text>
+
+    <!-- 辅色：雾蓝 -->
+    <rect x="196" width="84" height="78" rx="14" fill="#8B9FD1"/>
+    <rect x="196" width="84" height="78" rx="14" fill="url(#glassEdge)" opacity="0.25"/>
+    <text x="204" y="70" font-size="7" fill="#5A6B9A" style="font-family:'Jost',sans-serif">Secondary</text>
+    <text x="238" y="30" text-anchor="middle" font-size="11" fill="#fff" style="font-family:'Bodoni Moda',serif" font-style="italic">Mist Blue</text>
+    <text x="238" y="44" text-anchor="middle" font-size="7.5" fill="#FFFFFF" fill-opacity="0.65" style="font-family:'Jost',sans-serif">#8B9FD1</text>
+
+    <!-- 暖色：玫瑰金 -->
+    <rect x="294" width="84" height="78" rx="14" fill="#E8B4A8"/>
+    <rect x="294" width="84" height="78" rx="14" fill="url(#glassEdge)" opacity="0.25"/>
+    <text x="302" y="70" font-size="7" fill="#B07A6A" style="font-family:'Jost',sans-serif">Warmth</text>
+    <text x="336" y="30" text-anchor="middle" font-size="11" fill="#fff" style="font-family:'Bodoni Moda',serif" font-style="italic">Rose Gold</text>
+    <text x="336" y="44" text-anchor="middle" font-size="7.5" fill="#FFFFFF" fill-opacity="0.65" style="font-family:'Jost',sans-serif">#E8B4A8</text>
+
+    <!-- 月光金 -->
+    <rect x="392" width="84" height="78" rx="14" fill="#DBC8A0"/>
+    <rect x="392" width="84" height="78" rx="14" fill="url(#glassEdge)" opacity="0.25"/>
+    <text x="400" y="70" font-size="7" fill="#9A8550" style="font-family:'Jost',sans-serif">Accent</text>
+    <text x="434" y="30" text-anchor="middle" font-size="11" fill="#fff" style="font-family:'Bodoni Moda',serif" font-style="italic">Moon Gold</text>
+    <text x="434" y="44" text-anchor="middle" font-size="7.5" fill="#FFFFFF" fill-opacity="0.65" style="font-family:'Jost',sans-serif">#DBC8A0</text>
+
+    <!-- 疗愈绿 -->
+    <rect x="490" width="84" height="78" rx="14" fill="#9BCBB0"/>
+    <rect x="490" width="84" height="78" rx="14" fill="url(#glassEdge)" opacity="0.2"/>
+    <text x="498" y="70" font-size="7" fill="#5A8A70" style="font-family:'Jost',sans-serif">Healing</text>
+    <text x="532" y="30" text-anchor="middle" font-size="11" fill="#fff" style="font-family:'Bodoni Moda',serif" font-style="italic">Sage Mint</text>
+    <text x="532" y="44" text-anchor="middle" font-size="7.5" fill="#FFFFFF" fill-opacity="0.65" style="font-family:'Jost',sans-serif">#9BCBB0</text>
+
+    <!-- 文字色 -->
+    <rect x="588" width="84" height="78" rx="14" fill="#3A3450"/>
+    <rect x="588" width="84" height="78" rx="14" fill="url(#glassEdge)" opacity="0.3"/>
+    <text x="596" y="70" font-size="7" fill="#7B6F8A" style="font-family:'Jost',sans-serif">Surface</text>
+    <text x="630" y="30" text-anchor="middle" font-size="11" fill="#DDD4C8" style="font-family:'Bodoni Moda',serif" font-style="italic">Pearl</text>
+    <text x="630" y="44" text-anchor="middle" font-size="7.5" fill="#7B6F8A" style="font-family:'Jost',sans-serif">#3A3450</text>
+  </g>
+
+  <!-- 玻璃面参数 -->
+  <text x="40" y="230" font-size="8" fill="#6B6080" style="font-family:'Jost',sans-serif">Liquid Glass: backdrop-blur(20px) · bg rgba(255,255,255,0.05) · border 0.5px rgba(255,255,255,0.12) · shadow 0 8px 32px rgba(0,0,0,0.12)</text>
+  <text x="40" y="244" font-size="8" fill="#6B6080" style="font-family:'Jost',sans-serif">柔光氛围: radial-gradient opacity 0.06-0.14 · blur(22px) · 三层叠加(薰衣草+玫瑰金+月光金)</text>
+
+  <!-- ========== 02 字体系统 ========== -->
+  <text x="40" y="280" font-size="10" fill="#B0A6C0" letter-spacing="2.5" style="font-family:'Jost',sans-serif; text-transform:uppercase">02 · Typography — 高智感高对比</text>
+
+  <g transform="translate(40,294)">
+    <!-- 标题字体 -->
+    <rect width="278" height="90" rx="14" fill="url(#glassFill)" stroke="url(#glassEdge)" stroke-width="0.6"/>
+    <text x="16" y="28" font-size="7.5" fill="#7B6F8A" letter-spacing="1.5" style="font-family:'Jost',sans-serif; text-transform:uppercase">Display · Bodoni Moda</text>
+    <text x="16" y="58" font-size="30" fill="#DDD4C8" style="font-family:'Bodoni Moda',Georgia,serif" font-style="italic">The Star XVII</text>
+    <text x="16" y="78" font-size="8" fill="#6B6080" style="font-family:'Jost',sans-serif">Weights: 400 / 500 · Italic for titles · Letter-spacing 0.5px</text>
+
+    <!-- 正文字体 -->
+    <rect x="294" width="278" height="90" rx="14" fill="url(#glassFill)" stroke="url(#glassEdge)" stroke-width="0.6"/>
+    <text x="310" y="28" font-size="7.5" fill="#7B6F8A" letter-spacing="1.5" style="font-family:'Jost',sans-serif; text-transform:uppercase">Body · Jost</text>
+    <text x="310" y="52" font-size="13" fill="#C8BFD0" style="font-family:'Jost','Inter',sans-serif">Hope shines through the veil.</text>
+    <text x="310" y="70" font-size="10" fill="#8A80A0" style="font-family:'Jost',sans-serif">希望穿透薄雾闪耀 · 陪伴你的每一步</text>
+    <text x="310" y="82" font-size="7.5" fill="#6B6080" style="font-family:'Jost',sans-serif">Weights: 300 / 400 / 500 · 1.6 line-height</text>
+  </g>
+
+  <!-- ========== 03 质感语言 ========== -->
+  <text x="40" y="412" font-size="10" fill="#B0A6C0" letter-spacing="2.5" style="font-family:'Jost',sans-serif; text-transform:uppercase">03 · Material & Glow — 柔光质感</text>
+
+  <g transform="translate(40,426)">
+    <!-- 液态玻璃卡片 -->
+    <rect width="135" height="110" rx="18" fill="url(#glassFill)" stroke="url(#glassEdge)" stroke-width="0.6"/>
+    <ellipse cx="68" cy="48" rx="42" ry="28" fill="url(#pearlGlow)"/>
+    <circle cx="68" cy="48" r="8" fill="#B8A4E0" opacity="0.7" filter="url(#microBlur)"/>
+    <text x="68" y="92" text-anchor="middle" font-size="8" fill="#9A8FAA" style="font-family:'Jost',sans-serif">Liquid Glass</text>
+    <text x="68" y="103" text-anchor="middle" font-size="7" fill="#6B6080" style="font-family:'Jost',sans-serif">blur(20px) · 5% white</text>
+
+    <!-- 柔光球体 -->
+    <rect x="151" width="135" height="110" rx="18" fill="#2A2540"/>
+    <rect x="151" width="135" height="110" rx="18" fill="url(#glassEdge)" opacity="0.3"/>
+    <circle cx="218" cy="48" r="26" fill="#E8B4A8" opacity="0.18" filter="url(#softBlur)"/>
+    <circle cx="218" cy="48" r="14" fill="#E8B4A8" opacity="0.30" filter="url(#microBlur)"/>
+    <circle cx="218" cy="48" r="6" fill="#F0D4C4" opacity="0.7"/>
+    <text x="218" y="92" text-anchor="middle" font-size="8" fill="#9A8FAA" style="font-family:'Jost',sans-serif">Diffuse Glow</text>
+    <text x="218" y="103" text-anchor="middle" font-size="7" fill="#6B6080" style="font-family:'Jost',sans-serif">3-layer radial · blur(22px)</text>
+
+    <!-- 呼吸动效 -->
+    <rect x="302" width="135" height="110" rx="18" fill="#2A2540"/>
+    <rect x="302" width="135" height="110" rx="18" fill="url(#glassEdge)" opacity="0.3"/>
+    <circle cx="369" cy="48" r="22" fill="none" stroke="#DBC8A0" stroke-width="0.8" opacity="0.5">
+      <animate attributeName="r" values="18;28;18" dur="4s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.6;0.2;0.6" dur="4s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="369" cy="48" r="8" fill="#DBC8A0" opacity="0.5">
+      <animate attributeName="r" values="6;10;6" dur="4s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.6;0.35;0.6" dur="4s" repeatCount="indefinite"/>
+    </circle>
+    <text x="369" y="92" text-anchor="middle" font-size="8" fill="#9A8FAA" style="font-family:'Jost',sans-serif">Breathing</text>
+    <text x="369" y="103" text-anchor="middle" font-size="7" fill="#6B6080" style="font-family:'Jost',sans-serif">4s scale pulse · cubic-bezier</text>
+
+    <!-- 流体渐变 -->
+    <rect x="453" width="135" height="110" rx="18" fill="#2A2540"/>
+    <rect x="453" width="135" height="110" rx="18" fill="url(#glassEdge)" opacity="0.3"/>
+    <ellipse cx="520" cy="48" rx="50" ry="30" fill="url(#lavenderMist)" opacity="0.2">
+      <animate attributeName="cx" values="500;540;500" dur="12s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="520" cy="48" rx="30" ry="20" fill="url(#roseGold)" opacity="0.18">
+      <animate attributeName="cx" values="540;500;540" dur="10s" repeatCount="indefinite"/>
+    </ellipse>
+    <text x="520" y="92" text-anchor="middle" font-size="8" fill="#9A8FAA" style="font-family:'Jost',sans-serif">Aurora Flow</text>
+    <text x="520" y="103" text-anchor="middle" font-size="7" fill="#6B6080" style="font-family:'Jost',sans-serif">8-12s mesh drift · screen blend</text>
+  </g>
+
+  <!-- ========== 04 装饰母题 ========== -->
+  <text x="40" y="566" font-size="10" fill="#B0A6C0" letter-spacing="2.5" style="font-family:'Jost',sans-serif; text-transform:uppercase">04 · Decorative Motifs — 灵动星象</text>
+
+  <g transform="translate(40,580)">
+    <!-- 抽象星线 -->
+    <rect width="135" height="80" rx="14" fill="#2A2540" stroke="#FFFFFF" stroke-opacity="0.06" stroke-width="0.5"/>
+    <path d="M 20,40 Q 50,15 75,40 T 115,40" fill="none" stroke="#B8A4E0" stroke-width="0.6" opacity="0.5"/>
+    <circle cx="20" cy="40" r="2" fill="#DBC8A0" opacity="0.7"/>
+    <circle cx="75" cy="40" r="2.5" fill="#E8B4A8" opacity="0.6"/>
+    <circle cx="115" cy="40" r="1.5" fill="#8B9FD1" opacity="0.6"/>
+    <text x="68" y="70" text-anchor="middle" font-size="7.5" fill="#8A80A0" style="font-family:'Jost',sans-serif">Constellation Line</text>
+
+    <!-- 月相环 -->
+    <rect x="151" width="135" height="80" rx="14" fill="#2A2540" stroke="#FFFFFF" stroke-opacity="0.06" stroke-width="0.5"/>
+    <circle cx="218" cy="36" r="18" fill="none" stroke="#DBC8A0" stroke-width="0.6" opacity="0.4"/>
+    <path d="M 218,18 A 18,18 0 0 0 218,54 A 12,18 0 0 0 218,18 Z" fill="#DBC8A0" opacity="0.35"/>
+    <text x="218" y="70" text-anchor="middle" font-size="7.5" fill="#8A80A0" style="font-family:'Jost',sans-serif">Moon Phase Ring</text>
+
+    <!-- 光粒子 -->
+    <rect x="302" width="135" height="80" rx="14" fill="#2A2540" stroke="#FFFFFF" stroke-opacity="0.06" stroke-width="0.5"/>
+    <circle cx="335" cy="28" r="1.5" fill="#E8DFFF" opacity="0.7">
+      <animate attributeName="opacity" values="0.2;0.8;0.2" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="360" cy="42" r="1" fill="#F0D4C4" opacity="0.5">
+      <animate attributeName="opacity" values="0.6;0.1;0.6" dur="2.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="385" cy="24" r="1.2" fill="#B8A4E0" opacity="0.6">
+      <animate attributeName="opacity" values="0.3;0.7;0.3" dur="3.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="400" cy="48" r="0.8" fill="#DBC8A0" opacity="0.5">
+      <animate attributeName="opacity" values="0.1;0.6;0.1" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="345" cy="50" r="0.8" fill="#8B9FD1" opacity="0.4">
+      <animate attributeName="opacity" values="0.5;0.15;0.5" dur="2.8s" repeatCount="indefinite"/>
+    </circle>
+    <text x="369" y="70" text-anchor="middle" font-size="7.5" fill="#8A80A0" style="font-family:'Jost',sans-serif">Light Particles</text>
+
+    <!-- 柔光分隔线 -->
+    <rect x="453" width="135" height="80" rx="14" fill="#2A2540" stroke="#FFFFFF" stroke-opacity="0.06" stroke-width="0.5"/>
+    <line x1="470" y1="36" x2="570" y2="36" stroke="#FFFFFF" stroke-opacity="0.08" stroke-width="0.5"/>
+    <circle cx="520" cy="36" r="3" fill="#DBC8A0" opacity="0.4" filter="url(#microBlur)"/>
+    <circle cx="520" cy="36" r="1.2" fill="#E6D5A8" opacity="0.8"/>
+    <line x1="470" y1="50" x2="510" y2="50" stroke="#FFFFFF" stroke-opacity="0.05" stroke-width="0.4"/>
+    <line x1="530" y1="50" x2="570" y2="50" stroke="#FFFFFF" stroke-opacity="0.05" stroke-width="0.4"/>
+    <text x="520" y="70" text-anchor="middle" font-size="7.5" fill="#8A80A0" style="font-family:'Jost',sans-serif">Glow Divider</text>
+  </g>
+
+  <!-- ========== 05 动效令牌 ========== -->
+  <text x="40" y="690" font-size="10" fill="#B0A6C0" letter-spacing="2.5" style="font-family:'Jost',sans-serif; text-transform:uppercase">05 · Motion Tokens — 灵动呼吸</text>
+
+  <g transform="translate(40,704)">
+    <!-- 呼吸 -->
+    <rect width="180" height="68" rx="12" fill="url(#glassFill)" stroke="url(#glassEdge)" stroke-width="0.5"/>
+    <text x="14" y="22" font-size="8.5" fill="#DDD4C8" style="font-family:'Bodoni Moda',serif" font-style="italic">Breathing</text>
+    <text x="14" y="36" font-size="7" fill="#8A80A0" style="font-family:'Jost',sans-serif">scale: 0.96↔1.04 · 4s loop</text>
+    <text x="14" y="48" font-size="7" fill="#6B6080" style="font-family:'Jost',sans-serif">cubic-bezier(0.4, 0, 0.2, 1)</text>
+    <text x="14" y="60" font-size="6.5" fill="#5A5070" style="font-family:'Jost',sans-serif">card idle · glow pulse · orb float</text>
+
+    <!-- 飘移 -->
+    <rect x="194" width="180" height="68" rx="12" fill="url(#glassFill)" stroke="url(#glassEdge)" stroke-width="0.5"/>
+    <text x="208" y="22" font-size="8.5" fill="#DDD4C8" style="font-family:'Bodoni Moda',serif" font-style="italic">Drift</text>
+    <text x="208" y="36" font-size="7" fill="#8A80A0" style="font-family:'Jost',sans-serif">translate: ±8px · 8-12s loop</text>
+    <text x="208" y="48" font-size="7" fill="#6B6080" style="font-family:'Jost',sans-serif">stagger: 1.5s · random delay</text>
+    <text x="208" y="60" font-size="6.5" fill="#5A5070" style="font-family:'Jost',sans-serif">aurora bg · particles · star drift</text>
+
+    <!-- 翻牌 -->
+    <rect x="388" width="180" height="68" rx="12" fill="url(#glassFill)" stroke="url(#glassEdge)" stroke-width="0.5"/>
+    <text x="402" y="22" font-size="8.5" fill="#DDD4C8" style="font-family:'Bodoni Moda',serif" font-style="italic">Card Reveal</text>
+    <text x="402" y="36" font-size="7" fill="#8A80A0" style="font-family:'Jost',sans-serif">rotateY: 0→180° · 600ms</text>
+    <text x="402" y="48" font-size="7" fill="#6B6080" style="font-family:'Jost',sans-serif">expo.out · 80ms stagger</text>
+    <text x="402" y="60" font-size="6.5" fill="#5A5070" style="font-family:'Jost',sans-serif">flip + glow burst on complete</text>
+  </g>
+
+  <!-- ========== 06 圆角与间距 ========== -->
+  <text x="40" y="808" font-size="10" fill="#B0A6C0" letter-spacing="2.5" style="font-family:'Jost',sans-serif; text-transform:uppercase">06 · Shape & Spacing</text>
+
+  <g transform="translate(40,822)">
+    <!-- 圆角 -->
+    <rect width="100" height="56" rx="24" fill="url(#glassFill)" stroke="url(#glassEdge)" stroke-width="0.5"/>
+    <text x="50" y="22" text-anchor="middle" font-size="7" fill="#8A80A0" style="font-family:'Jost',sans-serif">Card · 24px</text>
+    <text x="50" y="38" text-anchor="middle" font-size="7" fill="#8A80A0" style="font-family:'Jost',sans-serif">Button · 20px</text>
+    <text x="50" y="50" text-anchor="middle" font-size="7" fill="#6B6080" style="font-family:'Jost',sans-serif">Tag · 12px</text>
+
+    <!-- 间距 -->
+    <rect x="116" width="100" height="56" rx="12" fill="url(#glassFill)" stroke="url(#glassEdge)" stroke-width="0.5"/>
+    <line x1="126" y1="18" x2="126" y2="48" stroke="#B8A4E0" stroke-width="0.8" opacity="0.5"/>
+    <line x1="206" y1="18" x2="206" y2="48" stroke="#B8A4E0" stroke-width="0.8" opacity="0.5"/>
+    <line x1="126" y1="18" x2="206" y2="18" stroke="#B8A4E0" stroke-width="0.6" opacity="0.4"/>
+    <line x1="126" y1="48" x2="206" y2="48" stroke="#B8A4E0" stroke-width="0.6" opacity="0.4"/>
+    <text x="166" y="34" text-anchor="middle" font-size="7" fill="#8A80A0" style="font-family:'Jost',sans-serif">80px gutter</text>
+    <text x="166" y="50" text-anchor="middle" font-size="6.5" fill="#6B6080" style="font-family:'Jost',sans-serif">24·32·48·80 grid</text>
+
+    <!-- 投影 -->
+    <rect x="232" width="100" height="56" rx="12" fill="#2A2540"/>
+    <rect x="232" width="100" height="56" rx="12" fill="none" stroke="#FFFFFF" stroke-opacity="0.04" stroke-width="0.5"/>
+    <ellipse cx="282" cy="62" rx="38" ry="4" fill="#000" opacity="0.25" filter="url(#microBlur)"/>
+    <text x="282" y="22" text-anchor="middle" font-size="7" fill="#8A80A0" style="font-family:'Jost',sans-serif">Soft Shadow</text>
+    <text x="282" y="38" text-anchor="middle" font-size="6.5" fill="#6B6080" style="font-family:'Jost',sans-serif">0 8px 32px</text>
+    <text x="282" y="50" text-anchor="middle" font-size="6.5" fill="#5A5070" style="font-family:'Jost',sans-serif">rgba(0,0,0,0.10)</text>
+
+    <!-- 发光 -->
+    <rect x="348" width="100" height="56" rx="12" fill="#2A2540"/>
+    <rect x="348" width="100" height="56" rx="12" fill="none" stroke="#FFFFFF" stroke-opacity="0.04" stroke-width="0.5"/>
+    <circle cx="398" cy="26" r="10" fill="#B8A4E0" opacity="0.25" filter="url(#softBlur)"/>
+    <circle cx="398" cy="26" r="4" fill="#B8A4E0" opacity="0.6"/>
+    <text x="398" y="44" text-anchor="middle" font-size="7" fill="#8A80A0" style="font-family:'Jost',sans-serif">Inner Glow</text>
+    <text x="398" y="52" text-anchor="middle" font-size="6.5" fill="#6B6080" style="font-family:'Jost',sans-serif">radial · 22px blur</text>
+
+    <!-- 触控 -->
+    <rect x="464" width="100" height="56" rx="12" fill="url(#glassFill)" stroke="url(#glassEdge)" stroke-width="0.5"/>
+    <circle cx="514" cy="24" r="16" fill="none" stroke="#E8B4A8" stroke-width="0.6" opacity="0.4" stroke-dasharray="2 2"/>
+    <text x="514" y="44" text-anchor="middle" font-size="7" fill="#8A80A0" style="font-family:'Jost',sans-serif">Touch · 44pt min</text>
+    <text x="514" y="52" text-anchor="middle" font-size="6.5" fill="#6B6080" style="font-family:'Jost',sans-serif">haptic on confirm</text>
+  </g>
+
+  <!-- 底部标签 -->
+  <line x1="40" y1="892" x2="640" y2="892" stroke="#FFFFFF" stroke-opacity="0.06" stroke-width="0.5"/>
+  <text x="40" y="908" font-size="7.5" fill="#5A5070" style="font-family:'Jost',sans-serif">v4 Soft Lumina · Aurora UI + Liquid Glass + Soft UI Evolution + Biomimetic Breathing · Bodoni Moda + Jost</text>
+  <text x="640" y="908" text-anchor="end" font-size="7.5" fill="#5A5070" style="font-family:'Jost',sans-serif">UI-UX Pro Max Engineered</text>
+</svg>

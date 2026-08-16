@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>屿眠 · 声光场景</title>
+<style>
+:root{--bg:#0a0c10;--cream:#f7e5bc;--gold:#e8b65e;--dim:rgba(247,229,188,.55)}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#060708;color:var(--cream);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue","PingFang SC",sans-serif}
+body{display:flex;flex-direction:column;align-items:center;padding:max(18px,env(safe-area-inset-top)) 18px 34px;overflow-x:hidden}
+h1{font-size:19px;font-weight:500;letter-spacing:.14em;margin:8px 0 2px;color:#f6e8ca}
+.sub{font-size:12px;color:var(--dim);letter-spacing:.3em;margin-bottom:22px}
+.stage{position:relative;width:min(560px,100%);aspect-ratio:16/10;border-radius:22px;overflow:hidden;background:#000;border:1px solid rgba(255,224,163,.12)}
+.stage video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.85}
+.stage .veil{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,0,.55) 100%);pointer-events:none}
+.stage .scene-name{position:absolute;left:20px;bottom:16px;z-index:3;font-size:15px;letter-spacing:.2em;color:#f6e8ca;text-shadow:0 2px 12px rgba(0,0,0,.8)}
+.stage .scene-en{position:absolute;left:20px;bottom:38px;z-index:3;font-size:11px;letter-spacing:.14em;color:rgba(247,229,188,.6)}
+.tracks{position:absolute;right:14px;top:14px;z-index:3;display:flex;flex-direction:column;gap:8px}
+.trk{border:1px solid rgba(255,224,163,.22);background:rgba(0,0,0,.45);backdrop-filter:blur(8px);color:rgba(247,229,188,.75);border-radius:999px;padding:7px 14px;font-size:12px;cursor:pointer;font-family:inherit;transition:all .3s}
+.trk.active{color:#fff0cb;border-color:rgba(232,182,94,.6);background:rgba(232,182,94,.16)}
+.scenes{width:min(560px,100%);display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:16px}
+.scene{position:relative;border:1px solid rgba(255,224,163,.14);border-radius:16px;padding:14px 6px 12px;text-align:center;cursor:pointer;background:rgba(255,232,187,.03);transition:all .3s}
+.scene:hover{border-color:rgba(255,224,163,.35)}
+.scene.active{border-color:rgba(232,182,94,.6);box-shadow:0 0 18px rgba(232,182,94,.1)}
+.scene .ico{font-size:20px}
+.scene .zh{font-size:12px;margin-top:6px;color:#f6e8ca}
+.scene .en{font-size:9px;color:rgba(247,229,188,.4);margin-top:2px;letter-spacing:.06em}
+.ctlbar{width:min(560px,100%);display:flex;align-items:center;gap:16px;margin-top:18px}
+button.ctl{border:1px solid rgba(255,224,163,.25);background:rgba(255,232,187,.06);color:var(--cream);width:50px;height:50px;border-radius:50%;font-size:18px;cursor:pointer;transition:background .3s}
+button.ctl:hover{background:rgba(255,232,187,.15)}
+.vol{-webkit-appearance:none;appearance:none;flex:1;height:3px;border-radius:2px;background:rgba(255,224,163,.18);outline:none}
+.vol::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--gold);cursor:pointer;box-shadow:0 0 8px rgba(232,182,94,.5)}
+.fade-ctl{width:min(560px,100%);display:flex;align-items:center;gap:10px;margin-top:14px;font-size:11px;color:var(--dim)}
+.fade-ctl input{flex:1}
+.hint{margin-top:20px;font-size:11px;color:rgba(247,229,188,.3);letter-spacing:.12em;text-align:center}
+</style>
+</head>
+<body>
+<h1>声光场景</h1>
+<div class="sub">下雨了。听。</div>
+<div class="stage">
+  <video id="vid" playsinline muted></video>
+  <div class="veil"></div>
+  <div class="scene-en" id="sceneEn">RAINY NIGHT</div>
+  <div class="scene-name" id="sceneZh">雨夜</div>
+  <div class="tracks" id="tracks"></div>
+</div>
+<div class="scenes" id="scenes"></div>
+<div class="ctlbar">
+  <button class="ctl" id="play">▶</button>
+  <input type="range" class="vol" id="vol" min="0" max="100" value="70">
+</div>
+<div class="fade-ctl">
+  <span>定时淡出</span>
+  <input type="range" id="fade" min="0" max="120" value="0" step="5">
+  <span id="fadeLabel">关闭</span>
+</div>
+<div class="hint">屿眠 Sleep Isle · witch-sleep-orb 声光库</div>
+<script>
+const ASSETS='../../witch-sleep-orb/assets/';
+const SCENES=[
+{key:'rain',zh:'雨',en:'RAIN',ico:'🌧',tracks:[{f:'rain-on-window.mp3',zh:'窗上雨'},{f:'distant-thunder-rain.mp3',zh:'远雷雨'}]},
+{key:'ocean',zh:'海',en:'OCEAN',ico:'🌊',tracks:[{f:'deep-ocean.mp3',zh:'深海'}]},
+{key:'forest',zh:'林',en:'FOREST',ico:'🌲',tracks:[{f:'forest-stream.mp3',zh:'林间溪'},{f:'night-forest.mp3',zh:'夜森林'}]},
+{key:'fire',zh:'火',en:'FIRE',ico:'🔥',tracks:[]},
+{key:'space',zh:'空',en:'SPACE',ico:'✨',tracks:[{f:'deep-space.mp3',zh:'深空'},{f:'space-ambience.mp3',zh:'星际氛围'}]}];
+const vid=document.getElementById('vid'),tracksEl=document.getElementById('tracks'),scenesEl=document.getElementById('scenes'),
+playBtn=document.getElementById('play'),vol=document.getElementById('vol'),fade=document.getElementById('fade'),fadeLabel=document.getElementById('fadeLabel'),
+sceneZh=document.getElementById('sceneZh'),sceneEn=document.getElementById('sceneEn');
+let audio=new Audio(),curScene=0,curTrack=0,fadeTimer=null,fadeMin=0;
+function pickVideo(s){const map={rain:['rain-on-window.mp4','distant-thunder-rain.mp4'],ocean:['gentle-ocean-waves.mp4','deep-ocean.mp4'],forest:['forest-stream.mp4','night-forest.mp4'],fire:['campfire-night.mp4'],space:['deep-space.mp4','space-ambience.mp4']};
+const arr=map[s.key]||[];return arr.length?ASSETS+'video/'+s.key+'/'+arr[Math.min(curTrack,arr.length-1)]:'';}
+function load(sIdx,tIdx,silent){curScene=sIdx;curTrack=tIdx;const s=SCENES[sIdx];
+sceneZh.textContent=s.zh;sceneEn.textContent=s.en.toUpperCase();
+const v=pickVideo(s);if(v){vid.src=v;vid.loop=true;vid.play().catch(()=>{});}
+const t=s.tracks[tIdx];
+if(t){audio.pause();audio.src=ASSETS+'audio/'+s.key+'/'+t.f;audio.loop=true;audio.volume=vol.value/100;if(!silent)audio.play().catch(()=>{});}
+renderUI();}
+function renderUI(){document.querySelectorAll('.scene').forEach((el,i)=>el.classList.toggle('active',i===curScene));
+document.querySelectorAll('.trk').forEach((el,i)=>el.classList.toggle('active',i===curTrack));
+playBtn.textContent=audio.paused?'▶':'❙❙';}
+SCENES.forEach((s,i)=>{const el=document.createElement('div');el.className='scene';
+el.innerHTML='<div class="ico">'+s.ico+'</div><div class="zh">'+s.zh+'</div><div class="en">'+s.en+'</div>';
+el.onclick=()=>{const t=s.tracks.length?0:0;tracksEl.innerHTML='';s.tracks.forEach((t2,j)=>{const b=document.createElement('button');b.className='trk';b.textContent=t2.zh;b.onclick=e=>{e.stopPropagation();load(i,j)};tracksEl.appendChild(b);});load(i,t)};scenesEl.appendChild(el);});
+{const s=SCENES[0];s.tracks.forEach((t2,j)=>{const b=document.createElement('button');b.className='trk';b.textContent=t2.zh;b.onclick=()=>load(0,j);tracksEl.appendChild(b);});}
+playBtn.onclick=()=>{if(audio.paused){audio.play();vid.play().catch(()=>{});}else{audio.pause();vid.pause();}renderUI();};
+vol.oninput=()=>{audio.volume=vol.value/100;};
+fade.oninput=()=>{fadeMin=+fade.value;fadeLabel.textContent=fadeMin?fadeMin+' 分钟':'关闭';clearInterval(fadeTimer);
+if(fadeMin){const stepMs=fadeMin*60*1000/(vol.value/0.05);fadeTimer=setInterval(()=>{const v=Math.max(0,audio.volume-0.005);audio.volume=v;vid.volume=v;if(v<=0){clearInterval(fadeTimer);audio.pause();vid.pause();renderUI();}},Math.max(500,stepMs));}};
+renderUI();
+</script>
+</body>
+</html>

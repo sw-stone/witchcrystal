@@ -1377,6 +1377,56 @@
 </div>
 
 <!-- ==================== 测试 Tab（水晶球语音交互测试） ==================== -->
+<div id="panel-sleep" class="panel">
+  <div class="section-header">屿眠 · Sleep Isle</div>
+  <div class="section-sub">End the scroll. Enter the sleep island.</div>
+
+  <div class="card" style="padding:20px;background:linear-gradient(135deg,rgba(168,200,236,.12),rgba(245,230,200,.08));">
+    <div style="font-size:15px;font-weight:600;margin-bottom:4px;">🌙 今夜，把手机交给水晶球</div>
+    <div style="font-size:12px;opacity:.7;margin-bottom:16px;">守夜女巫已就位 · 声光场景 / 呼吸引导 / 睡前冥想</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+      <a href="/static/whitenoise/whitenoise.html" style="text-decoration:none;color:inherit;">
+        <div style="border:1px solid rgba(255,224,163,.2);border-radius:14px;padding:16px 8px;text-align:center;background:rgba(255,232,187,.04);">
+          <div style="font-size:24px;">🌧</div>
+          <div style="font-size:13px;margin-top:8px;">声光场景</div>
+          <div style="font-size:10px;opacity:.5;margin-top:3px;">雨·海·林·火·空</div>
+        </div>
+      </a>
+      <a href="/static/breathing/breathing-orbit.html" style="text-decoration:none;color:inherit;">
+        <div style="border:1px solid rgba(255,224,163,.2);border-radius:14px;padding:16px 8px;text-align:center;background:rgba(255,232,187,.04);">
+          <div style="font-size:24px;">🫧</div>
+          <div style="font-size:13px;margin-top:8px;">呼吸引导</div>
+          <div style="font-size:10px;opacity:.5;margin-top:3px;">4吸8呼·光球同步</div>
+        </div>
+      </a>
+      <a href="/static/meditation/meditation.html" style="text-decoration:none;color:inherit;">
+        <div style="border:1px solid rgba(255,224,163,.2);border-radius:14px;padding:16px 8px;text-align:center;background:rgba(255,232,187,.04);">
+          <div style="font-size:24px;">🔮</div>
+          <div style="font-size:13px;margin-top:8px;">睡前冥想</div>
+          <div style="font-size:10px;opacity:.5;margin-top:3px;">5段引导·语音+文字</div>
+        </div>
+      </a>
+    </div>
+    <div style="margin-top:14px;padding:10px 14px;border-left:2px solid rgba(232,182,94,.5);font-size:12px;opacity:.75;background:rgba(232,182,94,.06);border-radius:0 8px 8px 0;">
+      “手机给我。今晚，我带你走。” —— 守夜女巫
+    </div>
+    <div style="margin-top:10px;font-size:10px;opacity:.4;text-align:center;letter-spacing:.1em;">
+      塔罗抽卡 · 勿扰视频 · 闹钟唤醒（视频生成中，占位预留）
+    </div>
+  </div>
+
+  <div class="card" style="padding:16px 20px;margin-top:12px;">
+    <div class="card-title"><span class="dot"></span> 夜间仪式链路</div>
+    <div style="font-size:12px;line-height:2;opacity:.75;margin-top:8px;">
+      1. 手机插入底座 → 自动播放勿扰视频（占位）<br>
+      2. 声光场景 / 呼吸引导 / 冥想 / 塔罗抽卡<br>
+      3. 入睡 → 灯光非线性渐暗（30%→20%→10%→3%→0%）<br>
+      4. 半夜接引：“还在。继续。”<br>
+      5. 闹钟唤醒：魔法球亮起 → 按按钮停止 → 欢呼庆祝（占位）
+    </div>
+  </div>
+</div>
+
 <div id="panel-test" class="panel">
   <div class="section-header">水晶球语音测试</div>
   <div class="section-sub">语音对话 · 实时模式同步 · 流式打断</div>
@@ -1468,6 +1518,9 @@
   </button>
   <button class="nav-item" onclick="switchTab('settings', event)">
     <span class="nav-icon">⚙️</span>我的
+  </button>
+  <button class="nav-item" onclick="switchTab('sleep', event)">
+    <span class="nav-icon">🌙</span>屿眠
   </button>
   <button class="nav-item" onclick="switchTab('test', event)">
     <span class="nav-icon">🧪</span>测试

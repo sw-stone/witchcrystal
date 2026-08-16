@@ -465,15 +465,32 @@ async function playNextTTS(queue, abortCtrl){
   if (!abortCtrl.signal.aborted) playNextTTS(queue, abortCtrl);
 }
 
-/* 后端 ElevenLabs TTS。返回 true=成功播放，false=失败（应降级） */
+// TTS 引擎探测：启动时问后端用什么引擎/音色（切换 provider 无需改前端）
+let serverTtsCfg = null;
+async function loadServerTtsCfg(){
+  if (serverTtsCfg) return serverTtsCfg;
+  try {
+    const r = await fetch(GW + '/voice/active?tts');
+    if (r.ok) {
+      const d = await r.json();
+      serverTtsCfg = { engine: (d.extra && d.extra.engine) || 'elevenlabs', voice: d.model || 'Z3R5wn05IrDiVCyEkUrK' };
+    }
+  } catch(_){}
+  serverTtsCfg = serverTtsCfg || { engine: 'elevenlabs', voice: 'Z3R5wn05IrDiVCyEkUrK' };
+  return serverTtsCfg;
+}
+
+/* 后端 TTS（edge_tts 中文母语 / ElevenLabs）。返回 true=成功播放，false=失败（应降级） */
 async function tryServerTTS(text, abortCtrl){
   try {
-    // 守夜女巫固定音色 + 慢语速
-    const voice = ELEVENLABS_VOICE_IDS[0];
+    const cfg = await loadServerTtsCfg();
+    const payload = cfg.engine === 'edge_tts'
+      ? { text, voice: cfg.voice, speed: 0.85 }
+      : { text, voice: cfg.voice, ...TTS_VOICE_SETTINGS };
     const resp = await fetch(GW + '/voice/tts', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text, voice, ...TTS_VOICE_SETTINGS }),
+      body: JSON.stringify(payload),
       signal: abortCtrl.signal,
     });
     if (!resp.ok) { console.warn('[TTS] server HTTP', resp.status); return false; }

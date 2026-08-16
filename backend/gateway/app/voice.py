@@ -89,7 +89,8 @@ async def voice_asr(audio: UploadFile = File(...)):
 async def voice_tts(request: Request):
     """文字转语音，流式返回 MP3。
     请求体：{text, voice?, speed?, stability?, similarity_boost?}
-    走 active tts provider（ElevenLabs /v1/text-to-speech/{voice}）。
+    走 active tts provider；extra.engine=edge_tts 用微软 edge-tts（免费，
+    中文母语级），否则走 ElevenLabs /v1/text-to-speech/{voice}。
     返回 audio/mpeg 流，web 端用 <audio> 或 AudioContext 播放。"""
     p = get_active_provider("tts")
     if not p:
@@ -101,6 +102,21 @@ async def voice_tts(request: Request):
     text = body.get("text", "")
     if not text:
         raise HTTPException(status_code=400, detail="text required")
+
+    # ---- edge-tts（免费，中文母语）----
+    if p.get("extra", {}).get("engine") == "edge_tts":
+        import edge_tts
+        voice = body.get("voice") or p["model"] or "zh-CN-XiaoxiaoNeural"
+        # 前端 speed=0.85（ElevenLabs 语义）→ edge rate=-15%
+        rate_pct = int(round((float(body.get("speed", 1.0)) - 1.0) * 100))
+        communicate = edge_tts.Communicate(text, voice, rate=f"{rate_pct:+d}%")
+        async def stream_edge():
+            async for chunk in communicate.stream():
+                if chunk["type"] == "audio":
+                    yield chunk["data"]
+        return StreamingResponse(stream_edge(), media_type="audio/mpeg")
+
+    # ---- ElevenLabs ----
     voice = body.get("voice") or p["model"] or "default"
     tts_path_tpl = p.get("extra", {}).get("tts_path", "/v1/text-to-speech/{voice}")
     tts_path = tts_path_tpl.replace("{voice}", voice)

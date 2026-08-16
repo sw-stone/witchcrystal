@@ -4097,12 +4097,31 @@ async function cbPlayTts(queue, abortCtrl){
   if (!abortCtrl.signal.aborted) cbPlayTts(queue, abortCtrl);
 }
 
+// TTS 引擎探测：启动时问后端用什么引擎/音色（切换 provider 无需改前端）
+let cbTtsCfg = null;
+async function cbLoadTtsCfg(){
+  if (cbTtsCfg) return cbTtsCfg;
+  try {
+    const r = await fetch(GW + '/voice/active?tts');
+    if (r.ok) {
+      const d = await r.json();
+      cbTtsCfg = { engine: (d.extra && d.extra.engine) || 'elevenlabs', voice: d.model || d.extra?.voice };
+    }
+  } catch(_){}
+  cbTtsCfg = cbTtsCfg || { engine: 'elevenlabs', voice: 'Z3R5wn05IrDiVCyEkUrK' };
+  return cbTtsCfg;
+}
+
 async function cbTryServerTts(text, abortCtrl){
   try {
-    // 守夜女巫固定音色：低语女声 + 慢语速（人格文档 ~80 词/分钟）
+    const cfg = await cbLoadTtsCfg();
+    // edge_tts：中文母语音色（model 字段即音色名），speed 换算由后端做
+    const payload = cfg.engine === 'edge_tts'
+      ? { text, voice: cfg.voice, speed: 0.85 }
+      : { text, voice: cfg.voice, speed: 0.85, stability: 0.65, similarity_boost: 0.8 };
     const resp = await fetch(GW + '/voice/tts', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({text, voice:'Z3R5wn05IrDiVCyEkUrK', speed:0.85, stability:0.65, similarity_boost:0.8}),
+      body: JSON.stringify(payload),
       signal: abortCtrl.signal
     });
     if (!resp.ok) { console.warn('[TTS] server HTTP', resp.status, 'GW=', GW); return false; }

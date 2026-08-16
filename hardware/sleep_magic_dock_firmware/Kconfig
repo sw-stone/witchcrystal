@@ -1,0 +1,66 @@
+mainmenu "AI Sleep Magic Ball Dock Configuration"
+
+config APP_CONFIG
+    bool
+    default y
+    select ENABLE_AI_COMPONENTS
+
+config TUYA_PRODUCT_ID
+    string "Product ID (Tuya IoT Platform)"
+    default "t6wgdighkirqcnyw"
+
+config BUTTON_NAME
+    string "Front button name (P29, registered by T5AI-Core BSP)"
+    default "ai_chat_button"
+
+config BTN_BACK_GPIO
+    int "Back button GPIO pin (force standby, edge+50ms debounce)"
+    default 3
+
+config BTN_DOWN_GPIO
+    int "Down button GPIO pin (dock-in-place detect, level trigger)"
+    default 4
+
+config BTN_DEBOUNCE_MS
+    int "Button debounce time (ms)"
+    default 50
+
+config BTN_DOWN_DEBOUNCE_MS
+    int "Down button (dock detect) debounce time (ms)"
+    default 100
+
+config AI_STANDBY_SILENCE_TIMEOUT_MS
+    int "S4 AI standby → back to idle silence timeout (ms)"
+    default 30000
+
+config S3_TO_S4_DELAY_MS
+    int "S3 docked → S4 AI standby activation delay (ms) (TODO-2)"
+    default 3000
+
+config S1_INTRO_TIMEOUT_MS
+    int "S1 first-use intro video timeout (ms) (TODO-4)"
+    default 30000
+
+config ALARM_RING_MAX_VOLUME
+    int "S8 alarm ringing max volume (0-100)"
+    default 100
+
+config STATE_SYNC_HEARTBEAT_MS
+    int "S8 alarm heartbeat interval to phone (ms)"
+    default 5000
+
+config WIFI_RECONNECT_BACKOFF_MIN_MS
+    int "Wi-Fi reconnect exponential backoff base (ms)"
+    default 1000
+
+config WIFI_RECONNECT_BACKOFF_MAX_MS
+    int "Wi-Fi reconnect exponential backoff cap (ms)"
+    default 60000
+
+config AI_AGENT_PERSONA
+    string "AI Agent persona prompt (sleep magic ball)"
+    default "You are 'Nyx', a sleep guardian spirit living in a magic ball dock. Speak softly, briefly, and warmly. Guide users toward sleep through meditation, white noise, breathing, or tarot. Never exceed 3 sentences per turn."
+
+config LOW_POWER_ENABLE
+    bool "Enable low-power mode in S0/S4"
+    default y

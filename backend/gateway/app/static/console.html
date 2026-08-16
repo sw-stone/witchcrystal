@@ -1532,6 +1532,14 @@
 <script>
 // ==================== State ====================
 let GW = localStorage.getItem('gw_url') || location.origin;
+// 纠偏：历史调试残留的 gw_url 若指向 localhost/内网，线上页面会静默降级（ASR→WebSpeech、TTS→机械音）
+(function(){ try {
+  const u = new URL(GW);
+  if (/^(localhost|127\.|0\.0\.0\.0|192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[01])\.)/.test(u.hostname)) {
+    GW = location.origin; localStorage.setItem('gw_url', GW);
+    console.warn('[GW] stale gw_url detected, reset to', GW);
+  }
+} catch(_){ GW = location.origin; } })();
 let UID = localStorage.getItem('user_id') || '';
 let AUTH_TOKEN = localStorage.getItem('auth_token') || '';
 let LLM_KEY = localStorage.getItem('llm_key') || '';
@@ -4097,13 +4105,17 @@ async function cbTryServerTts(text, abortCtrl){
       body: JSON.stringify({text, voice:'Z3R5wn05IrDiVCyEkUrK', speed:0.85, stability:0.65, similarity_boost:0.8}),
       signal: abortCtrl.signal
     });
-    if (!resp.ok) return false;
+    if (!resp.ok) { console.warn('[TTS] server HTTP', resp.status, 'GW=', GW); return false; }
     const arr = await resp.arrayBuffer();
-    if (arr.byteLength < 1000) return false;
+    if (arr.byteLength < 1000) { console.warn('[TTS] tiny resp:', new TextDecoder().decode(arr.slice(0,120)), 'GW=', GW); return false; }
     if (abortCtrl.signal.aborted) return true;
     if (!cbAudioCtx || cbAudioCtx.state === 'closed') cbAudioCtx = new (window.AudioContext||window.webkitAudioContext)();
-    const audioBuf = await cbAudioCtx.decodeAudioData(arr);
-    if (!audioBuf) return false;
+    const audioBuf = await new Promise((res, rej) => {
+      const p = cbAudioCtx.decodeAudioData(arr, res, rej);
+      if (p && p.then) p.then(res, rej);
+    });
+    if (!audioBuf) { console.warn('[TTS] decodeAudioData null'); return false; }
+    console.log('[TTS] ElevenLabs playing', text.slice(0,10), (audioBuf.duration||0).toFixed(1)+'s', 'GW=', GW);
     return await new Promise(resolve => {
       try {
         cbTtsSource = cbAudioCtx.createBufferSource();
@@ -4113,7 +4125,7 @@ async function cbTryServerTts(text, abortCtrl){
         cbTtsSource.start();
       } catch(e) { resolve(false); }
     });
-  } catch(e) { return e.name === 'AbortError' ? true : false; }
+  } catch(e) { console.warn('[TTS] err', e && e.name, e && e.message); return e.name === 'AbortError' ? true : false; }
 }
 
 async function cbNativeTts(text, abortCtrl){

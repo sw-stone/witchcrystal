@@ -4110,18 +4110,23 @@ async function cbTryServerTts(text, abortCtrl){
     if (arr.byteLength < 1000) { console.warn('[TTS] tiny resp:', new TextDecoder().decode(arr.slice(0,120)), 'GW=', GW); return false; }
     if (abortCtrl.signal.aborted) return true;
     if (!cbAudioCtx || cbAudioCtx.state === 'closed') cbAudioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    // Chrome 自动播放策略：无手势时 ctx 挂起 → start() 无声且 onended 不触发 → 整条链卡死。
+    // 播放前强制 resume（点击麦克风/发送按钮就是手势，此时 resume 必成功）
+    if (cbAudioCtx.state === 'suspended') { try { await cbAudioCtx.resume(); } catch(_){} }
     const audioBuf = await new Promise((res, rej) => {
       const p = cbAudioCtx.decodeAudioData(arr, res, rej);
       if (p && p.then) p.then(res, rej);
     });
     if (!audioBuf) { console.warn('[TTS] decodeAudioData null'); return false; }
-    console.log('[TTS] ElevenLabs playing', text.slice(0,10), (audioBuf.duration||0).toFixed(1)+'s', 'GW=', GW);
+    console.log('[TTS] ElevenLabs playing', text.slice(0,10), (audioBuf.duration||0).toFixed(1)+'s', 'ctx=', cbAudioCtx.state, 'GW=', GW);
     return await new Promise(resolve => {
       try {
         cbTtsSource = cbAudioCtx.createBufferSource();
         cbTtsSource.buffer = audioBuf;
         cbTtsSource.connect(cbAudioCtx.destination);
-        cbTtsSource.onended = () => { cbTtsSource = null; resolve(true); };
+        // 保险：即使 onended 因浏览器 bug 丢失，播放时长+2s 后也放行，不卡队列
+        const guard = setTimeout(() => { try{cbTtsSource&&cbTtsSource.stop();}catch(_){} resolve(true); }, (audioBuf.duration||3)*1000 + 2000);
+        cbTtsSource.onended = () => { clearTimeout(guard); cbTtsSource = null; resolve(true); };
         cbTtsSource.start();
       } catch(e) { resolve(false); }
     });

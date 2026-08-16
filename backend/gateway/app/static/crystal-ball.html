@@ -484,16 +484,19 @@ async function tryServerTTS(text, abortCtrl){
     if (!audioCtx || audioCtx.state === 'closed') {
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     }
+    // Chrome 自动播放策略：ctx 挂起时 start() 无声且 onended 不触发 → 链路卡死。强制 resume
+    if (audioCtx.state === 'suspended') { try { await audioCtx.resume(); } catch(_){} }
     const audioBuffer = await audioCtx.decodeAudioData(arrayBuf);
     if (!audioBuffer) return false;
-    console.log('[TTS] ElevenLabs playing', text.slice(0, 12), audioBuffer.duration.toFixed(1) + 's');
+    console.log('[TTS] ElevenLabs playing', text.slice(0, 12), (audioBuffer.duration||0).toFixed(1) + 's', 'ctx=', audioCtx.state);
     return await new Promise(resolve => {
       try {
         currentTTSSource = audioCtx.createBufferSource();
         currentTTSSource.buffer = audioBuffer;
         currentTTSSource.connect(audioCtx.destination);
-        currentTTSSource.onended = () => { currentTTSSource = null; resolve(true); };
-        currentTTSSource.onerror = () => { currentTTSSource = null; resolve(false); };
+        const guard = setTimeout(() => { try{currentTTSSource&&currentTTSSource.stop();}catch(_){} resolve(true); }, (audioBuffer.duration||3)*1000 + 2000);
+        currentTTSSource.onended = () => { clearTimeout(guard); currentTTSSource = null; resolve(true); };
+        currentTTSSource.onerror = () => { clearTimeout(guard); currentTTSSource = null; resolve(false); };
         currentTTSSource.start();
       } catch(e) { resolve(false); }
     });
